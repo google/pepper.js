@@ -22,6 +22,10 @@ var ppapi_exports = {
     },
   },
 
+  NotImplemented: function() {
+    throw "Function not implemented.";
+  },
+
   Console_Log: function(instance, level, value) {
     var svalue = ppapi_glue.stringForVar(value);
     // TODO symbols?
@@ -62,7 +66,7 @@ var ppapi_exports = {
     if (resource) {
       resource.refcount -= 1;
       if (resource.refcount <= 0) {
-        //console.log("Freeing: " + resource.value);
+        _free(ppapi_glue.var_tracker[uid].memory);
         delete ppapi_glue.var_tracker[uid];
       }
     }
@@ -74,7 +78,17 @@ var ppapi_exports = {
       ppapi_glue.var_uid = ppapi_glue.var_uid + 1 & 0xffffffff;
     }
     var uid = ppapi_glue.var_uid;
-    ppapi_glue.var_tracker[uid] = {refcount: 1, value: value};
+
+    // Create a copy of the string.
+    // TODO more efficient copy?
+    var memory = _malloc(len + 1);
+    for (var i = 0; i < len; i++) {
+	HEAPU8[memory + i] = HEAPU8[ptr + i];
+    }
+    // Null terminate the string because why not?
+    HEAPU8[memory + len] = 0;
+
+    ppapi_glue.var_tracker[uid] = {refcount: 1, value: value, memory: memory, len: len};
 
     // Generate the return value.
     var o = ppapi_glue.PP_Var;
@@ -83,7 +97,19 @@ var ppapi_exports = {
   },
 
   Var_VarToUtf8: function(v, lenptr) {
-    throw "VarToUtf8 not implemented.";
+    var o = ppapi_glue.PP_Var;
+    var type = Module.getValue(v + o.type, 'i32');
+    if (type == ppapi_glue.PP_VARTYPE_STRING) {
+      var uid = Module.getValue(v + o.value, 'i32');
+      var resource = ppapi_glue.var_tracker[uid];
+      if (resource) {
+        Module.setValue(lenptr, resource.len, 'i32');
+        return resource.memory;
+      }
+    }
+    // Something isn't right, return a null pointer.
+    Module.setValue(lenptr, 0, 'i32');
+    return 0;
   },
 };
 
