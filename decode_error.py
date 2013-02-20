@@ -7,11 +7,14 @@ A simple script for finding missing symbols based on node.js error messages.
 import subprocess
 import sys
 
-assert len(sys.argv) == 4, sys.argv
+assert len(sys.argv) == 2, sys.argv
 
-fn = sys.argv[1]
-ln = int(sys.argv[2])
-cn = int(sys.argv[3])
+args = sys.argv[1].split(":")
+assert len(args) == 3, args
+
+fn = args[0]
+ln = int(args[1])
+cn = int(args[2])
 
 with open(fn) as f:
     lineno = 0

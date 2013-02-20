@@ -70,10 +70,22 @@ extern "C" {
   extern const char* Var_VarToUtf8(struct PP_Var var, uint32_t* len);
 }
 
+static struct PP_Var Var_VarFromUtf8_1_0(PP_Module module, const char* data, uint32_t len) {
+  return Var_VarFromUtf8(data, len);
+}
+
 static PPB_Var var_interface = {
   Var_AddRef,
   Var_Release,
   Var_VarFromUtf8,
+  Var_VarToUtf8
+};
+
+// Used by ppapi_cpp
+static PPB_Var_1_0 var_interface_1_0 = {
+  Var_AddRef,
+  Var_Release,
+  Var_VarFromUtf8_1_0,
   Var_VarToUtf8
 };
 
@@ -87,7 +99,7 @@ static PPB_Messaging messaging_interface = {
 
 
 const void* get_browser_interface_c(const char* interface_name) {
-  printf("Get interface: %s\n", interface_name);
+  printf("STUB requested: %s\n", interface_name);
   if (strcmp(interface_name, PPB_CONSOLE_INTERFACE) == 0) {
     return &console_interface;
   } else if (strcmp(interface_name, PPB_CORE_INTERFACE) == 0) {
@@ -96,7 +108,10 @@ const void* get_browser_interface_c(const char* interface_name) {
     return &messaging_interface;
   } else if (strcmp(interface_name, PPB_VAR_INTERFACE) == 0) {
     return &var_interface;
+  } else if (strcmp(interface_name, PPB_VAR_INTERFACE_1_0) == 0) {
+    return &var_interface_1_0;
   }
+  printf("STUB not supported: %s\n", interface_name);
   return NULL;
 }
 
@@ -132,7 +147,7 @@ int main() {
     goto cleanup;
   }
 
-  doPostMessage(instance, "Hello, world.");
+  doPostMessage(instance, "getUrl:hello_world.html");
 
  cleanup:
   instance_interface->DidDestroy(instance);
