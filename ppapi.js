@@ -109,6 +109,23 @@ ppapi = (function() {
 	PP_ERROR_WRONG_THREAD: -52
     };
 
+    var Console = {};
+    ppapi.Console = Console;
+    Console.Log = function(instance, level, value) {
+	// TODO enum?
+	if (level == 2) {
+	    console.warn(value);
+	} else if (level == 3) {
+	    console.error(value);
+	} else {
+	    console.log(value);
+	}
+    };
+
+    Console.LogWithSource = function(instance, level, source, value) {
+	Console.Log(instance, level, source + ": " + value);
+    };
+
     var URLLoader = {};
     ppapi.URLLoader = URLLoader;
 

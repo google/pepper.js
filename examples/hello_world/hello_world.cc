@@ -50,7 +50,6 @@ static PPB_Var* ppb_var_interface = NULL;
  * @return PP_Var containing string.
  */
 static struct PP_Var CStrToVar(const char* str) {
-  //return PP_MakeInt32(strlen(str));
   if (ppb_var_interface != NULL) {
     return ppb_var_interface->VarFromUtf8(str, strlen(str));
   }

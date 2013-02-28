@@ -52,19 +52,11 @@ var ppapi_exports = {
   },
 
   Console_Log: function(instance, level, value) {
-    var svalue = ppapi_glue.stringForVar(value);
-    // TODO symbols?
-    if (level == 2) {
-      console.warn(svalue);
-    } else if (level == 3) {
-      console.error(svalue);
-    } else {
-      console.log(svalue);
-    }
+    ppapi.Console.Log(instance, level, ppapi_glue.stringForVar(value));
   },
 
-  Console_LogWithSource: function() {
-    NotImplemented;
+  Console_LogWithSource: function(instance, level, source, value) {
+    ppapi.Console.LogWithSource(instance, level, ppapi_glue.stringForVar(source), ppapi_glue.stringForVar(value));
   },
 
   Core_ReleaseResource: function(uid) {
