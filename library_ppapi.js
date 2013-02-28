@@ -73,8 +73,8 @@ var ppapi_exports = {
   },
 
   Messaging_PostMessage: function(instance, value) {
-    var svalue = ppapi_glue.stringForVar(value);
-    Module.print("PostMessage: " + svalue);
+    // TODO arbitrary objects.
+    ppapi.Messaging.PostMessage(instance, ppapi_glue.stringForVar(value));
   },
 
   URLLoader_Create: function(instance) {
