@@ -1,0 +1,20 @@
+<h2>PPAPI Test</h2>
+<script src="ppapi.js"></script>
+<script>
+var instance = 1;
+var loader = ppapi.URLLoader.Create(instance);
+var request = {
+    url: "out/hello_world.html"
+};
+var callback = function(status) {
+    console.log(status);
+    var callback = function(status, data) {
+        console.log(data);
+        if (status > 0) {
+            ppapi.URLLoader.ReadResponseBody(loader, 20, callback);
+        }
+    }
+    ppapi.URLLoader.ReadResponseBody(loader, 20, callback);
+};
+ppapi.URLLoader.Open(loader, request, callback);
+</script>

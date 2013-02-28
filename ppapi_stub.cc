@@ -7,6 +7,9 @@
 #include "ppapi/c/ppb_core.h"
 #include "ppapi/c/ppb_console.h"
 #include "ppapi/c/ppb_messaging.h"
+#include "ppapi/c/ppb_url_loader.h"
+#include "ppapi/c/ppb_url_request_info.h"
+#include "ppapi/c/ppb_url_response_info.h"
 #include "ppapi/c/ppb_var.h"
 
 #include "ppapi/c/ppp.h"
@@ -14,7 +17,7 @@
 #include "ppapi/c/ppp_messaging.h"
 
 extern "C" {
-  extern void NotImplemented();
+  extern void ThrowNotImplemented();
 }
 
 extern "C" {
@@ -29,25 +32,25 @@ static PPB_Console console_interface = {
 
 
 void Core_AddRefResource(PP_Resource resource) {
-  NotImplemented();
+  ThrowNotImplemented();
 }
 
-void Core_ReleaseResource(PP_Resource resource) {
-  NotImplemented();
+extern "C" {
+  extern void Core_ReleaseResource(PP_Resource resource);
 }
 
 PP_Time Core_GetTime() {
-  NotImplemented();
+  ThrowNotImplemented();
   return 0;
 }
 
 PP_TimeTicks Core_GetTimeTicks() {
-  NotImplemented();
+  ThrowNotImplemented();
   return 0;
 }
 
 void Core_CallOnMainThread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback, int32_t result) {
-  NotImplemented();
+  ThrowNotImplemented();
 }
 
 PP_Bool Core_IsMainThread() {
@@ -62,6 +65,68 @@ static PPB_Core core_interface = {
   &Core_CallOnMainThread,
   &Core_IsMainThread
 };
+
+extern "C" {
+  PP_Resource URLLoader_Create(PP_Instance instance);
+  PP_Bool URLLoader_IsURLLoader(PP_Resource resource);
+  int32_t URLLoader_Open(PP_Resource loader,
+                  PP_Resource request_info,
+                  struct PP_CompletionCallback callback);
+  int32_t URLLoader_FollowRedirect(PP_Resource loader,
+                            struct PP_CompletionCallback callback);
+  PP_Bool URLLoader_GetUploadProgress(PP_Resource loader,
+                               int64_t* bytes_sent,
+                               int64_t* total_bytes_to_be_sent);
+  PP_Bool URLLoader_GetDownloadProgress(PP_Resource loader,
+                                 int64_t* bytes_received,
+                                 int64_t* total_bytes_to_be_received);
+  PP_Resource URLLoader_GetResponseInfo(PP_Resource loader);
+  int32_t URLLoader_ReadResponseBody(PP_Resource loader,
+                              void* buffer,
+                              int32_t bytes_to_read,
+                              struct PP_CompletionCallback callback);
+  int32_t URLLoader_FinishStreamingToFile(PP_Resource loader,
+                                   struct PP_CompletionCallback callback);
+  void URLLoader_Close(PP_Resource loader);
+}
+
+static PPB_URLLoader url_loader_interface = {
+  &URLLoader_Create,
+  &URLLoader_IsURLLoader,
+  &URLLoader_Open,
+  &URLLoader_FollowRedirect,
+  &URLLoader_GetUploadProgress,
+  &URLLoader_GetDownloadProgress,
+  &URLLoader_GetResponseInfo,
+  &URLLoader_ReadResponseBody,
+  &URLLoader_FinishStreamingToFile,
+  &URLLoader_Close
+};
+
+extern "C" {
+  PP_Resource URLRequestInfo_Create(PP_Instance instance);
+  PP_Bool URLRequestInfo_IsURLRequestInfo(PP_Resource resource);
+  PP_Bool URLRequestInfo_SetProperty(PP_Resource request,
+                         PP_URLRequestProperty property,
+                         struct PP_Var value);
+  PP_Bool URLRequestInfo_AppendDataToBody(PP_Resource request,
+                              const void* data,
+                              uint32_t len);
+  PP_Bool URLRequestInfo_AppendFileToBody(PP_Resource request,
+                              PP_Resource file_ref,
+                              int64_t start_offset,
+                              int64_t number_of_bytes,
+                              PP_Time expected_last_modified_time);
+}
+
+static PPB_URLRequestInfo url_request_info_interface = {
+  &URLRequestInfo_Create,
+  &URLRequestInfo_IsURLRequestInfo,
+  &URLRequestInfo_SetProperty,
+  &URLRequestInfo_AppendDataToBody,
+  &URLRequestInfo_AppendFileToBody
+};
+
 
 extern "C" {
   extern void Var_AddRef(struct PP_Var var);
@@ -106,6 +171,10 @@ const void* get_browser_interface_c(const char* interface_name) {
     return &core_interface;
   } else if (strcmp(interface_name, PPB_MESSAGING_INTERFACE) == 0) {
     return &messaging_interface;
+  } else if (strcmp(interface_name, PPB_URLLOADER_INTERFACE) == 0) {
+    return &url_loader_interface;
+  } else if (strcmp(interface_name, PPB_URLREQUESTINFO_INTERFACE) == 0) {
+    return &url_request_info_interface;
   } else if (strcmp(interface_name, PPB_VAR_INTERFACE) == 0) {
     return &var_interface;
   } else if (strcmp(interface_name, PPB_VAR_INTERFACE_1_0) == 0) {
@@ -113,6 +182,12 @@ const void* get_browser_interface_c(const char* interface_name) {
   }
   printf("STUB not supported: %s\n", interface_name);
   return NULL;
+}
+
+extern "C" {
+  PP_EXPORT void RunCompletionCallback(struct PP_CompletionCallback* cc, int32_t result) {
+    PP_RunCompletionCallback(cc, result);
+  }
 }
 
 void doPostMessage(PP_Instance instance, const char* message) {
@@ -148,9 +223,11 @@ int main() {
   }
 
   doPostMessage(instance, "getUrl:hello_world.html");
+  // Let it run.
+  return 0;
 
  cleanup:
   instance_interface->DidDestroy(instance);
   PPP_ShutdownModule();
-  return 0;
+  return 1;
 }
