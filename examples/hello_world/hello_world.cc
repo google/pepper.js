@@ -11,8 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <string>
-
 #include "ppapi/c/pp_errors.h"
 #include "ppapi/c/pp_module.h"
 #include "ppapi/c/pp_var.h"
@@ -61,22 +59,17 @@ static struct PP_Var CStrToVar(const char* str) {
  * Post a message back to our JavaScript
  */
 static void SendMessage(PP_Instance instance, const char *str) {
-  if (ppb_messaging_interface && ppb_var_interface) {
-    PP_Var message = CStrToVar(str);
-    ppb_messaging_interface->PostMessage(instance, message);
-    ppb_var_interface->Release(message);
-  }
+  if (ppb_messaging_interface)
+    ppb_messaging_interface->PostMessage(instance, CStrToVar(str));
 }
 
 /**
  * Send a message to the JavaScript Console
  */
 static void LogMessage(PP_Instance instance, const char *str) {
-  if (ppb_console_interface && ppb_var_interface) {
-    PP_Var message = CStrToVar(str);
-    ppb_console_interface->Log(instance, PP_LOGLEVEL_ERROR, message);
-    ppb_var_interface->Release(message);
-  }
+  if (ppb_console_interface)
+    ppb_console_interface->Log(instance, PP_LOGLEVEL_ERROR,
+                          CStrToVar(str));
 }
 
 /**
@@ -179,13 +172,7 @@ static PP_Bool Instance_HandleDocumentLoad(PP_Instance instance,
   return PP_FALSE;
 }
 
-static void Messaging_HandleMessage(PP_Instance instance, PP_Var message) {
-  uint32_t len = 0;
-  const char* text = ppb_var_interface->VarToUtf8(message, &len);
-  std::string s(text, len);
-  s = "Got message: " + s;
-  LogMessage(instance, s.c_str());
-}
+
 
 /**
  * Entry points for the module.
@@ -221,11 +208,6 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
       &Instance_HandleDocumentLoad,
     };
     return &instance_interface;
-  } else if (strcmp(interface_name, PPP_MESSAGING_INTERFACE) == 0) {
-    static PPP_Messaging messaging_interface = {
-      &Messaging_HandleMessage
-    };
-    return &messaging_interface;
   }
   return NULL;
 }
