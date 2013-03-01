@@ -25,7 +25,7 @@ var common = (function () {
     // HACK global
     fakeEmbed = moduleEl;
 
-    var instance = _Startup();
+    var instance = Module._Startup();
 
     // Fake the load event.
     var evt = document.createEvent('Event');

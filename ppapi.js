@@ -142,6 +142,7 @@ ppapi = (function() {
     ppapi.postMessage = function(message) {
         // HACK assumes string.
         ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
+        // HACK to make the closure compiler happy.
         _DoPostMessage(1, ptr);
         _free(ptr);
     }

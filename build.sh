@@ -9,6 +9,7 @@ set -e
 # Make sure the main output directory exists.
 mkdir -p out
 
+FLAGS="-std=c++11 -O0 --closure 0 --minify 0 --js-library library_ppapi.js --pre-js ppapi.js"
 IN_DIR=examples/hello_world
 OUT_DIR=out/hello_world
 
@@ -19,7 +20,7 @@ mkdir -p $OUT_DIR
 cp examples/common.js $IN_DIR/*.html $IN_DIR/*.js $OUT_DIR
 
 # Compile the hello world example.
-$EMCC -std=c++11 -I$NACL_SDK_ROOT/include ppapi_stub.cc $IN_DIR/hello_world.cc --js-library library_ppapi.js --pre-js ppapi.js -o $OUT_DIR/hello_world.js -s EXPORTED_FUNCTIONS="['_Startup', '_RunCompletionCallback', '_DoPostMessage']"
+$EMCC $FLAGS -I$NACL_SDK_ROOT/include ppapi_stub.cc $IN_DIR/hello_world.cc -o $OUT_DIR/hello_world.js -s EXPORTED_FUNCTIONS="['_Startup']"
 
 # Files that are normally compiled into libppapi_cpp.
 D=$NACL_SDK_ROOT/src/ppapi_cpp
@@ -35,4 +36,4 @@ mkdir -p $OUT_DIR
 cp examples/common.js $IN_DIR/*.html $IN_DIR/*.js $OUT_DIR
 
 # Compile the geturl example.
-$EMCC -std=c++11 -I$NACL_SDK_ROOT/include ppapi_stub.cc $PPAPI_CPP $IN_DIR/geturl.cc $IN_DIR/geturl_handler.cc --js-library library_ppapi.js --pre-js ppapi.js -o $OUT_DIR/geturl.js -s EXPORTED_FUNCTIONS="['_Startup', '_RunCompletionCallback', '_DoPostMessage']"
+$EMCC $FLAGS -I$NACL_SDK_ROOT/include ppapi_stub.cc $PPAPI_CPP $IN_DIR/geturl.cc $IN_DIR/geturl_handler.cc -o $OUT_DIR/geturl.js -s EXPORTED_FUNCTIONS="['_Startup']"

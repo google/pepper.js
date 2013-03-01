@@ -16,6 +16,8 @@
 #include "ppapi/c/ppp_instance.h"
 #include "ppapi/c/ppp_messaging.h"
 
+#define CALLED_FROM_JS __attribute__((used))
+
 extern "C" {
   extern void ThrowNotImplemented();
 }
@@ -185,7 +187,7 @@ const void* get_browser_interface_c(const char* interface_name) {
 }
 
 extern "C" {
-  PP_EXPORT void DoPostMessage(PP_Instance instance, const char* message) {
+  CALLED_FROM_JS void DoPostMessage(PP_Instance instance, const char* message) {
     const PPP_Messaging* messaging_interface = (const PPP_Messaging*)PPP_GetInterface(PPP_MESSAGING_INTERFACE);
     if (!messaging_interface) {
       return;
@@ -195,7 +197,7 @@ extern "C" {
     var_interface.Release(message_var);
   }
 
-  PP_EXPORT void RunCompletionCallback(struct PP_CompletionCallback* cc, int32_t result) {
+  CALLED_FROM_JS void RunCompletionCallback(struct PP_CompletionCallback* cc, int32_t result) {
     PP_RunCompletionCallback(cc, result);
   }
 

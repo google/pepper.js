@@ -12,10 +12,10 @@ var ppapi_exports = {
 
     stringForVar: function(p) {
       var o = ppapi_glue.PP_Var;
-      var type = Module.getValue(p + o.type, 'i32');
+      var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
       if (type != ppapi_glue.PP_VARTYPE_STRING)
         throw "PP_Var is not a string.";
-      var uid = Module.getValue(p + o.value, 'i32');
+      var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
       var resource = ppapi_glue.var_tracker[uid];
       if (!resource) {
         throw "Tried to reference a dead PP_Var.";
@@ -25,11 +25,11 @@ var ppapi_exports = {
 
     boolForVar: function(p) {
       var o = ppapi_glue.PP_Var;
-      var type = Module.getValue(p + o.type, 'i32');
+      var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
       if (type != ppapi_glue.PP_VARTYPE_BOOL)
         throw "PP_Var is not a Boolean.";
       // PP_Bool is guarenteed to be 4 bytes.
-      var value = Module.getValue(p + o.value, 'i32');
+      var value = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
       return value > 0;
     },
 
@@ -144,7 +144,7 @@ var ppapi_exports = {
   Var_AddRef: function(v) {
     // TODO check var type.
     var o = ppapi_glue.PP_Var;
-    var uid = Module.getValue(v + o.value, 'i32');
+    var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
     var resource = ppapi_glue.var_tracker[uid];
     if (resource) {
       resource.refcount += 1;
@@ -154,7 +154,7 @@ var ppapi_exports = {
   Var_Release: function(v) {
     // TODO check var type.
     var o = ppapi_glue.PP_Var;
-    var uid = Module.getValue(v + o.value, 'i32');
+    var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
     var resource = ppapi_glue.var_tracker[uid];
     if (resource) {
       resource.refcount -= 1;
@@ -182,23 +182,23 @@ var ppapi_exports = {
 
     // Generate the return value.
     var o = ppapi_glue.PP_Var;
-    Module.setValue(result + o.type, ppapi_glue.PP_VARTYPE_STRING, 'i32');
-    Module.setValue(result + o.value, uid, 'i32');
+    {{{ makeSetValue('result + o.type', '0', 'ppapi_glue.PP_VARTYPE_STRING', 'i32') }}};
+    {{{ makeSetValue('result + o.value', '0', 'uid', 'i32') }}};
   },
 
   Var_VarToUtf8: function(v, lenptr) {
     var o = ppapi_glue.PP_Var;
-    var type = Module.getValue(v + o.type, 'i32');
+    var type = {{{ makeGetValue('v + o.type', '0', 'i32') }}};
     if (type == ppapi_glue.PP_VARTYPE_STRING) {
-      var uid = Module.getValue(v + o.value, 'i32');
+      var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
       var resource = ppapi_glue.var_tracker[uid];
       if (resource) {
-        Module.setValue(lenptr, resource.len, 'i32');
+        {{{ makeSetValue('lenptr', '0', 'resource.len', 'i32') }}};
         return resource.memory;
       }
     }
     // Something isn't right, return a null pointer.
-    Module.setValue(lenptr, 0, 'i32');
+    {{{ makeSetValue('lenptr', '0', '0', 'i32') }}};
     return 0;
   },
 };
