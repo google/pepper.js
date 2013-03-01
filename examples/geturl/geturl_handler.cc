@@ -50,7 +50,6 @@ void GetURLHandler::Start() {
 }
 
 void GetURLHandler::OnOpen(int32_t result) {
-  printf("Running OnOpen.\n");
   if (result != PP_OK) {
     ReportResultAndDie(url_, "pp::URLLoader::Open() failed", false);
     return;
@@ -94,8 +93,6 @@ void GetURLHandler::AppendDataBytes(const char* buffer, int32_t num_bytes) {
 }
 
 void GetURLHandler::OnRead(int32_t result) {
-  printf("Running OnRead: %d.\n", result);
-
   if (result == PP_OK) {
     // Streaming the file is complete, delete the read buffer since it is
     // no longer needed.
@@ -124,9 +121,6 @@ void GetURLHandler::ReadBody() {
   // the callback we created since the loader won't do anything with it.
   pp::CompletionCallback cc =
       cc_factory_.NewOptionalCallback(&GetURLHandler::OnRead);
-
-  printf("ReadBody this: %p\n", this);
-
   int32_t result = PP_OK;
   do {
     result = url_loader_.ReadResponseBody(buffer_, READ_BUFFER_SIZE, cc);

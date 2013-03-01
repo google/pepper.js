@@ -141,10 +141,9 @@ ppapi = (function() {
     // HACK
     ppapi.postMessage = function(message) {
         // HACK assumes string.
-	ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
-	console.log("Got postmessage: ", this, message, ptr);
+        ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
         _DoPostMessage(1, ptr);
-        free(ptr);
+        _free(ptr);
     }
 
     var URLLoader = {};
@@ -156,7 +155,6 @@ ppapi = (function() {
 
     var updatePendingRead = function(loader) {
 	if (loader.pendingReadCallback) {
-            console.log(loader.data.length, loader.index, loader.pendingReadSize, loader.done);
 	    var full_read_possible = loader.data.length >= loader.index + loader.pendingReadSize
 	    if (loader.done || full_read_possible){
 		var cb = loader.pendingReadCallback;
@@ -176,13 +174,10 @@ ppapi = (function() {
 	    if (this.readyState == 1) {
 	    } else if (this.readyState == 2) {
 		callback(this.status == 200 ? ppapi.PP_Error.PP_OK : ppapi.PP_Error.PP_FAILED);
-		console.log(this);
 	    } else if (this.readyState == 3) {
-		console.log(this.readyState, this.status, this.response);
 		loader.data = this.responseText;
 		updatePendingRead(loader);
 	    } else {
-		console.log(this.readyState, this.status, this.response);
 		loader.data = this.responseText;
 		loader.done = true;
 		updatePendingRead(loader);
