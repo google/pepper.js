@@ -19,7 +19,7 @@ mkdir -p $OUT_DIR
 cp examples/common.js $IN_DIR/*.html $IN_DIR/*.js $OUT_DIR
 
 # Compile the hello world example.
-$EMCC -std=c++11 -I$NACL_SDK_ROOT/include ppapi_stub.cc $IN_DIR/hello_world.cc --js-library library_ppapi.js --pre-js ppapi.js --pre-js module.js -o $OUT_DIR/hello_world.js
+$EMCC -std=c++11 -I$NACL_SDK_ROOT/include ppapi_stub.cc $IN_DIR/hello_world.cc --js-library library_ppapi.js --pre-js ppapi.js -o $OUT_DIR/hello_world.js -s EXPORTED_FUNCTIONS="['_Startup', '_RunCompletionCallback', '_DoPostMessage']"
 
 # Files that are normally compiled into libppapi_cpp.
 D=$NACL_SDK_ROOT/src/ppapi_cpp
@@ -35,4 +35,4 @@ mkdir -p $OUT_DIR
 cp examples/common.js $IN_DIR/*.html $IN_DIR/*.js $OUT_DIR
 
 # Compile the geturl example.
-$EMCC -std=c++11 -I$NACL_SDK_ROOT/include ppapi_stub.cc $PPAPI_CPP $IN_DIR/geturl.cc $IN_DIR/geturl_handler.cc --js-library library_ppapi.js --pre-js module.js --pre-js ppapi.js -o $OUT_DIR/geturl.js -s EXPORTED_FUNCTIONS="['_main', '_RunCompletionCallback', '_DoPostMessage']"
+$EMCC -std=c++11 -I$NACL_SDK_ROOT/include ppapi_stub.cc $PPAPI_CPP $IN_DIR/geturl.cc $IN_DIR/geturl_handler.cc --js-library library_ppapi.js --pre-js ppapi.js -o $OUT_DIR/geturl.js -s EXPORTED_FUNCTIONS="['_Startup', '_RunCompletionCallback', '_DoPostMessage']"

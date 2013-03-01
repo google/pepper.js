@@ -198,35 +198,38 @@ extern "C" {
   PP_EXPORT void RunCompletionCallback(struct PP_CompletionCallback* cc, int32_t result) {
     PP_RunCompletionCallback(cc, result);
   }
-}
 
-int main() {
-  int32_t status = PPP_InitializeModule(1, &get_browser_interface_c);
-  if (status != PP_OK) {
-    printf("STUB: Failed to initialize module.\n");
-    return 1;
+  void Shutdown(PP_Instance instance) {
+    const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
+    if (instance_interface) {
+      instance_interface->DidDestroy(instance);
+    }
+    PPP_ShutdownModule();
   }
 
-  const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
-  if (instance_interface == NULL) {
-    printf("STUB: Failed to get instance interface.\n");
-    return 1;
+  PP_Instance Startup() {
+    int32_t status = PPP_InitializeModule(1, &get_browser_interface_c);
+    if (status != PP_OK) {
+      printf("STUB: Failed to initialize module.\n");
+      return 0;
+    }
+
+    const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
+    if (instance_interface == NULL) {
+      printf("STUB: Failed to get instance interface.\n");
+      return 0;
+    }
+
+    const PP_Instance instance = 1;
+
+    // TODO arguments.
+    status = instance_interface->DidCreate(instance, 0, NULL, NULL);
+    if (status != PP_TRUE) {
+      printf("STUB: Failed to create instance.\n");
+      Shutdown(instance);
+      return 0;
+    }
+
+    return instance;
   }
-
-  const PP_Instance instance = 1;
-
-  // TODO arguments.
-  status = instance_interface->DidCreate(instance, 0, NULL, NULL);
-  if (status != PP_TRUE) {
-    printf("STUB: Failed to create instance.\n");
-    goto cleanup;
-  }
-
-  // Let it run.
-  return 0;
-
- cleanup:
-  instance_interface->DidDestroy(instance);
-  PPP_ShutdownModule();
-  return 1;
 }
