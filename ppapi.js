@@ -138,6 +138,15 @@ ppapi = (function() {
         }
     }
 
+    // HACK
+    ppapi.postMessage = function(message) {
+        // HACK assumes string.
+	ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
+	console.log("Got postmessage: ", this, message, ptr);
+        _DoPostMessage(1, ptr);
+        free(ptr);
+    }
+
     var URLLoader = {};
     ppapi.URLLoader = URLLoader;
 

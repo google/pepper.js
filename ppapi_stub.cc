@@ -185,19 +185,19 @@ const void* get_browser_interface_c(const char* interface_name) {
 }
 
 extern "C" {
+  PP_EXPORT void DoPostMessage(PP_Instance instance, const char* message) {
+    const PPP_Messaging* messaging_interface = (const PPP_Messaging*)PPP_GetInterface(PPP_MESSAGING_INTERFACE);
+    if (!messaging_interface) {
+      return;
+    }
+    PP_Var message_var = var_interface.VarFromUtf8(message, strlen(message));
+    messaging_interface->HandleMessage(instance, message_var);
+    var_interface.Release(message_var);
+  }
+
   PP_EXPORT void RunCompletionCallback(struct PP_CompletionCallback* cc, int32_t result) {
     PP_RunCompletionCallback(cc, result);
   }
-}
-
-void doPostMessage(PP_Instance instance, const char* message) {
-  const PPP_Messaging* messaging_interface = (const PPP_Messaging*)PPP_GetInterface(PPP_MESSAGING_INTERFACE);
-  if (!messaging_interface) {
-    return;
-  }
-  PP_Var message_var = var_interface.VarFromUtf8(message, strlen(message));
-  messaging_interface->HandleMessage(instance, message_var);
-  var_interface.Release(message_var);
 }
 
 int main() {
@@ -222,8 +222,6 @@ int main() {
     goto cleanup;
   }
 
-  // HACK always send this event to make the geturl test work.
-  doPostMessage(instance, "getUrl:geturl_success.html");
   // Let it run.
   return 0;
 
