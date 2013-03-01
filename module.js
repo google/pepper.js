@@ -1,0 +1,3 @@
+var Module = {
+  'noInitialRun': true
+};
