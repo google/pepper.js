@@ -1,6 +1,29 @@
+<!DOCTYPE html>
 <html>
-<body>
-<script src="geturl.js"></script>
-<h2>Get URL</h2>
+<!--
+Copyright (c) 2012 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+-->
+<head>
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <title>Get URL</title>
+  <script type="text/javascript" src="common.js"></script>
+  <script type="text/javascript" src="example.js"></script>
+  <script type="text/javascript" src="geturl.js"></script>
+</head>
+<body data-name="geturl" data-tc="emscripten" data-path="newlib/Release">
+  <h1>Get URL</h1>
+  <h2>Status: <code id="statusField">NO-STATUS</code></h2>
+  <table border=5 cellpadding=5% summary="A title and a result log">
+    <tr>
+      <td valign=top><pre id='generalOutput' class='notrun'></pre></td>
+    </tr>
+  </table>
+  <input id="button" type="button" value="Get URL">
+  <!-- The NaCl plugin will be embedded inside the element with id "listener".
+      See common.js.-->
+  <div id="listener"></div>
 </body>
 </html>

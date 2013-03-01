@@ -222,7 +222,8 @@ int main() {
     goto cleanup;
   }
 
-  doPostMessage(instance, "getUrl:hello_world.html");
+  // HACK always send this event to make the geturl test work.
+  doPostMessage(instance, "getUrl:geturl_success.html");
   // Let it run.
   return 0;
 
