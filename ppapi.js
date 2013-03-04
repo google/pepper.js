@@ -1,4 +1,4 @@
-ppapi = (function() {
+var ppapi = (function() {
     var ppapi = {};
 
     ppapi.PP_Error = {
@@ -126,7 +126,7 @@ ppapi = (function() {
 	Console.Log(instance, level, source + ": " + value);
     };
 
-    Messaging = {};
+    var Messaging = {};
     ppapi.Messaging = Messaging;
     Messaging.PostMessage = function(instance, value) {
         // HACK use global.
@@ -138,8 +138,8 @@ ppapi = (function() {
         }
     }
 
-    // HACK
-    ppapi.postMessage = function(message) {
+    // HACK make global, implicitly exports the symbol.
+    postMessage = function(message) {
         // HACK assumes string.
         ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
         // HACK to make the closure compiler happy.

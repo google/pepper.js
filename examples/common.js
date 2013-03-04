@@ -17,7 +17,7 @@ var common = (function () {
     moduleEl.setAttribute('width', width);
     moduleEl.setAttribute('height',height);
 
-    moduleEl.postMessage = ppapi.postMessage;
+    moduleEl.postMessage = postMessage;
 
     var listenerDiv = document.getElementById('listener');
     listenerDiv.appendChild(moduleEl);

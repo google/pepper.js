@@ -9,7 +9,7 @@ set -e
 # Make sure the main output directory exists.
 mkdir -p out
 
-FLAGS="-std=c++11 -O0 --closure 0 --minify 0 --js-library library_ppapi.js --pre-js ppapi.js"
+FLAGS="-std=c++11 -O2 --closure 1 --minify 0 --js-library library_ppapi.js --pre-js ppapi.js"
 IN_DIR=examples/hello_world
 OUT_DIR=out/hello_world
 
