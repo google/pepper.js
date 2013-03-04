@@ -13,7 +13,7 @@ FLAGS="-std=c++11 -O0 --closure 0 --minify 0 --js-library library_ppapi.js --pre
 
 # Files that are normally compiled into libppapi_cpp.
 D=$NACL_SDK_ROOT/src/ppapi_cpp
-PPAPI_CPP="$D/ppp_entrypoints.cc $D/module.cc $D/instance.cc $D/instance_handle.cc $D/var.cc $D/url_request_info.cc $D/url_response_info.cc $D/url_loader.cc $D/resource.cc $D/lock.cc"
+PPAPI_CPP="$D/ppp_entrypoints.cc $D/module.cc $D/instance.cc $D/instance_handle.cc $D/var.cc $D/url_request_info.cc $D/url_response_info.cc $D/url_loader.cc $D/resource.cc $D/lock.cc $D/input_event.cc $D/view.cc"
 
 example() {
   NAME=$1

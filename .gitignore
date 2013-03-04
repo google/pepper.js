@@ -1,6 +1,10 @@
 # Build director
 /out/
 
+# python
+*.pyc
+*.pyo
+
 # emacs
 *~
 \#*\#

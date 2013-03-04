@@ -4,8 +4,9 @@
 A simple script for finding missing symbols based on node.js error messages.
 """
 
-import subprocess
 import sys
+
+import common
 
 assert len(sys.argv) == 2, sys.argv
 
@@ -30,8 +31,7 @@ with open(fn) as f:
             symbol = line[1:].split("(")[0]
             print symbol
             print
-            decoded = subprocess.check_output(['c++filt', symbol]).strip()
-            print decoded
+            print common.decodeSymbol(symbol)
             print
 
             break
