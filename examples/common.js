@@ -11,26 +11,9 @@
 var common = (function () {
 
   function createEmscriptenModule(name, tool, path, width, height) {
-    var moduleEl = document.createElement('embed');
-    moduleEl.setAttribute('name', 'nacl_module');
-    moduleEl.setAttribute('id', 'nacl_module');
-    moduleEl.setAttribute('width', width);
-    moduleEl.setAttribute('height',height);
-
-    moduleEl.postMessage = postMessage;
-
-    var listenerDiv = document.getElementById('listener');
-    listenerDiv.appendChild(moduleEl);
-
-    // HACK global
-    fakeEmbed = moduleEl;
-
-    var instance = Module._Startup();
-
-    // Fake the load event.
-    var evt = document.createEvent('Event');
-    evt.initEvent('load', true, true);  // bubbles, cancelable
-    moduleEl.dispatchEvent(evt);
+    var e = CreateInstance(width, height);
+    document.getElementById('listener').appendChild(e);
+    return e;
   }
 
   /**

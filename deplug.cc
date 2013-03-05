@@ -217,6 +217,15 @@ extern "C" {
     var_interface.Release(message_var);
   }
 
+  CALLED_FROM_JS void DoChangeView(PP_Instance instance, PP_Resource resource) {
+    const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
+    if (instance_interface == NULL) {
+      printf("STUB: Failed to get instance interface.\n");
+      return;
+    }
+    instance_interface->DidChangeView(instance, resource);
+  }
+
   CALLED_FROM_JS void RunCompletionCallback(struct PP_CompletionCallback* cc, int32_t result) {
     PP_RunCompletionCallback(cc, result);
   }
@@ -229,7 +238,7 @@ extern "C" {
     PPP_ShutdownModule();
   }
 
-  PP_Instance Startup() {
+  CALLED_FROM_JS PP_Instance NativeCreateInstance() {
     int32_t status = PPP_InitializeModule(1, &get_browser_interface_c);
     if (status != PP_OK) {
       printf("STUB: Failed to initialize module.\n");

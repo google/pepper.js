@@ -9,7 +9,7 @@ set -e
 # Make sure the main output directory exists.
 mkdir -p out
 
-FLAGS="-std=c++11 -O0 --closure 0 --minify 0 --js-library library_ppapi.js --pre-js ppapi.js -I$NACL_SDK_ROOT/include"
+FLAGS="-std=c++11 -O0 --closure 0 --minify 0 --js-library library_ppapi.js --pre-js ppapi.js --pre-js deplug.js -I$NACL_SDK_ROOT/include"
 
 # Libraries
 mkdir -p out/lib
@@ -33,12 +33,12 @@ example() {
 
 example "hello_world"
 SOURCES="$IN_DIR/hello_world.cc"
-$EMCC $FLAGS deplug.cc $SOURCES -o $OUT_DIR/$NAME.js -s EXPORTED_FUNCTIONS="['_Startup']"
+$EMCC $FLAGS deplug.cc $SOURCES -o $OUT_DIR/$NAME.js -s EXPORTED_FUNCTIONS="['CreateInstance']"
 
 example "geturl"
 SOURCES="$IN_DIR/geturl.cc $IN_DIR/geturl_handler.cc"
-$EMCC $FLAGS $PPAPI_CPP deplug.cc $SOURCES -o $OUT_DIR/$NAME.js -s EXPORTED_FUNCTIONS="['_Startup']"
+$EMCC $FLAGS $PPAPI_CPP deplug.cc $SOURCES -o $OUT_DIR/$NAME.js -s EXPORTED_FUNCTIONS="['CreateInstance']"
 
 example "pi_generator"
 SOURCES="$IN_DIR/pi_generator.cc $IN_DIR/pi_generator_module.cc"
-$EMCC $FLAGS -I . deplug.cc $PPAPI_CPP $SOURCES -o $OUT_DIR/$NAME.js -s "EXPORTED_FUNCTIONS=['_Startup']"
+$EMCC $FLAGS -I . deplug.cc $PPAPI_CPP $SOURCES -o $OUT_DIR/$NAME.js -s "EXPORTED_FUNCTIONS=['CreateInstance']"
