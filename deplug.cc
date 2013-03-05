@@ -16,6 +16,8 @@
 #include "ppapi/c/ppp_instance.h"
 #include "ppapi/c/ppp_messaging.h"
 
+#include "deplug.h"
+
 #define CALLED_FROM_JS __attribute__((used))
 
 extern "C" {
@@ -184,6 +186,24 @@ const void* get_browser_interface_c(const char* interface_name) {
   }
   printf("STUB not supported: %s\n", interface_name);
   return NULL;
+}
+
+extern "C" {
+  extern void Schedule(void (*)(void*, void*), void*, void*);
+  CALLED_FROM_JS void RunScheduled(void (*func)(void*, void*), void* p0, void* p1) {
+    func(p0, p1);
+  }
+}
+
+void RunDaemon(void* f, void* param) {
+  DaemonFunc func = (DaemonFunc)f;
+  struct DaemonCallback callback = func(param);
+  LaunchDaemon(callback.func, callback.param);
+}
+
+void LaunchDaemon(DaemonFunc func, void* param) {
+  if (func)
+    Schedule(&RunDaemon, (void *) func, param);
 }
 
 extern "C" {

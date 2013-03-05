@@ -33,6 +33,33 @@ var ppapi_exports = {
       return value > 0;
     },
 
+    jsForVar: function(p) {
+	var o = ppapi_glue.PP_Var;
+	var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
+
+        if (type == 0) {
+	    return undefined;
+        } else if (type == 1) {
+	    return null;
+        } else if (type == ppapi_glue.PP_VARTYPE_BOOL) {
+	    // PP_Bool is guarenteed to be 4 bytes.
+	    return 0 != {{{ makeGetValue('p + o.value', '0', 'i32') }}};
+        } else if (type == 3) {
+	    return {{{ makeGetValue('p + o.value', '0', 'i32') }}};
+        } else if (type == 4) {
+	    return {{{ makeGetValue('p + o.value', '0', 'double') }}};
+	} else if (type == ppapi_glue.PP_VARTYPE_STRING) {
+	    var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
+	    var resource = ppapi_glue.var_tracker[uid];
+	    if (!resource) {
+                throw "Tried to reference a dead PP_Var.";
+	    }
+	    return resource.value;
+	} else {
+	    throw "Var type conversion not implemented: " + type;
+        }
+    },
+
     allocateUID: function() {
       while (ppapi_glue.var_uid in ppapi_glue.var_tracker) {
         ppapi_glue.var_uid = ppapi_glue.var_uid + 1 & 0xffffffff;
@@ -47,16 +74,22 @@ var ppapi_exports = {
     }
   },
 
+  Schedule: function(f, p0, p1) {
+      setTimeout(function() {
+	  _RunScheduled(f, p0, p1);
+      }, 10);
+  },
+
   ThrowNotImplemented: function() {
       throw "NotImplemented";
   },
 
   Console_Log: function(instance, level, value) {
-    ppapi.Console.Log(instance, level, ppapi_glue.stringForVar(value));
+    ppapi.Console.Log(instance, level, ppapi_glue.jsForVar(value));
   },
 
   Console_LogWithSource: function(instance, level, source, value) {
-    ppapi.Console.LogWithSource(instance, level, ppapi_glue.stringForVar(source), ppapi_glue.stringForVar(value));
+    ppapi.Console.LogWithSource(instance, level, ppapi_glue.jsForVar(source), ppapi_glue.jsForVar(value));
   },
 
   Core_ReleaseResource: function(uid) {
@@ -73,8 +106,7 @@ var ppapi_exports = {
   },
 
   Messaging_PostMessage: function(instance, value) {
-    // TODO arbitrary objects.
-    ppapi.Messaging.PostMessage(instance, ppapi_glue.stringForVar(value));
+    ppapi.Messaging.PostMessage(instance, ppapi_glue.jsForVar(value));
   },
 
   URLLoader_Create: function(instance) {
