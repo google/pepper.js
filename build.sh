@@ -11,10 +11,14 @@ mkdir -p out
 
 FLAGS="-std=c++11 -O0 --closure 0 --minify 0 --js-library library_ppapi.js --pre-js ppapi.js -I$NACL_SDK_ROOT/include"
 
-# Files that are normally compiled into libppapi_cpp.
+# Libraries
+mkdir -p out/lib
 D=$NACL_SDK_ROOT/src/ppapi_cpp
-PPAPI_CPP="$D/ppp_entrypoints.cc $D/module.cc $D/instance.cc $D/instance_handle.cc $D/var.cc $D/url_request_info.cc $D/url_response_info.cc $D/url_loader.cc $D/resource.cc $D/lock.cc $D/input_event.cc $D/view.cc $D/graphics_2d.cc $D/image_data.cc"
+PPAPI_CPP_FILES="$D/ppp_entrypoints.cc $D/module.cc $D/instance.cc $D/instance_handle.cc $D/var.cc $D/url_request_info.cc $D/url_response_info.cc $D/url_loader.cc $D/resource.cc $D/lock.cc $D/input_event.cc $D/view.cc $D/graphics_2d.cc $D/image_data.cc"
+PPAPI_CPP=out/lib/ppapi_cpp.o
+$EMCC $FLAGS $PPAPI_CPP_FILES -o $PPAPI_CPP
 
+# Examples
 example() {
   NAME=$1
   IN_DIR=examples/$NAME
