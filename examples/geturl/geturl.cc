@@ -45,10 +45,13 @@ class GetURLInstance : public pp::Instance {
 };
 
 void GetURLInstance::HandleMessage(const pp::Var& var_message) {
+  printf("Got message!\n");
   if (!var_message.is_string()) {
     return;
   }
   std::string message = var_message.AsString();
+  printf("Text: %s\n", message.c_str());
+
   if (message.find(kLoadUrlMethodId) == 0) {
     // The argument to getUrl is everything after the first ':'.
     size_t sep_pos = message.find_first_of(kMessageArgumentSeparator);

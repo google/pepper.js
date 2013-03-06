@@ -7,8 +7,6 @@ var ppapi_exports = {
     ]),
     PP_VARTYPE_BOOL: 2,
     PP_VARTYPE_STRING: 5,
-    var_tracker: {},
-    var_uid: 0,
 
     stringForVar: function(p) {
       var o = ppapi_glue.PP_Var;
@@ -16,11 +14,7 @@ var ppapi_exports = {
       if (type != ppapi_glue.PP_VARTYPE_STRING)
         throw "PP_Var is not a string.";
       var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-      var resource = ppapi_glue.var_tracker[uid];
-      if (!resource) {
-        throw "Tried to reference a dead PP_Var.";
-      }
-      return resource.value;
+      return resources.resolve(uid).value;
     },
 
     boolForVar: function(p) {
@@ -50,27 +44,10 @@ var ppapi_exports = {
 	    return {{{ makeGetValue('p + o.value', '0', 'double') }}};
 	} else if (type == ppapi_glue.PP_VARTYPE_STRING) {
 	    var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-	    var resource = ppapi_glue.var_tracker[uid];
-	    if (!resource) {
-                throw "Tried to reference a dead PP_Var.";
-	    }
-	    return resource.value;
+	    return resources.resolve(uid).value;
 	} else {
 	    throw "Var type conversion not implemented: " + type;
         }
-    },
-
-    allocateUID: function() {
-      while (ppapi_glue.var_uid in ppapi_glue.var_tracker) {
-        ppapi_glue.var_uid = ppapi_glue.var_uid + 1 & 0xffffffff;
-      }
-      return ppapi_glue.var_uid;
-    },
-
-    createResource: function(value) {
-      var uid = ppapi_glue.allocateUID();
-      ppapi_glue.var_tracker[uid] = {refcount: 1, value: value};
-      return uid;
     }
   },
 
@@ -92,17 +69,12 @@ var ppapi_exports = {
     ppapi.Console.LogWithSource(instance, level, ppapi_glue.jsForVar(source), ppapi_glue.jsForVar(value));
   },
 
+  Core_AddRefResource: function(uid) {
+      resources.addRef(uid);
+  },
+
   Core_ReleaseResource: function(uid) {
-      console.log("Releasing resource", uid);
-      var resource = ppapi_glue.var_tracker[uid];
-      if (!resource) {
-        throw "Tried to reference a dead resource.";
-      }
-      console.log(resource);
-      resource.refcount -= 1;
-      if (resource.refcount <= 0) {
-        delete ppapi_glue.var_tracker[uid];
-      }
+      resources.release(uid);
   },
 
   Messaging_PostMessage: function(instance, value) {
@@ -110,12 +82,12 @@ var ppapi_exports = {
   },
 
   URLLoader_Create: function(instance) {
-      return ppapi_glue.createResource(ppapi.URLLoader.Create(instance));
+      return resources.register({value: ppapi.URLLoader.Create(instance)});
   },
   URLLoader_IsURLLoader: function() { NotImplemented; },
   URLLoader_Open: function(loader, request, callback) {
-      var l = ppapi_glue.var_tracker[loader].value;
-      var r = ppapi_glue.var_tracker[request].value;
+      var l = resources.resolve(loader).value;
+      var r = resources.resolve(request).value;
       ppapi.URLLoader.Open(l, r, function(status) {
           _RunCompletionCallback(callback, status);
       });
@@ -132,7 +104,7 @@ var ppapi_exports = {
   URLLoader_GetResponseInfo: function() { NotImplemented; },
 
   URLLoader_ReadResponseBody: function(loader, buffer_ptr, read_size, callback) {
-      var l = ppapi_glue.var_tracker[loader].value;
+      var l = resources.resolve(loader).value;
       return ppapi.URLLoader.ReadResponseBody(l, read_size, function(status, data) {
 	  writeStringToMemory(data, buffer_ptr, true);
 	  _RunCompletionCallback(callback, status);
@@ -143,7 +115,7 @@ var ppapi_exports = {
   URLLoader_Close: function() { NotImplemented; },
 
   URLRequestInfo_Create: function(instance) {
-    return ppapi_glue.createResource(ppapi.URLRequestInfo.Create(instance));
+    return resources.register({value: ppapi.URLRequestInfo.Create(instance)});
   },
 
   URLRequestInfo_IsURLRequestInfo: function(resource) {
@@ -152,7 +124,7 @@ var ppapi_exports = {
   },
 
   URLRequestInfo_SetProperty: function(request, property, value) {
-    var r = ppapi_glue.var_tracker[request].value;
+    var r = resources.resolve(request).value;
     if (property === 0) {
       r.url = ppapi_glue.stringForVar(value);
     } else if (property === 1) {
@@ -177,29 +149,18 @@ var ppapi_exports = {
     // TODO check var type.
     var o = ppapi_glue.PP_Var;
     var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
-    var resource = ppapi_glue.var_tracker[uid];
-    if (resource) {
-      resource.refcount += 1;
-    }
+    resources.addRef(uid);
   },
 
   Var_Release: function(v) {
     // TODO check var type.
     var o = ppapi_glue.PP_Var;
     var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
-    var resource = ppapi_glue.var_tracker[uid];
-    if (resource) {
-      resource.refcount -= 1;
-      if (resource.refcount <= 0) {
-        _free(ppapi_glue.var_tracker[uid].memory);
-        delete ppapi_glue.var_tracker[uid];
-      }
-    }
+    resources.release(uid);
   },
 
   Var_VarFromUtf8: function(result, ptr, len) {
     var value = Pointer_stringify(ptr, len);
-    var uid = ppapi_glue.allocateUID();
 
     // Create a copy of the string.
     // TODO more efficient copy?
@@ -210,7 +171,14 @@ var ppapi_exports = {
     // Null terminate the string because why not?
     HEAPU8[memory + len] = 0;
 
-    ppapi_glue.var_tracker[uid] = {refcount: 1, value: value, memory: memory, len: len};
+    var uid = resources.register({
+	value: value,
+	memory: memory,
+	len: len,
+	destroy: function() {
+	    _free(this.memory)
+	}
+    });
 
     // Generate the return value.
     var o = ppapi_glue.PP_Var;
@@ -223,7 +191,7 @@ var ppapi_exports = {
     var type = {{{ makeGetValue('v + o.type', '0', 'i32') }}};
     if (type == ppapi_glue.PP_VARTYPE_STRING) {
       var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
-      var resource = ppapi_glue.var_tracker[uid];
+      var resource = resources.resolve(uid);
       if (resource) {
         {{{ makeSetValue('lenptr', '0', 'resource.len', 'i32') }}};
         return resource.memory;

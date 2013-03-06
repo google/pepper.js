@@ -35,11 +35,8 @@ static PPB_Console console_interface = {
 };
 
 
-void Core_AddRefResource(PP_Resource resource) {
-  ThrowNotImplemented();
-}
-
 extern "C" {
+  extern void Core_AddRefResource(PP_Resource resource);
   extern void Core_ReleaseResource(PP_Resource resource);
 }
 
@@ -214,7 +211,7 @@ extern "C" {
     }
     PP_Var message_var = var_interface.VarFromUtf8(message, strlen(message));
     messaging_interface->HandleMessage(instance, message_var);
-    var_interface.Release(message_var);
+    // It appears that the callee own the var, so no need to release it?
   }
 
   CALLED_FROM_JS void DoChangeView(PP_Instance instance, PP_Resource resource) {
