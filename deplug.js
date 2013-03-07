@@ -70,7 +70,11 @@ CreateInstance = function(width, height) {
 
     shadow_instance.addEventListener('DOMNodeInserted', function(evt) {
 	instance = _NativeCreateInstance();
-	//_DoChangeView(instance, 101);
+
+	// Create and send a bogus view resource.
+	var view = resources.register({value: {}});
+	_DoChangeView(instance, view.uid);
+	resources.release(view);
 
 	// Fake the load event.
         var evt = document.createEvent('Event');

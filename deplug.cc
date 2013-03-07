@@ -38,6 +38,7 @@ static PPB_Console console_interface = {
 extern "C" {
   extern void Core_AddRefResource(PP_Resource resource);
   extern void Core_ReleaseResource(PP_Resource resource);
+  extern void Core_CallOnMainThread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback, int32_t result);
 }
 
 PP_Time Core_GetTime() {
@@ -48,10 +49,6 @@ PP_Time Core_GetTime() {
 PP_TimeTicks Core_GetTimeTicks() {
   ThrowNotImplemented();
   return 0;
-}
-
-void Core_CallOnMainThread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback, int32_t result) {
-  ThrowNotImplemented();
 }
 
 PP_Bool Core_IsMainThread() {
@@ -221,10 +218,6 @@ extern "C" {
       return;
     }
     instance_interface->DidChangeView(instance, resource);
-  }
-
-  CALLED_FROM_JS void RunCompletionCallback(struct PP_CompletionCallback* cc, int32_t result) {
-    PP_RunCompletionCallback(cc, result);
   }
 
   void Shutdown(PP_Instance instance) {

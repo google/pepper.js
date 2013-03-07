@@ -48,6 +48,13 @@ var ppapi_exports = {
 	} else {
 	    throw "Var type conversion not implemented: " + type;
         }
+    },
+    convertCompletionCallback: function(callback) {
+      // Assumes 4-byte pointers.
+      func = {{{ makeGetValue('callback + 0', '0', 'i32') }}};
+      user_data = {{{ makeGetValue('callback + 4', '0', 'i32') }}};
+      // TODO correct way to call?
+      return function(result) { FUNCTION_TABLE[func](user_data, result); };
     }
   },
 
@@ -69,6 +76,13 @@ var ppapi_exports = {
     ppapi.Console.LogWithSource(instance, level, ppapi_glue.jsForVar(source), ppapi_glue.jsForVar(value));
   },
 
+  Core_CallOnMainThread: function(delay, callback, result) {
+      callback = ppapi_glue.convertCompletionCallback(callback);
+      setTimeout(function() {
+          callback(result);
+      }, delay);
+  },
+
   Core_AddRefResource: function(uid) {
       resources.addRef(uid);
   },
@@ -88,9 +102,8 @@ var ppapi_exports = {
   URLLoader_Open: function(loader, request, callback) {
       var l = resources.resolve(loader).value;
       var r = resources.resolve(request).value;
-      ppapi.URLLoader.Open(l, r, function(status) {
-          _RunCompletionCallback(callback, status);
-      });
+      var c = ppapi_glue.convertCompletionCallback(callback);
+      ppapi.URLLoader.Open(l, r, c);
   },
   URLLoader_FollowRedirect: function() { NotImplemented; },
   URLLoader_GetUploadProgress: function() { NotImplemented; },
@@ -105,9 +118,10 @@ var ppapi_exports = {
 
   URLLoader_ReadResponseBody: function(loader, buffer_ptr, read_size, callback) {
       var l = resources.resolve(loader).value;
+      var c = ppapi_glue.convertCompletionCallback(callback);
       return ppapi.URLLoader.ReadResponseBody(l, read_size, function(status, data) {
 	  writeStringToMemory(data, buffer_ptr, true);
-	  _RunCompletionCallback(callback, status);
+	  c(status);
       });
   },
 
