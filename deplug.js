@@ -10,11 +10,12 @@ var ResourceManager = function() {
     this.uid = 1;
 }
 
-ResourceManager.prototype.register = function(res) {
+ResourceManager.prototype.register = function(type, res) {
     while (this.uid in this.lut) {
         this.uid = (this.uid + 1) & 0xffffffff;
     }
-    res.uid = this.uid
+    res.type = type;
+    res.uid = this.uid;
     res.refcount = 1;
     this.lut[res.uid] = res;
     //console.log("create", res.uid);
@@ -28,8 +29,13 @@ ResourceManager.prototype.resolve = function(res) {
 	return res;
 }
 
+ResourceManager.prototype.is = function(res, type) {
+    var res = this.resolve(res);
+    return res && res.type == type;
+}
+
 ResourceManager.prototype.addRef = function(uid) {
-    res = this.resolve(uid);
+    var res = this.resolve(uid);
     //console.log("inc", uid);
     if (res === undefined) {
 	throw "Resource does not exist.";
@@ -38,7 +44,7 @@ ResourceManager.prototype.addRef = function(uid) {
 }
 
 ResourceManager.prototype.release = function(uid) {
-    res = this.resolve(uid);
+    var res = this.resolve(uid);
     //console.log("dec", uid);
     if (res === undefined) {
 	throw "Resource does not exist.";
@@ -72,7 +78,7 @@ CreateInstance = function(width, height) {
 	instance = _NativeCreateInstance();
 
 	// Create and send a bogus view resource.
-	var view = resources.register({
+	var view = resources.register("view", {
 	    rect: {x: 0, y: 0, width: width, height: height},
 	    fullscreen: true,
 	    visible: true,

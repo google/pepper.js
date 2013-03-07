@@ -102,12 +102,14 @@ var ppapi_exports = {
   },
 
   URLLoader_Create: function(instance) {
-      return resources.register({value: ppapi.URLLoader.Create(instance)});
+      return resources.register("url_loader", ppapi.URLLoader.Create(instance));
   },
-  URLLoader_IsURLLoader: function() { NotImplemented; },
+  URLLoader_IsURLLoader: function(resource) {
+      return resources.is(resource, "url_loader");
+  },
   URLLoader_Open: function(loader, request, callback) {
-      var l = resources.resolve(loader).value;
-      var r = resources.resolve(request).value;
+      var l = resources.resolve(loader);
+      var r = resources.resolve(request);
       var c = ppapi_glue.convertCompletionCallback(callback);
       ppapi.URLLoader.Open(l, r, c);
   },
@@ -123,7 +125,7 @@ var ppapi_exports = {
   URLLoader_GetResponseInfo: function() { NotImplemented; },
 
   URLLoader_ReadResponseBody: function(loader, buffer_ptr, read_size, callback) {
-      var l = resources.resolve(loader).value;
+      var l = resources.resolve(loader);
       var c = ppapi_glue.convertCompletionCallback(callback);
       return ppapi.URLLoader.ReadResponseBody(l, read_size, function(status, data) {
 	  writeStringToMemory(data, buffer_ptr, true);
@@ -135,16 +137,15 @@ var ppapi_exports = {
   URLLoader_Close: function() { NotImplemented; },
 
   URLRequestInfo_Create: function(instance) {
-    return resources.register({value: ppapi.URLRequestInfo.Create(instance)});
+      return resources.register("url_request_info", ppapi.URLRequestInfo.Create(instance));
   },
 
   URLRequestInfo_IsURLRequestInfo: function(resource) {
-    console.log(resource);
-    NotImplemented;
+      return resources.is(resource, "url_request_info");
   },
 
   URLRequestInfo_SetProperty: function(request, property, value) {
-    var r = resources.resolve(request).value;
+    var r = resources.resolve(request);
     if (property === 0) {
       r.url = ppapi_glue.stringForVar(value);
     } else if (property === 1) {
@@ -191,7 +192,7 @@ var ppapi_exports = {
     // Null terminate the string because why not?
     HEAPU8[memory + len] = 0;
 
-    var uid = resources.register({
+    var uid = resources.register("string", {
 	value: value,
 	memory: memory,
 	len: len,
@@ -223,8 +224,7 @@ var ppapi_exports = {
   },
 
     View_IsView: function(resource) {
-	// TODO typechecking
-	return true;
+	return resources.is(resource, "view");
     },
     View_GetRect: function(resource, rectptr) {
 	ppapi_glue.setRect(resources.resolve(resource).rect, rectptr);
