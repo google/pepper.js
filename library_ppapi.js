@@ -55,7 +55,13 @@ var ppapi_exports = {
       user_data = {{{ makeGetValue('callback + 4', '0', 'i32') }}};
       // TODO correct way to call?
       return function(result) { FUNCTION_TABLE[func](user_data, result); };
-    }
+    },
+    setRect: function(rect, ptr) {
+	{{{ makeSetValue('ptr', '0', 'rect.x', 'i32') }}};
+	{{{ makeSetValue('ptr + 4', '0', 'rect.y', 'i32') }}};
+	{{{ makeSetValue('ptr + 8', '0', 'rect.width', 'i32') }}};
+	{{{ makeSetValue('ptr + 16', '0', 'rect.height', 'i32') }}};
+    },
   },
 
   Schedule: function(f, p0, p1) {
@@ -215,6 +221,28 @@ var ppapi_exports = {
     {{{ makeSetValue('lenptr', '0', '0', 'i32') }}};
     return 0;
   },
+
+    View_IsView: function(resource) {
+	// TODO typechecking
+	return true;
+    },
+    View_GetRect: function(resource, rectptr) {
+	ppapi_glue.setRect(resources.resolve(resource).rect, rectptr);
+	return true;
+    },
+    View_IsFullscreen: function(resource) {
+	return resources.resolve(resource).fullscreen;
+    },
+    View_IsVisible: function(resource) {
+	return resources.resolve(resource).visible;
+    },
+    View_IsPageVisible: function(resource) {
+	return resources.resolve(resource).page_visible;
+    },
+    View_GetClipRect: function(resource, rectptr) {
+	ppapi_glue.setRect(resources.resolve(resource).clip_rect, rectptr);
+	return true;
+    },
 };
 
 

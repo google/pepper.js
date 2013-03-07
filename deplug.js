@@ -72,8 +72,14 @@ CreateInstance = function(width, height) {
 	instance = _NativeCreateInstance();
 
 	// Create and send a bogus view resource.
-	var view = resources.register({value: {}});
-	_DoChangeView(instance, view.uid);
+	var view = resources.register({
+	    rect: {x: 0, y: 0, width: width, height: height},
+	    fullscreen: true,
+	    visible: true,
+	    page_visible: true,
+	    clip_rect: {x: 0, y: 0, width: width, height: height}
+	});
+	_DoChangeView(instance, view);
 	resources.release(view);
 
 	// Fake the load event.
