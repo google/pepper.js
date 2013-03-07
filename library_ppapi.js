@@ -60,7 +60,13 @@ var ppapi_exports = {
 	{{{ makeSetValue('ptr', '0', 'rect.x', 'i32') }}};
 	{{{ makeSetValue('ptr + 4', '0', 'rect.y', 'i32') }}};
 	{{{ makeSetValue('ptr + 8', '0', 'rect.width', 'i32') }}};
-	{{{ makeSetValue('ptr + 16', '0', 'rect.height', 'i32') }}};
+	{{{ makeSetValue('ptr + 12', '0', 'rect.height', 'i32') }}};
+    },
+    getSize: function(ptr) {
+	return {
+	    width: {{{ makeGetValue('ptr', '0', 'i32') }}},
+	    height: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
+	};
     },
   },
 
@@ -96,6 +102,36 @@ var ppapi_exports = {
   Core_ReleaseResource: function(uid) {
       resources.release(uid);
   },
+
+    Graphics2D_Create: function(instance, size_ptr, is_always_opaque) {
+	resource = resources.register("graphics_2d", {size: ppapi_glue.getSize(size_ptr), always_opaque: true});
+	return resource;
+    },
+    Graphics2D_IsGraphics2D: function(resource) {
+	return resources.is(resource, "graphics_2d");
+    },
+    Graphics2D_Describe: function(resource, size_ptr, is_always_opqaue_ptr) {
+	NotImplemented;
+    },
+    Graphics2D_PaintImageData: function(resource, image_data, top_left_ptr, src_rect_ptr) {
+	// Ignore.
+    },
+    Graphics2D_Scroll: function(resource, clip_rect_ptr, amount_ptr) {
+	NotImplemented;
+    },
+    Graphics2D_ReplaceContents: function(resource, image_data) {
+	NotImplemented;
+    },
+    Graphics2D_Flush: function(resource, callback) {
+	// Ignore
+	// TODO vsync
+	var c = ppapi_glue.convertCompletionCallback(callback);
+	setTimeout(function() {
+	    c(ppapi.PP_Error.PP_OK);
+	}, 15);
+	return ppapi.PP_Error.PP_OK;
+   },
+
 
   Messaging_PostMessage: function(instance, value) {
     ppapi.Messaging.PostMessage(instance, ppapi_glue.jsForVar(value));

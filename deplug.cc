@@ -6,6 +6,7 @@
 #include "ppapi/c/ppp.h"
 #include "ppapi/c/ppb_core.h"
 #include "ppapi/c/ppb_console.h"
+#include "ppapi/c/ppb_graphics_2d.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_url_loader.h"
 #include "ppapi/c/ppb_url_request_info.h"
@@ -63,6 +64,27 @@ static PPB_Core core_interface = {
   &Core_GetTimeTicks,
   &Core_CallOnMainThread,
   &Core_IsMainThread
+};
+
+
+extern "C" {
+  PP_Resource Graphics2D_Create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque);
+  PP_Bool Graphics2D_IsGraphics2D(PP_Resource resource);
+  PP_Bool Graphics2D_Describe(PP_Resource graphics_2d, struct PP_Size *size, PP_Bool *is_always_opqaue);
+  void Graphics2D_PaintImageData(PP_Resource graphics_2d, PP_Resource image_data, const struct PP_Point *top_left, const struct PP_Rect *src_rect);
+  void Graphics2D_Scroll(PP_Resource graphics_2d, const struct PP_Rect *clip_rect, const struct PP_Point *amount);
+  void Graphics2D_ReplaceContents(PP_Resource graphics_2d, PP_Resource image_data);
+  int32_t Graphics2D_Flush(PP_Resource graphics_2d, struct PP_CompletionCallback callback);
+}
+
+static PPB_Graphics2D graphics_2d_interface_1_0 = {
+  Graphics2D_Create,
+  Graphics2D_IsGraphics2D,
+  Graphics2D_Describe,
+  Graphics2D_PaintImageData,
+  Graphics2D_Scroll,
+  Graphics2D_ReplaceContents,
+  Graphics2D_Flush
 };
 
 extern "C" {
@@ -187,6 +209,8 @@ const void* get_browser_interface_c(const char* interface_name) {
     return &console_interface;
   } else if (strcmp(interface_name, PPB_CORE_INTERFACE) == 0) {
     return &core_interface;
+  } else if (strcmp(interface_name, PPB_GRAPHICS_2D_INTERFACE_1_0) == 0) {
+    return &graphics_2d_interface_1_0;
   } else if (strcmp(interface_name, PPB_MESSAGING_INTERFACE) == 0) {
     return &messaging_interface;
   } else if (strcmp(interface_name, PPB_URLLOADER_INTERFACE) == 0) {
