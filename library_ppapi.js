@@ -133,6 +133,16 @@ var ppapi_exports = {
    },
 
 
+    Instance_BindGraphics: function(instance, device) {
+	// Ignore
+	return 1;
+    },
+
+    Instance_IsFullFrame: function(instance) {
+	return 0;
+    },
+
+
   Messaging_PostMessage: function(instance, value) {
     ppapi.Messaging.PostMessage(instance, ppapi_glue.jsForVar(value));
   },

@@ -7,6 +7,7 @@
 #include "ppapi/c/ppb_core.h"
 #include "ppapi/c/ppb_console.h"
 #include "ppapi/c/ppb_graphics_2d.h"
+#include "ppapi/c/ppb_instance.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_url_loader.h"
 #include "ppapi/c/ppb_url_request_info.h"
@@ -85,6 +86,16 @@ static PPB_Graphics2D graphics_2d_interface_1_0 = {
   Graphics2D_Scroll,
   Graphics2D_ReplaceContents,
   Graphics2D_Flush
+};
+
+extern "C" {
+  PP_Bool Instance_BindGraphics(PP_Instance instance, PP_Resource device);
+  PP_Bool Instance_IsFullFrame(PP_Instance instance);
+}
+
+static PPB_Instance instance_interface_1_0 = {
+  Instance_BindGraphics,
+  Instance_IsFullFrame
 };
 
 extern "C" {
@@ -211,6 +222,8 @@ const void* get_browser_interface_c(const char* interface_name) {
     return &core_interface;
   } else if (strcmp(interface_name, PPB_GRAPHICS_2D_INTERFACE_1_0) == 0) {
     return &graphics_2d_interface_1_0;
+  } else if (strcmp(interface_name, PPB_INSTANCE_INTERFACE_1_0) == 0) {
+    return &instance_interface_1_0;
   } else if (strcmp(interface_name, PPB_MESSAGING_INTERFACE) == 0) {
     return &messaging_interface;
   } else if (strcmp(interface_name, PPB_URLLOADER_INTERFACE) == 0) {
