@@ -63,7 +63,7 @@ var resources = new ResourceManager();
 
 // Entry point
 CreateInstance = function(width, height) {
-    var shadow_instance = document.createElement('embed');
+    var shadow_instance = document.createElement('canvas');
     shadow_instance.setAttribute('name', 'nacl_module');
     shadow_instance.setAttribute('id', 'nacl_module');
     shadow_instance.setAttribute('width', width);
@@ -71,6 +71,11 @@ CreateInstance = function(width, height) {
     shadow_instance.postMessage = postMessage;
     // HACK global
     fakeEmbed = shadow_instance;
+
+    // HACK more globals
+    ctx = fakeEmbed.getContext('2d');
+    imageData = ctx.createImageData(200, 200);
+    mapped_buffer = new Uint32Array(imageData.data.buffer);
 
     var instance = 0;
 

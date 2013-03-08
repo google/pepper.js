@@ -73,7 +73,7 @@ var ppapi_exports = {
   Schedule: function(f, p0, p1) {
       setTimeout(function() {
 	  _RunScheduled(f, p0, p1);
-      }, 10);
+      }, 0);
   },
 
   ThrowNotImplemented: function() {
@@ -114,7 +114,7 @@ var ppapi_exports = {
 	NotImplemented;
     },
     Graphics2D_PaintImageData: function(resource, image_data, top_left_ptr, src_rect_ptr) {
-	// Ignore.
+	ctx.putImageData(imageData, 0, 0);
     },
     Graphics2D_Scroll: function(resource, clip_rect_ptr, amount_ptr) {
 	NotImplemented;
@@ -141,13 +141,14 @@ var ppapi_exports = {
     },
     ImageData_Create: function(instance, format, size_ptr, init_to_zero) {
 	size = ppapi_glue.getSize(size_ptr);
-	return resources.register("image_data", {format: format, size: size});
+	uid = resources.register("image_data", {format: format, size: size});
+	return uid;
     },
     ImageData_IsImageData: function (image_data) {
 	return resources.is("image_data", image_data);
     },
     ImageData_Describe: function(image_data, desc_ptr) {
-	if (!resources.is("image_data", image_data)) return 0;
+	//if (!resources.is("image_data", image_data)) return 0;
 
 	var res = resources.resolve(image_data);
 	{{{ makeSetValue('desc_ptr + 0', '0', 'res.format', 'i32') }}};
@@ -157,10 +158,19 @@ var ppapi_exports = {
 	return 1;
     },
     ImageData_Map: function(image_data) {
-	NotImplemented;
+	// A little hackish - use the resource ID as the "mapped data ID".
+	// This allows us to leverage the existing ID => object mapping.
+	return image_data;
     },
     ImageData_Unmap: function(image_data) {
-	NotImplemented;
+	// Ignore
+    },
+
+    ReadImageData: function(ptr, offset) {
+	return mapped_buffer[offset];
+    },
+    WriteImageData: function(ptr, offset, value) {
+	mapped_buffer[offset] = value;
     },
 
     Instance_BindGraphics: function(instance, device) {

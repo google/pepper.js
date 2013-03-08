@@ -34,6 +34,11 @@ void FlushCallback(void* data, int32_t result) {
 
 }  // namespace
 
+extern "C" {
+  extern uint32_t ReadImageData(uint32_t* ptr, uint32_t offset);
+  extern void WriteImageData(uint32_t* ptr, uint32_t offset, uint32_t value);
+}
+
 namespace pi_generator {
 
 // A small helper RAII class that implementes a scoped pthread_mutex lock.
@@ -239,7 +244,7 @@ void PiGenerator::DrawPoint(double x, double y, bool inside, uint32_t* pixel_bit
   }
   int px = x * width();
   int py = (1.0 - y) * height();
-  uint32_t color = pixel_bits[width() * py + px];
+  uint32_t color = ReadImageData(pixel_bits, width() * py + px);
   if (inside) {
     // Set color to blue.
     color += 4 << kBlueShift;
@@ -249,7 +254,7 @@ void PiGenerator::DrawPoint(double x, double y, bool inside, uint32_t* pixel_bit
     color += 4 << kRedShift;
     color &= kRedMask;
   }
-  pixel_bits[width() * py + px] = color | kOpaqueColorMask;
+  WriteImageData(pixel_bits, width() * py + px, color | kOpaqueColorMask);
 }
 
 void PiGenerator::Work() {
