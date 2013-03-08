@@ -1,6 +1,8 @@
+"use strict";
+
 var postMessage = function(message) {
     // HACK assumes string.
-    ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
+    var ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
     _DoPostMessage(1, ptr);
     _free(ptr);
 }
@@ -60,9 +62,14 @@ ResourceManager.prototype.release = function(uid) {
 
 // HACK
 var resources = new ResourceManager();
+var fakeEmbed = null;
+var imageData = null;
+var mapped_buffer = null;
+var ctx = null;
 
-// Entry point
-CreateInstance = function(width, height) {
+var Module = {};
+
+var CreateInstance = function(width, height) {
     var shadow_instance = document.createElement('canvas');
     shadow_instance.setAttribute('name', 'nacl_module');
     shadow_instance.setAttribute('id', 'nacl_module');
@@ -103,3 +110,6 @@ CreateInstance = function(width, height) {
 
     return shadow_instance;
 }
+
+// Entry point
+window["CreateInstance"] = CreateInstance;

@@ -42,12 +42,8 @@ static PPB_Console console_interface = {
 extern "C" {
   extern void Core_AddRefResource(PP_Resource resource);
   extern void Core_ReleaseResource(PP_Resource resource);
+  extern PP_Time Core_GetTime();
   extern void Core_CallOnMainThread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback, int32_t result);
-}
-
-PP_Time Core_GetTime() {
-  ThrowNotImplemented();
-  return 0;
 }
 
 PP_TimeTicks Core_GetTimeTicks() {

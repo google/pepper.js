@@ -108,6 +108,9 @@ class PiGenerator : public pp::Instance {
   unsigned int num_inside;
   unsigned int num_samples;
 
+  double prev_time;
+  unsigned int timed_samples;
+
   // ComputePi() estimates Pi using Monte Carlo method and it is executed by a
   // separate thread created in SetWindow(). ComputePi() puts kMaxPointCount
   // points inside the square whose length of each side is 1.0, and calculates

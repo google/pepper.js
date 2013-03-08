@@ -126,6 +126,13 @@ void PiGenerator::DidChangeView(const pp::View& view) {
   }
 }
 
+
+void Pump(void* param, int result) {
+  PiGenerator* pi_generator = static_cast<PiGenerator*>(param);
+  pi_generator->Work();
+  pp::Module::Get()->core()->CallOnMainThread(0, pp::CompletionCallback(&Pump, param));
+}
+
 struct DaemonCallback RunGenerator(void* param) {
   PiGenerator* pi_generator = static_cast<PiGenerator*>(param);
   pi_generator->Work();
@@ -133,7 +140,10 @@ struct DaemonCallback RunGenerator(void* param) {
 }
 
 bool PiGenerator::Init(uint32_t argc, const char* argn[], const char* argv[]) {
-  LaunchDaemon(&RunGenerator, this);
+  prev_time = pp::Module::Get()->core()->GetTime();
+  timed_samples = 0;
+  pp::Module::Get()->core()->CallOnMainThread(0, pp::CompletionCallback(&Pump, this));
+  //LaunchDaemon(&RunGenerator, this);
   return true;
 
   thread_create_result_ = pthread_create(&compute_pi_thread_, NULL, ComputePi, this);
@@ -219,6 +229,7 @@ void PiGenerator::FlushPixelBuffer() {
 
 void PiGenerator::UpdateEstimate(bool inside) {
   num_samples += 1;
+  timed_samples += 1;
   if (inside)
     num_inside += 1;
   pi_ = 4.0 * num_inside / num_samples; 
@@ -262,6 +273,14 @@ void PiGenerator::Work() {
   uint32_t* pixel_bits = scoped_pixel_lock.pixels();
   for (int i=0; i<10000; i++) {
     ComputeStep(pixel_bits);
+  }
+  double current = pp::Module::Get()->core()->GetTime();
+  double delta = current - prev_time;
+  if (delta >= 4) {
+    prev_time = current;
+    std::string message = "Samples/sec: " + std::to_string((int)(timed_samples / delta));
+    LogToConsole(PP_LOGLEVEL_LOG, pp::Var(message));
+    timed_samples = 0;
   }
 }
 

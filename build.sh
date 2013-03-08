@@ -9,7 +9,7 @@ set -e
 # Make sure the main output directory exists.
 mkdir -p out
 
-FLAGS="-std=c++11 -O0 --closure 0 --minify 0 --js-library library_ppapi.js --pre-js ppapi.js --pre-js deplug.js -I$NACL_SDK_ROOT/include"
+FLAGS="-std=c++11 -O0 --closure 0 --minify 0 --js-library library_ppapi.js --pre-js deplug.js --pre-js ppapi.js -I$NACL_SDK_ROOT/include"
 
 # Libraries
 mkdir -p out/lib

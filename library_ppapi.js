@@ -51,8 +51,8 @@ var ppapi_exports = {
     },
     convertCompletionCallback: function(callback) {
       // Assumes 4-byte pointers.
-      func = {{{ makeGetValue('callback + 0', '0', 'i32') }}};
-      user_data = {{{ makeGetValue('callback + 4', '0', 'i32') }}};
+      var func = {{{ makeGetValue('callback + 0', '0', 'i32') }}};
+      var user_data = {{{ makeGetValue('callback + 4', '0', 'i32') }}};
       // TODO correct way to call?
       return function(result) { FUNCTION_TABLE[func](user_data, result); };
     },
@@ -89,9 +89,9 @@ var ppapi_exports = {
   },
 
   Core_CallOnMainThread: function(delay, callback, result) {
-      callback = ppapi_glue.convertCompletionCallback(callback);
+      var js_callback = ppapi_glue.convertCompletionCallback(callback);
       setTimeout(function() {
-          callback(result);
+          js_callback(result);
       }, delay);
   },
 
@@ -103,8 +103,12 @@ var ppapi_exports = {
       resources.release(uid);
   },
 
+    Core_GetTime: function() {
+	return (new Date()) / 1000;
+    },
+
     Graphics2D_Create: function(instance, size_ptr, is_always_opaque) {
-	resource = resources.register("graphics_2d", {size: ppapi_glue.getSize(size_ptr), always_opaque: true});
+	var resource = resources.register("graphics_2d", {size: ppapi_glue.getSize(size_ptr), always_opaque: true});
 	return resource;
     },
     Graphics2D_IsGraphics2D: function(resource) {
@@ -140,8 +144,8 @@ var ppapi_exports = {
 	NotImplemented;
     },
     ImageData_Create: function(instance, format, size_ptr, init_to_zero) {
-	size = ppapi_glue.getSize(size_ptr);
-	uid = resources.register("image_data", {format: format, size: size});
+	var size = ppapi_glue.getSize(size_ptr);
+	var uid = resources.register("image_data", {format: format, size: size});
 	return uid;
     },
     ImageData_IsImageData: function (image_data) {
@@ -334,4 +338,3 @@ var ppapi_exports = {
 
 autoAddDeps(ppapi_exports, '$ppapi_glue');
 mergeInto(LibraryManager.library, ppapi_exports);
-
