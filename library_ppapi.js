@@ -133,6 +133,36 @@ var ppapi_exports = {
    },
 
 
+    ImageData_GetNativeImageDataFormat: function() {
+	NotImplemented;
+    },
+    ImageData_IsImageDataFormatSupported: function(format) {
+	NotImplemented;
+    },
+    ImageData_Create: function(instance, format, size_ptr, init_to_zero) {
+	size = ppapi_glue.getSize(size_ptr);
+	return resources.register("image_data", {format: format, size: size});
+    },
+    ImageData_IsImageData: function (image_data) {
+	return resources.is("image_data", image_data);
+    },
+    ImageData_Describe: function(image_data, desc_ptr) {
+	if (!resources.is("image_data", image_data)) return 0;
+
+	var res = resources.resolve(image_data);
+	{{{ makeSetValue('desc_ptr + 0', '0', 'res.format', 'i32') }}};
+	{{{ makeSetValue('desc_ptr + 4', '0', 'res.size.width', 'i32') }}};
+	{{{ makeSetValue('desc_ptr + 8', '0', 'res.size.height', 'i32') }}};
+	{{{ makeSetValue('desc_ptr + 12', '0', '(res.size.width*4)', 'i32') }}};
+	return 1;
+    },
+    ImageData_Map: function(image_data) {
+	NotImplemented;
+    },
+    ImageData_Unmap: function(image_data) {
+	NotImplemented;
+    },
+
     Instance_BindGraphics: function(instance, device) {
 	// Ignore
 	return 1;

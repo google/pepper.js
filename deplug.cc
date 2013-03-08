@@ -7,6 +7,7 @@
 #include "ppapi/c/ppb_core.h"
 #include "ppapi/c/ppb_console.h"
 #include "ppapi/c/ppb_graphics_2d.h"
+#include "ppapi/c/ppb_image_data.h"
 #include "ppapi/c/ppb_instance.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_url_loader.h"
@@ -86,6 +87,26 @@ static PPB_Graphics2D graphics_2d_interface_1_0 = {
   Graphics2D_Scroll,
   Graphics2D_ReplaceContents,
   Graphics2D_Flush
+};
+
+extern "C" {
+  PP_ImageDataFormat ImageData_GetNativeImageDataFormat();
+  PP_Bool ImageData_IsImageDataFormatSupported(PP_ImageDataFormat format);
+  PP_Resource ImageData_Create(PP_Instance instance, PP_ImageDataFormat format, const struct PP_Size *size, PP_Bool init_to_zero);
+  PP_Bool ImageData_IsImageData(PP_Resource image_data);
+  PP_Bool ImageData_Describe(PP_Resource image_data, struct PP_ImageDataDesc *desc);
+  void* ImageData_Map(PP_Resource image_data);
+  void ImageData_Unmap(PP_Resource image_data);
+}
+
+static PPB_ImageData image_data_interface_1_0 = {
+  ImageData_GetNativeImageDataFormat,
+  ImageData_IsImageDataFormatSupported,
+  ImageData_Create,
+  ImageData_IsImageData,
+  ImageData_Describe,
+  ImageData_Map,
+  ImageData_Unmap
 };
 
 extern "C" {
@@ -222,6 +243,8 @@ const void* get_browser_interface_c(const char* interface_name) {
     return &core_interface;
   } else if (strcmp(interface_name, PPB_GRAPHICS_2D_INTERFACE_1_0) == 0) {
     return &graphics_2d_interface_1_0;
+  } else if (strcmp(interface_name, PPB_IMAGEDATA_INTERFACE_1_0) == 0) {
+    return &image_data_interface_1_0;
   } else if (strcmp(interface_name, PPB_INSTANCE_INTERFACE_1_0) == 0) {
     return &instance_interface_1_0;
   } else if (strcmp(interface_name, PPB_MESSAGING_INTERFACE) == 0) {
