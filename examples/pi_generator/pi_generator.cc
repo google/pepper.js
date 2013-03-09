@@ -11,8 +11,6 @@
 #include "ppapi/cpp/completion_callback.h"
 #include "ppapi/cpp/var.h"
 
-#include "deplug.h"
-
 #include "pi_generator.h"
 
 namespace {
@@ -34,10 +32,16 @@ void FlushCallback(void* data, int32_t result) {
 
 }  // namespace
 
+
+#ifdef EMSCRIPTEN
 extern "C" {
   extern uint32_t ReadImageData(uint32_t* ptr, uint32_t offset);
   extern void WriteImageData(uint32_t* ptr, uint32_t offset, uint32_t value);
 }
+#else
+#define ReadImageData(ptr, offset) (ptr[offset])
+#define WriteImageData(ptr, offset, value) (ptr[offset] = value)
+#endif
 
 namespace pi_generator {
 
@@ -133,17 +137,10 @@ void Pump(void* param, int result) {
   pp::Module::Get()->core()->CallOnMainThread(0, pp::CompletionCallback(&Pump, param));
 }
 
-struct DaemonCallback RunGenerator(void* param) {
-  PiGenerator* pi_generator = static_cast<PiGenerator*>(param);
-  pi_generator->Work();
-  return {&RunGenerator, param};
-}
-
 bool PiGenerator::Init(uint32_t argc, const char* argn[], const char* argv[]) {
   prev_time = pp::Module::Get()->core()->GetTime();
   timed_samples = 0;
   pp::Module::Get()->core()->CallOnMainThread(0, pp::CompletionCallback(&Pump, this));
-  //LaunchDaemon(&RunGenerator, this);
   return true;
 
   thread_create_result_ = pthread_create(&compute_pi_thread_, NULL, ComputePi, this);
@@ -278,7 +275,9 @@ void PiGenerator::Work() {
   double delta = current - prev_time;
   if (delta >= 4) {
     prev_time = current;
-    std::string message = "Samples/sec: " + std::to_string((int)(timed_samples / delta));
+    char buf[1024];
+    sprintf(buf, "%d", (int)(timed_samples / delta));
+    std::string message = "Samples/sec: " + std::string(buf);
     LogToConsole(PP_LOGLEVEL_LOG, pp::Var(message));
     timed_samples = 0;
   }

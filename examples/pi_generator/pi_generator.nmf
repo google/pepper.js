@@ -1,0 +1,14 @@
+{
+  "files": {},
+  "program": {
+    "x86-64": {
+      "url": "pi_generator_x86_64.nexe"
+    },
+    "arm": {
+      "url": "pi_generator_arm.nexe"
+    },
+    "x86-32": {
+      "url": "pi_generator_x86_32.nexe"
+    }
+  }
+}

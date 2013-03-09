@@ -42,3 +42,7 @@ $EMCC $FLAGS $PPAPI_CPP deplug.cc $SOURCES -o $OUT_DIR/$NAME.js -s EXPORTED_FUNC
 example "pi_generator"
 SOURCES="$IN_DIR/pi_generator.cc $IN_DIR/pi_generator_module.cc"
 $EMCC $FLAGS -I . deplug.cc $PPAPI_CPP $SOURCES -o $OUT_DIR/$NAME.js -s "EXPORTED_FUNCTIONS=['CreateInstance']"
+
+# Native version.
+GCC=$NACL_SDK_ROOT/toolchain/linux_x86_newlib/bin/x86_64-nacl-g++
+$GCC -m64 -std=gnu++98 -O2 -I$NACL_SDK_ROOT/include $SOURCES -lppapi_cpp -lppapi -lpthread -lplatform -o $OUT_DIR/${NAME}_x86_64.nexe
