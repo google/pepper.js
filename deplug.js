@@ -70,20 +70,22 @@ var ctx = null;
 var Module = {};
 
 var CreateInstance = function(width, height) {
-    var shadow_instance = document.createElement('canvas');
+    var shadow_instance = document.createElement('span');
     shadow_instance.setAttribute('name', 'nacl_module');
     shadow_instance.setAttribute('id', 'nacl_module');
-    shadow_instance.setAttribute('width', width);
-    shadow_instance.setAttribute('height', height);
+    shadow_instance.style.width = width + "px";
+    shadow_instance.style.height = height + "px";
+    shadow_instance.style.padding = "0px";
     shadow_instance.postMessage = postMessage;
 
     // HACK global
     fakeEmbed = shadow_instance;
-    ctx = fakeEmbed.getContext('2d');
 
     var instance = 0;
 
     shadow_instance.addEventListener('DOMNodeInserted', function(evt) {
+	if (evt.srcElement !== shadow_instance) return;
+
 	instance = _NativeCreateInstance();
 
 	// Create and send a bogus view resource.

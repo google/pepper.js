@@ -114,7 +114,19 @@ var ppapi_exports = {
     },
 
     Graphics2D_Create: function(instance, size_ptr, is_always_opaque) {
-	var resource = resources.register("graphics_2d", {size: ppapi_glue.getSize(size_ptr), always_opaque: true});
+	var size = ppapi_glue.getSize(size_ptr);
+	var canvas = document.createElement('canvas');
+	canvas.width = size.width;
+	canvas.height = size.height;
+	var resource = resources.register("graphics_2d", {
+	    size: size,
+	    canvas: canvas,
+	    ctx: canvas.getContext('2d'),
+	    always_opaque: true,
+	    destroy: function() {
+		throw "Canvas destroy not implemented.";
+            }
+	});
 	return resource;
     },
     Graphics2D_IsGraphics2D: function(resource) {
@@ -124,11 +136,13 @@ var ppapi_exports = {
 	NotImplemented;
     },
     Graphics2D_PaintImageData: function(resource, image_data, top_left_ptr, src_rect_ptr) {
+        var g2d = resources.resolve(resource);
+
 	var res = resources.resolve(image_data);
 	res.image_data.data.set(res.view);
 
 	var top_left = ppapi_glue.getPos(top_left_ptr);
-        ctx.putImageData(res.image_data, top_left.x, top_left.y);
+        g2d.ctx.putImageData(res.image_data, top_left.x, top_left.y);
     },
     Graphics2D_Scroll: function(resource, clip_rect_ptr, amount_ptr) {
 	NotImplemented;
@@ -160,7 +174,11 @@ var ppapi_exports = {
         // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
         var view = new Uint8ClampedArray(buffer, memory, bytes);
         // Due to limitations of the canvas API, we need to create an intermediate "ImageData" buffer.
+        // HACK for creating an image data without having a 2D context available.
+        var c = document.createElement('canvas');
+        var ctx = c.getContext('2d')
 	var image_data = ctx.createImageData(size.width, size.height);
+
 	var uid = resources.register("image_data", {
             format: format,
             size: size,
@@ -194,7 +212,8 @@ var ppapi_exports = {
     },
 
     Instance_BindGraphics: function(instance, device) {
-	// Ignore
+	var res = resources.resolve(device);
+	fakeEmbed.appendChild(res.canvas);
 	return 1;
     },
 
