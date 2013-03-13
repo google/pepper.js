@@ -76,13 +76,10 @@ var CreateInstance = function(width, height) {
     shadow_instance.setAttribute('width', width);
     shadow_instance.setAttribute('height', height);
     shadow_instance.postMessage = postMessage;
+
     // HACK global
     fakeEmbed = shadow_instance;
-
-    // HACK more globals
     ctx = fakeEmbed.getContext('2d');
-    imageData = ctx.createImageData(200, 200);
-    mapped_buffer = new Uint32Array(imageData.data.buffer);
 
     var instance = 0;
 
