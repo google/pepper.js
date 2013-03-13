@@ -3,7 +3,7 @@
 var postMessage = function(message) {
     // HACK assumes string.
     var ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
-    _DoPostMessage(1, ptr);
+    _DoPostMessage(this.instance, ptr);
     _free(ptr);
 }
 
@@ -60,12 +60,7 @@ ResourceManager.prototype.release = function(uid) {
     }
 }
 
-// HACK
 var resources = new ResourceManager();
-var fakeEmbed = null;
-var imageData = null;
-var mapped_buffer = null;
-var ctx = null;
 
 var Module = {};
 
@@ -78,15 +73,16 @@ var CreateInstance = function(width, height) {
     shadow_instance.style.padding = "0px";
     shadow_instance.postMessage = postMessage;
 
-    // HACK global
-    fakeEmbed = shadow_instance;
-
-    var instance = 0;
-
     shadow_instance.addEventListener('DOMNodeInserted', function(evt) {
 	if (evt.srcElement !== shadow_instance) return;
 
-	instance = _NativeCreateInstance();
+	var instance = resources.register("instance", {
+	    element: shadow_instance
+	});
+	// Allows shadow_instance.postMessage to work.
+	// This is only a UID so there is no circular reference.
+	shadow_instance.instance = instance;
+	_NativeCreateInstance(instance);
 
 	// Create and send a bogus view resource.
 	var view = resources.register("view", {

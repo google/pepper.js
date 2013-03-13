@@ -126,18 +126,6 @@ var ppapi = (function() {
 	Console.Log(instance, level, source + ": " + value);
     };
 
-    var Messaging = {};
-    ppapi.Messaging = Messaging;
-    Messaging.PostMessage = function(instance, value) {
-        // HACK use global.
-        if (fakeEmbed) {
-            var evt = document.createEvent('Event');
-	    evt.initEvent('message', true, true);  // bubbles, cancelable
-            evt.data = value;
-	    fakeEmbed.dispatchEvent(evt);
-        }
-    }
-
     var URLLoader = {};
     ppapi.URLLoader = URLLoader;
 

@@ -306,29 +306,25 @@ extern "C" {
     PPP_ShutdownModule();
   }
 
-  CALLED_FROM_JS PP_Instance NativeCreateInstance() {
+  CALLED_FROM_JS void NativeCreateInstance(PP_Instance instance) {
     int32_t status = PPP_InitializeModule(1, &get_browser_interface_c);
     if (status != PP_OK) {
       printf("STUB: Failed to initialize module.\n");
-      return 0;
+      return;
     }
 
     const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
     if (instance_interface == NULL) {
       printf("STUB: Failed to get instance interface.\n");
-      return 0;
+      return;
     }
-
-    const PP_Instance instance = 1;
 
     // TODO arguments.
     status = instance_interface->DidCreate(instance, 0, NULL, NULL);
     if (status != PP_TRUE) {
       printf("STUB: Failed to create instance.\n");
       Shutdown(instance);
-      return 0;
+      return;
     }
-
-    return instance;
   }
 }

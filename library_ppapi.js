@@ -212,8 +212,9 @@ var ppapi_exports = {
     },
 
     Instance_BindGraphics: function(instance, device) {
-	var res = resources.resolve(device);
-	fakeEmbed.appendChild(res.canvas);
+	var inst = resources.resolve(instance);
+	var dev = resources.resolve(device);
+	inst.element.appendChild(dev.canvas);
 	return 1;
     },
 
@@ -223,7 +224,12 @@ var ppapi_exports = {
 
 
   Messaging_PostMessage: function(instance, value) {
-    ppapi.Messaging.PostMessage(instance, ppapi_glue.jsForVar(value));
+    var inst = resources.resolve(instance);
+    var val = ppapi_glue.jsForVar(value);
+    var evt = document.createEvent('Event');
+    evt.initEvent('message', true, true);  // bubbles, cancelable
+    evt.data = val;
+    inst.element.dispatchEvent(evt);
   },
 
   URLLoader_Create: function(instance) {
