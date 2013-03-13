@@ -45,7 +45,7 @@ example() {
   mkdir -p $OUT_DIR
 
   # Stage data requried to run in the browser.
-  cp examples/common.js $IN_DIR/*.html $IN_DIR/*.js $OUT_DIR
+  cp examples/common.js $IN_DIR/data/* $OUT_DIR
 }
 
 example "hello_world"
@@ -62,7 +62,6 @@ $EMCC $FLAGS -I . deplug.cc $PPAPI_CPP $SOURCES -o $OUT_DIR/$NAME.js -s "EXPORTE
 
 # Native version.
 NEXE=$OUT_DIR/${NAME}_x86_64.nexe
-cp $IN_DIR/*.nmf $OUT_DIR
 GCC=$NACL_SDK_ROOT/toolchain/linux_x86_newlib/bin/x86_64-nacl-g++
 $GCC -m64 -std=gnu++98 -O2 -I$NACL_SDK_ROOT/include $SOURCES -lppapi_cpp -lppapi -lpthread -lplatform -o $NEXE
 strip $NEXE
