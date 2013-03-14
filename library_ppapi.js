@@ -76,6 +76,10 @@ var ppapi_exports = {
     },
   },
 
+  GetBrowserInterface: function(interface_name) {
+      return interfaces[Pointer_stringify(interface_name)]|0;
+  },
+
   Schedule: function(f, p0, p1) {
       setTimeout(function() {
 	  _RunScheduled(f, p0, p1);
@@ -353,27 +357,6 @@ var ppapi_exports = {
     {{{ makeSetValue('lenptr', '0', '0', 'i32') }}};
     return 0;
   },
-
-    View_IsView: function(resource) {
-	return resources.is(resource, "view");
-    },
-    View_GetRect: function(resource, rectptr) {
-	ppapi_glue.setRect(resources.resolve(resource).rect, rectptr);
-	return true;
-    },
-    View_IsFullscreen: function(resource) {
-	return resources.resolve(resource).fullscreen;
-    },
-    View_IsVisible: function(resource) {
-	return resources.resolve(resource).visible;
-    },
-    View_IsPageVisible: function(resource) {
-	return resources.resolve(resource).page_visible;
-    },
-    View_GetClipRect: function(resource, rectptr) {
-	ppapi_glue.setRect(resources.resolve(resource).clip_rect, rectptr);
-	return true;
-    },
 };
 
 

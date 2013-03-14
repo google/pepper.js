@@ -61,6 +61,17 @@ ResourceManager.prototype.release = function(uid) {
 }
 
 var resources = new ResourceManager();
+var interfaces = {};
+
+var registerInterface = function(name, functions) {
+    // allocate(...) is bugged for non-i8 allocations, so do it manually
+    var ptr = Runtime.staticAlloc(functions.length * 4);
+    for (var i in functions) {
+	// TODO what is the sig?
+	setValue(ptr + i * 4, Runtime.addFunction(functions[i], 1), 'i32');
+    }
+    interfaces[name] = ptr;
+};
 
 var Module = {};
 

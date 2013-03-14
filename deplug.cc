@@ -14,7 +14,6 @@
 #include "ppapi/c/ppb_url_request_info.h"
 #include "ppapi/c/ppb_url_response_info.h"
 #include "ppapi/c/ppb_var.h"
-#include "ppapi/c/ppb_view.h"
 
 #include "ppapi/c/ppp.h"
 #include "ppapi/c/ppp_instance.h"
@@ -204,25 +203,6 @@ static PPB_Var_1_0 var_interface_1_0 = {
 };
 
 extern "C" {
-  PP_Bool View_IsView(PP_Resource resource);
-  PP_Bool View_GetRect(PP_Resource resource, struct PP_Rect *rect);
-  PP_Bool View_IsFullscreen(PP_Resource resource);
-  PP_Bool View_IsVisible(PP_Resource resource);
-  PP_Bool View_IsPageVisible(PP_Resource resource);
-  PP_Bool View_GetClipRect(PP_Resource resource, struct PP_Rect *clip);
-}
-
-static PPB_View_1_0 view_interface_1_0 = {
-  View_IsView,
-  View_GetRect,
-  View_IsFullscreen,
-  View_IsVisible,
-  View_IsPageVisible,
-  View_GetClipRect
-};
-
-
-extern "C" {
   extern void Messaging_PostMessage(PP_Instance instance, struct PP_Var var);
 }
 
@@ -231,8 +211,17 @@ static PPB_Messaging messaging_interface = {
 };
 
 
+extern "C" {
+  void* GetBrowserInterface(const char* interface_name);
+}
+
 const void* get_browser_interface_c(const char* interface_name) {
   printf("STUB requested: %s\n", interface_name);
+  void* interface = GetBrowserInterface(interface_name);
+  if(interface) {
+    return interface;
+  }
+
   if (strcmp(interface_name, PPB_CONSOLE_INTERFACE) == 0) {
     return &console_interface;
   } else if (strcmp(interface_name, PPB_CORE_INTERFACE) == 0) {
@@ -253,8 +242,6 @@ const void* get_browser_interface_c(const char* interface_name) {
     return &var_interface;
   } else if (strcmp(interface_name, PPB_VAR_INTERFACE_1_0) == 0) {
     return &var_interface_1_0;
-  } else if (strcmp(interface_name, PPB_VIEW_INTERFACE_1_0) == 0) {
-    return &view_interface_1_0;
   }
   printf("STUB not supported: %s\n", interface_name);
   return NULL;
