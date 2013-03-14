@@ -77,17 +77,12 @@ var ppapi_exports = {
   },
 
   GetBrowserInterface: function(interface_name) {
-      return interfaces[Pointer_stringify(interface_name)]|0;
-  },
-
-  Schedule: function(f, p0, p1) {
-      setTimeout(function() {
-	  _RunScheduled(f, p0, p1);
-      }, 0);
-  },
-
-  ThrowNotImplemented: function() {
-      throw "NotImplemented";
+      var name = Pointer_stringify(interface_name);
+      var inf = interfaces[name]|0;
+      if (inf == 0) {
+	  console.error('Requested unknown interface: ' + name);
+      }
+      return inf;
   },
 };
 

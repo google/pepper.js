@@ -10,44 +10,11 @@
 #include "ppapi/c/ppp_instance.h"
 #include "ppapi/c/ppp_messaging.h"
 
-#include "deplug.h"
-
 #define CALLED_FROM_JS __attribute__((used))
 
 extern "C" {
-  extern void ThrowNotImplemented();
-  void* GetBrowserInterface(const char* interface_name);
-}
+  const void* GetBrowserInterface(const char* interface_name);
 
-const void* get_browser_interface_c(const char* interface_name) {
-  printf("STUB requested: %s\n", interface_name);
-  void* interface = GetBrowserInterface(interface_name);
-  if(interface) {
-    return interface;
-  }
-  printf("STUB not supported: %s\n", interface_name);
-  return NULL;
-}
-
-extern "C" {
-  extern void Schedule(void (*)(void*, void*), void*, void*);
-  CALLED_FROM_JS void RunScheduled(void (*func)(void*, void*), void* p0, void* p1) {
-    func(p0, p1);
-  }
-}
-
-void RunDaemon(void* f, void* param) {
-  DaemonFunc func = (DaemonFunc)f;
-  struct DaemonCallback callback = func(param);
-  LaunchDaemon(callback.func, callback.param);
-}
-
-void LaunchDaemon(DaemonFunc func, void* param) {
-  if (func)
-    Schedule(&RunDaemon, (void *) func, param);
-}
-
-extern "C" {
   CALLED_FROM_JS void DoPostMessage(PP_Instance instance, const char* message) {
     const PPP_Messaging* messaging_interface = (const PPP_Messaging*)PPP_GetInterface(PPP_MESSAGING_INTERFACE);
     if (!messaging_interface) {
@@ -81,7 +48,7 @@ extern "C" {
   }
 
   CALLED_FROM_JS void NativeCreateInstance(PP_Instance instance) {
-    int32_t status = PPP_InitializeModule(1, &get_browser_interface_c);
+    int32_t status = PPP_InitializeModule(1, &GetBrowserInterface);
     if (status != PP_OK) {
       printf("STUB: Failed to initialize module.\n");
       return;
