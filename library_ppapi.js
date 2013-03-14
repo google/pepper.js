@@ -90,33 +90,6 @@ var ppapi_exports = {
       throw "NotImplemented";
   },
 
-  Console_Log: function(instance, level, value) {
-    ppapi.Console.Log(instance, level, ppapi_glue.jsForVar(value));
-  },
-
-  Console_LogWithSource: function(instance, level, source, value) {
-    ppapi.Console.LogWithSource(instance, level, ppapi_glue.jsForVar(source), ppapi_glue.jsForVar(value));
-  },
-
-  Core_CallOnMainThread: function(delay, callback, result) {
-      var js_callback = ppapi_glue.convertCompletionCallback(callback);
-      setTimeout(function() {
-          js_callback(result);
-      }, delay);
-  },
-
-  Core_AddRefResource: function(uid) {
-      resources.addRef(uid);
-  },
-
-  Core_ReleaseResource: function(uid) {
-      resources.release(uid);
-  },
-
-    Core_GetTime: function() {
-	return (new Date()) / 1000;
-    },
-
     Graphics2D_Create: function(instance, size_ptr, is_always_opaque) {
 	var size = ppapi_glue.getSize(size_ptr);
 	var canvas = document.createElement('canvas');
@@ -214,84 +187,6 @@ var ppapi_exports = {
     ImageData_Unmap: function(image_data) {
 	// Ignore
     },
-
-    Instance_BindGraphics: function(instance, device) {
-	var inst = resources.resolve(instance);
-	var dev = resources.resolve(device);
-	inst.element.appendChild(dev.canvas);
-	return 1;
-    },
-
-    Instance_IsFullFrame: function(instance) {
-	return 0;
-    },
-
-
-  Messaging_PostMessage: function(instance, value) {
-    var inst = resources.resolve(instance);
-    var val = ppapi_glue.jsForVar(value);
-    var evt = document.createEvent('Event');
-    evt.initEvent('message', true, true);  // bubbles, cancelable
-    evt.data = val;
-    inst.element.dispatchEvent(evt);
-  },
-
-  Var_AddRef: function(v) {
-    // TODO check var type.
-    var o = ppapi_glue.PP_Var;
-    var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
-    resources.addRef(uid);
-  },
-
-  Var_Release: function(v) {
-    // TODO check var type.
-    var o = ppapi_glue.PP_Var;
-    var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
-    resources.release(uid);
-  },
-
-  Var_VarFromUtf8: function(result, ptr, len) {
-    var value = Pointer_stringify(ptr, len);
-
-    // Create a copy of the string.
-    // TODO more efficient copy?
-    var memory = _malloc(len + 1);
-    for (var i = 0; i < len; i++) {
-	HEAPU8[memory + i] = HEAPU8[ptr + i];
-    }
-    // Null terminate the string because why not?
-    HEAPU8[memory + len] = 0;
-
-    var uid = resources.register("string", {
-	value: value,
-	memory: memory,
-	len: len,
-	destroy: function() {
-	    _free(this.memory)
-	}
-    });
-
-    // Generate the return value.
-    var o = ppapi_glue.PP_Var;
-    {{{ makeSetValue('result + o.type', '0', 'ppapi_glue.PP_VARTYPE_STRING', 'i32') }}};
-    {{{ makeSetValue('result + o.value', '0', 'uid', 'i32') }}};
-  },
-
-  Var_VarToUtf8: function(v, lenptr) {
-    var o = ppapi_glue.PP_Var;
-    var type = {{{ makeGetValue('v + o.type', '0', 'i32') }}};
-    if (type == ppapi_glue.PP_VARTYPE_STRING) {
-      var uid = {{{ makeGetValue('v + o.value', '0', 'i32') }}};
-      var resource = resources.resolve(uid);
-      if (resource) {
-        {{{ makeSetValue('lenptr', '0', 'resource.len', 'i32') }}};
-        return resource.memory;
-      }
-    }
-    // Something isn't right, return a null pointer.
-    {{{ makeSetValue('lenptr', '0', '0', 'i32') }}};
-    return 0;
-  },
 };
 
 

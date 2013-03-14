@@ -26,7 +26,7 @@ set -e
 # Make sure the main output directory exists.
 mkdir -p $BUILD_ROOT
 
-FLAGS="-std=c++11 $MODE_FLAGS --js-library library_ppapi.js --pre-js deplug.js --pre-js ppapi.js --post-js wrappers/url_loader.js --post-js wrappers/view.js -I$NACL_SDK_ROOT/include"
+FLAGS="-std=c++11 $MODE_FLAGS --js-library library_ppapi.js --pre-js deplug.js --pre-js ppapi.js --post-js wrappers/base.js --post-js wrappers/url_loader.js --post-js wrappers/view.js -I$NACL_SDK_ROOT/include"
 
 # Libraries
 mkdir -p $BUILD_ROOT/lib

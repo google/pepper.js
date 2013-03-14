@@ -4,12 +4,8 @@
 #include "ppapi/c/pp_errors.h"
 
 #include "ppapi/c/ppp.h"
-#include "ppapi/c/ppb_core.h"
-#include "ppapi/c/ppb_console.h"
 #include "ppapi/c/ppb_graphics_2d.h"
 #include "ppapi/c/ppb_image_data.h"
-#include "ppapi/c/ppb_instance.h"
-#include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_var.h"
 
 #include "ppapi/c/ppp.h"
@@ -23,43 +19,6 @@
 extern "C" {
   extern void ThrowNotImplemented();
 }
-
-extern "C" {
-  extern void Console_Log(PP_Instance instance, PP_LogLevel level, struct PP_Var value);
-  extern void Console_LogWithSource(PP_Instance instance, PP_LogLevel level, struct PP_Var source, struct PP_Var value);
-}
-
-static PPB_Console console_interface = {
-  &Console_Log,
-  &Console_LogWithSource
-};
-
-
-extern "C" {
-  extern void Core_AddRefResource(PP_Resource resource);
-  extern void Core_ReleaseResource(PP_Resource resource);
-  extern PP_Time Core_GetTime();
-  extern void Core_CallOnMainThread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback, int32_t result);
-}
-
-PP_TimeTicks Core_GetTimeTicks() {
-  ThrowNotImplemented();
-  return 0;
-}
-
-PP_Bool Core_IsMainThread() {
-  return PP_TRUE;
-}
-
-static PPB_Core core_interface = {
-  &Core_AddRefResource,
-  &Core_ReleaseResource,
-  &Core_GetTime,
-  &Core_GetTimeTicks,
-  &Core_CallOnMainThread,
-  &Core_IsMainThread
-};
-
 
 extern "C" {
   PP_Resource Graphics2D_Create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque);
@@ -102,51 +61,6 @@ static PPB_ImageData image_data_interface_1_0 = {
 };
 
 extern "C" {
-  PP_Bool Instance_BindGraphics(PP_Instance instance, PP_Resource device);
-  PP_Bool Instance_IsFullFrame(PP_Instance instance);
-}
-
-static PPB_Instance instance_interface_1_0 = {
-  Instance_BindGraphics,
-  Instance_IsFullFrame
-};
-
-extern "C" {
-  extern void Var_AddRef(struct PP_Var var);
-  extern void Var_Release(struct PP_Var var);
-  extern struct PP_Var Var_VarFromUtf8(const char* data, uint32_t len);
-  extern const char* Var_VarToUtf8(struct PP_Var var, uint32_t* len);
-}
-
-static struct PP_Var Var_VarFromUtf8_1_0(PP_Module module, const char* data, uint32_t len) {
-  return Var_VarFromUtf8(data, len);
-}
-
-static PPB_Var var_interface = {
-  Var_AddRef,
-  Var_Release,
-  Var_VarFromUtf8,
-  Var_VarToUtf8
-};
-
-// Used by ppapi_cpp
-static PPB_Var_1_0 var_interface_1_0 = {
-  Var_AddRef,
-  Var_Release,
-  Var_VarFromUtf8_1_0,
-  Var_VarToUtf8
-};
-
-extern "C" {
-  extern void Messaging_PostMessage(PP_Instance instance, struct PP_Var var);
-}
-
-static PPB_Messaging messaging_interface = {
-  Messaging_PostMessage
-};
-
-
-extern "C" {
   void* GetBrowserInterface(const char* interface_name);
 }
 
@@ -157,22 +71,10 @@ const void* get_browser_interface_c(const char* interface_name) {
     return interface;
   }
 
-  if (strcmp(interface_name, PPB_CONSOLE_INTERFACE) == 0) {
-    return &console_interface;
-  } else if (strcmp(interface_name, PPB_CORE_INTERFACE) == 0) {
-    return &core_interface;
-  } else if (strcmp(interface_name, PPB_GRAPHICS_2D_INTERFACE_1_0) == 0) {
+  if (strcmp(interface_name, PPB_GRAPHICS_2D_INTERFACE_1_0) == 0) {
     return &graphics_2d_interface_1_0;
   } else if (strcmp(interface_name, PPB_IMAGEDATA_INTERFACE_1_0) == 0) {
     return &image_data_interface_1_0;
-  } else if (strcmp(interface_name, PPB_INSTANCE_INTERFACE_1_0) == 0) {
-    return &instance_interface_1_0;
-  } else if (strcmp(interface_name, PPB_MESSAGING_INTERFACE) == 0) {
-    return &messaging_interface;
-  } else if (strcmp(interface_name, PPB_VAR_INTERFACE) == 0) {
-    return &var_interface;
-  } else if (strcmp(interface_name, PPB_VAR_INTERFACE_1_0) == 0) {
-    return &var_interface_1_0;
   }
   printf("STUB not supported: %s\n", interface_name);
   return NULL;
@@ -202,7 +104,12 @@ extern "C" {
     if (!messaging_interface) {
       return;
     }
-    PP_Var message_var = var_interface.VarFromUtf8(message, strlen(message));
+    const PPB_Var* var_interface = (const PPB_Var*)GetBrowserInterface(PPB_VAR_INTERFACE);
+    if (!var_interface) {
+      return;
+    }
+
+    PP_Var message_var = var_interface->VarFromUtf8(message, strlen(message));
     messaging_interface->HandleMessage(instance, message_var);
     // It appears that the callee own the var, so no need to release it?
   }
