@@ -1,6 +1,8 @@
 (function() {
     var URLLoader_Create = function(instance) {
-	return resources.register("url_loader", ppapi.URLLoader.Create(instance));
+	var loader = ppapi.URLLoader.Create(instance)
+	var uid = resources.register("url_loader", loader);
+	return uid;
     };
 
     var URLLoader_IsURLLoader = function(resource) {
@@ -11,16 +13,17 @@
 	var l = resources.resolve(loader);
 	var r = resources.resolve(request);
 	var c = ppapi_glue.convertCompletionCallback(callback);
-	ppapi.URLLoader.Open(l, r, c);
+	return ppapi.URLLoader.Open(l, r, c);
     };
 
     var URLLoader_FollowRedirect = function() { NotImplemented; };
     var URLLoader_GetUploadProgress = function() { NotImplemented; };
 
-    var URLLoader_GetDownloadProgress = function(loader, bytes_prt, total_ptr) {
-	console.log(arguments);
-	// HACK not implemented, but don't cause an error.
-	return 0;
+    var URLLoader_GetDownloadProgress = function(loader, bytes_ptr, total_ptr) {
+	var l = resources.resolve(loader);
+	setValue(bytes_ptr, loader.progress_bytes, 'i64');
+	setValue(total_ptr, loader.progress_total, 'i64');
+	return 1;
     };
 
     var URLLoader_GetResponseInfo = function() { NotImplemented; };

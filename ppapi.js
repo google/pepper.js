@@ -150,10 +150,26 @@ var ppapi = (function() {
     URLLoader.Open = function(loader, request, callback) {
 
 	var req = new XMLHttpRequest();
+
+	var did_callback = false;
+
+	// Assumed: onprogress will be called before onreadystatechange.
+	req.onprogress = function(evt) {
+	    loader.progress_bytes = evt.loaded;
+	    loader.progress_total = evt.total;
+	    if (!did_callback) {
+		// Apps may attempt to synchonously GetDownloadProcess inside the callback,
+		// so wait until we have progress to report.
+		callback(ppapi.PP_Error.PP_OK);
+		did_callback = true;
+	    }
+        }
 	req.onreadystatechange = function() {
 	    if (this.readyState == 1) {
 	    } else if (this.readyState == 2) {
-		callback(this.status == 200 ? ppapi.PP_Error.PP_OK : ppapi.PP_Error.PP_FAILED);
+		if (this.status != 200) {
+		    callback(ppapi.PP_Error.PP_FAILED);
+		}
 	    } else if (this.readyState == 3) {
 		loader.data = this.responseText;
 		updatePendingRead(loader);
@@ -170,6 +186,8 @@ var ppapi = (function() {
 	loader.done = false;
 	loader.pendingReadCallback = null;
 	loader.pendingReadSize = 0;
+	loader.progress_bytes = 0;
+	loader.progress_total = -1;
 
 	return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
     };
