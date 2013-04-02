@@ -21,8 +21,8 @@
 
     var URLLoader_GetDownloadProgress = function(loader, bytes_ptr, total_ptr) {
 	var l = resources.resolve(loader);
-	setValue(bytes_ptr, loader.progress_bytes, 'i64');
-	setValue(total_ptr, loader.progress_total, 'i64');
+	setValue(bytes_ptr, l.progress_bytes, 'i64');
+	setValue(total_ptr, l.progress_total, 'i64');
 	return 1;
     };
 
