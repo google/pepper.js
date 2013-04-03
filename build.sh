@@ -30,10 +30,15 @@ FLAGS="-std=c++11 $MODE_FLAGS --js-library library_ppapi.js --pre-js deplug.js -
 
 # Libraries
 mkdir -p $BUILD_ROOT/lib
+
 D=$NACL_SDK_ROOT/src/ppapi_cpp
 PPAPI_CPP_FILES="$D/ppp_entrypoints.cc $D/module.cc $D/instance.cc $D/instance_handle.cc $D/var.cc $D/url_request_info.cc $D/url_response_info.cc $D/url_loader.cc $D/resource.cc $D/lock.cc $D/input_event.cc $D/view.cc $D/graphics_2d.cc $D/image_data.cc $D/core.cc"
 PPAPI_CPP=$BUILD_ROOT/lib/ppapi_cpp.o
 $EMCC $FLAGS $PPAPI_CPP_FILES -o $PPAPI_CPP
+
+D=$NACL_SDK_ROOT/src/ppapi_gles2
+PPAPI_GLES2="$BUILD_ROOT/lib/ppapi_gles2.o --post-js wrappers/graphics_3d.js --post-js wrappers/gles.js --post-js wrappers/gles_ext.js"
+$EMCC $FLAGS -std=c99 $D/gl2ext_ppapi.c $D/gles2.c -o $PPAPI_GLES2
 
 # Examples
 example() {
@@ -65,3 +70,7 @@ NEXE=$OUT_DIR/${NAME}_x86_64.nexe
 GCC=$NACL_SDK_ROOT/toolchain/linux_x86_newlib/bin/x86_64-nacl-g++
 $GCC -m64 -std=gnu++98 -O2 -I$NACL_SDK_ROOT/include $SOURCES -lppapi_cpp -lppapi -lpthread -lplatform -o $NEXE
 strip $NEXE
+
+example "hello_world_gles"
+SOURCES="$IN_DIR/hello_world.cc $IN_DIR/matrix.cc"
+$EMCC $FLAGS deplug.cc $SOURCES $PPAPI_GLES2 -o $OUT_DIR/$NAME.js -s EXPORTED_FUNCTIONS="['CreateInstance']"
