@@ -135,14 +135,14 @@ var ppapi = (function() {
 
     var updatePendingRead = function(loader) {
 	if (loader.pendingReadCallback) {
-	    var full_read_possible = loader.data.length >= loader.index + loader.pendingReadSize
+	    var full_read_possible = loader.data.byteLength >= loader.index + loader.pendingReadSize
 	    if (loader.done || full_read_possible){
 		var cb = loader.pendingReadCallback;
 		loader.pendingReadCallback = null;
-		var readSize = full_read_possible ? loader.pendingReadSize : loader.data.length - loader.index;
+		var readSize = full_read_possible ? loader.pendingReadSize : loader.data.byteLength - loader.index;
 		var index = loader.index;
 		loader.index += readSize;
-		cb(readSize, loader.data.slice(index, loader.index));
+		cb(readSize, new Uint8Array(loader.data, index, readSize));
 	    }
 	}
     }
@@ -150,6 +150,7 @@ var ppapi = (function() {
     URLLoader.Open = function(loader, request, callback) {
 
 	var req = new XMLHttpRequest();
+	req.responseType = "arraybuffer";
 
 	var did_callback = false;
 
@@ -171,10 +172,9 @@ var ppapi = (function() {
 		    callback(ppapi.PP_Error.PP_FAILED);
 		}
 	    } else if (this.readyState == 3) {
-		loader.data = this.responseText;
-		updatePendingRead(loader);
+		// Array buffers do not do partial downloads.
 	    } else {
-		loader.data = this.responseText;
+		loader.data = this.response;
 		loader.done = true;
 		updatePendingRead(loader);
 	    }

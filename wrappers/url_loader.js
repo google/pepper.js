@@ -32,7 +32,7 @@
 	var l = resources.resolve(loader);
 	var c = ppapi_glue.convertCompletionCallback(callback);
 	return ppapi.URLLoader.ReadResponseBody(l, read_size, function(status, data) {
-	    writeStringToMemory(data, buffer_ptr, true);
+            HEAP8.set(data, buffer_ptr);
 	    c(status);
 	});
     };
