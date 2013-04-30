@@ -150,7 +150,6 @@ var ppapi = (function() {
     URLLoader.Open = function(loader, request, callback) {
 
 	var req = new XMLHttpRequest();
-	req.responseType = "arraybuffer";
 
 	var did_callback = false;
 
@@ -180,6 +179,7 @@ var ppapi = (function() {
 	    }
 	};
 	req.open(request.method || "GET", request.url);
+	req.responseType = "arraybuffer";
 	req.send();
 	loader.data = '';
 	loader.index = 0;

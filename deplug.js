@@ -85,7 +85,7 @@ var CreateInstance = function(width, height) {
     shadow_instance.postMessage = postMessage;
 
     shadow_instance.addEventListener('DOMNodeInserted', function(evt) {
-	if (evt.srcElement !== shadow_instance) return;
+	if (evt.target !== shadow_instance) return;
 
 	var instance = resources.register("instance", {
 	    element: shadow_instance
@@ -113,7 +113,6 @@ var CreateInstance = function(width, height) {
     }, true);
 
     // TODO handle removal events.
-
     return shadow_instance;
 }
 
