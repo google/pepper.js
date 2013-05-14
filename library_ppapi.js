@@ -1,3 +1,15 @@
+// C functions called by the JavaScript shims.
+EXPORTED_FUNCTIONS['_DoPostMessage'] = 1;
+EXPORTED_FUNCTIONS['_DoChangeView'] = 1;
+EXPORTED_FUNCTIONS['_NativeCreateInstance'] = 1;
+
+// Actually a JS function. Done to fix minimization problems.
+EXPORTED_FUNCTIONS['CreateInstance'] = 1;
+
+// HACK PPAPI will export a bunch of anonymous function pointers.
+// Eventually we should make these non-anonymous.
+RESERVED_FUNCTION_POINTERS = 1000;
+
 var ppapi_exports = {
   $ppapi_glue: {
     PP_Var: Runtime.generateStructInfo([
@@ -54,7 +66,9 @@ var ppapi_exports = {
       var func = {{{ makeGetValue('callback + 0', '0', 'i32') }}};
       var user_data = {{{ makeGetValue('callback + 4', '0', 'i32') }}};
       // TODO correct way to call?
-      return function(result) { FUNCTION_TABLE[func](user_data, result); };
+      return function(result) {
+        Runtime.dynCall('vii', func, [user_data, result]);
+      };
     },
     setRect: function(rect, ptr) {
 	{{{ makeSetValue('ptr', '0', 'rect.x', 'i32') }}};

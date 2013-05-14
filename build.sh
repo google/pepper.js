@@ -55,15 +55,15 @@ example() {
 
 example "hello_world"
 SOURCES="$IN_DIR/hello_world.cc"
-$EMCC $FLAGS deplug.cc $SOURCES -o $OUT_DIR/$NAME.js -s EXPORTED_FUNCTIONS="['CreateInstance']"
+$EMCC $FLAGS deplug.cc $SOURCES -o $OUT_DIR/$NAME.js
 
 example "geturl"
 SOURCES="$IN_DIR/geturl.cc $IN_DIR/geturl_handler.cc"
-$EMCC $FLAGS $PPAPI_CPP deplug.cc $SOURCES -o $OUT_DIR/$NAME.js -s EXPORTED_FUNCTIONS="['CreateInstance']"
+$EMCC $FLAGS $PPAPI_CPP deplug.cc $SOURCES -o $OUT_DIR/$NAME.js
 
 example "pi_generator"
 SOURCES="$IN_DIR/pi_generator.cc $IN_DIR/pi_generator_module.cc"
-$EMCC $FLAGS -I . deplug.cc $PPAPI_CPP $SOURCES -o $OUT_DIR/$NAME.js -s "EXPORTED_FUNCTIONS=['CreateInstance']"
+$EMCC $FLAGS -I . deplug.cc $PPAPI_CPP $SOURCES -o $OUT_DIR/$NAME.js
 
 # Native version.
 NEXE=$OUT_DIR/${NAME}_x86_64.nexe
@@ -73,4 +73,4 @@ strip $NEXE
 
 example "hello_world_gles"
 SOURCES="$IN_DIR/hello_world.cc $IN_DIR/matrix.cc"
-$EMCC $FLAGS deplug.cc $SOURCES $PPAPI_GLES2 -o $OUT_DIR/$NAME.js -s EXPORTED_FUNCTIONS="['CreateInstance']"
+$EMCC $FLAGS deplug.cc $SOURCES $PPAPI_GLES2 -o $OUT_DIR/$NAME.js
