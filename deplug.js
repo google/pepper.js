@@ -65,7 +65,8 @@ var interfaces = {};
 
 var registerInterface = function(name, functions) {
     // allocate(...) is bugged for non-i8 allocations, so do it manually
-    var ptr = Runtime.staticAlloc(functions.length * 4);
+    // TODO(ncbray): static alloc?
+    var ptr = allocate(functions.length * 4, 'i8', ALLOC_NORMAL);
     for (var i in functions) {
 	// TODO what is the sig?
 	setValue(ptr + i * 4, Runtime.addFunction(functions[i], 1), 'i32');
