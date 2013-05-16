@@ -9,3 +9,12 @@ Assumed file layout:
 
 ./nacl_sdk => the NaCl SDK
   https://developers.google.com/native-client/sdk/download
+
+Building:
+
+cd examples
+make V=1 TOOLCHAIN=emscripten|newlib CONFIG=Debug|Release -j32
+
+Running:
+./tools/httpd.py
+Surf to: examples/*/data/*.html

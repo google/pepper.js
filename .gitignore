@@ -1,5 +1,11 @@
-# Build director
+# Build directory
+/lib/
 /out/
+
+# SDK build locations
+newlib/
+glibc/
+emscripten/
 
 # python
 *.pyc
