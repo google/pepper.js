@@ -1,10 +1,21 @@
 (function() {
+    var DoLog = function(level, value) {
+	// TODO enum?
+	if (level == 2) {
+	    console.warn(value);
+	} else if (level == 3) {
+	    console.error(value);
+	} else {
+	    console.log(_value);
+	}
+    }
+
     var Console_Log = function(instance, level, value) {
-	ppapi.Console.Log(instance, level, ppapi_glue.jsForVar(value));
+	DoLog(level, ppapi_glue.jsForVar(value));
     };
 
     var Console_LogWithSource = function(instance, level, source, value) {
-	ppapi.Console.LogWithSource(instance, level, ppapi_glue.jsForVar(source), ppapi_glue.jsForVar(value));
+	DoLog(level, ppapi_glue.jsForVar(source) + ": " + ppapi_glue.jsForVar(value));
     };
 
     registerInterface("PPB_Console;1.0", [
