@@ -44,12 +44,10 @@
     };
 
     var Graphics2D_Flush = function(resource, callback) {
-	// Ignore
-	// TODO vsync
 	var c = ppapi_glue.convertCompletionCallback(callback);
-	setTimeout(function() {
+	Module.requestAnimationFrame(function() {
 	    c(ppapi.PP_Error.PP_OK);
-	}, 15);
+	});
 	return ppapi.PP_Error.PP_OK;
     };
 

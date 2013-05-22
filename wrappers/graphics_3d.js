@@ -40,12 +40,11 @@
     };
 
     var Graphics3D_SwapBuffers = function(context, callback) {
-	// TODO vsync.
 	// TODO double buffering.
 	var c = ppapi_glue.convertCompletionCallback(callback);
-	setTimeout(function() {
+	Module.requestAnimationFrame(function() {
 	    c(0);
-	}, 15);
+	});
     };
 
     registerInterface("PPB_Graphics3D;1.0", [
