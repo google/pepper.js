@@ -40,8 +40,10 @@ NACL_CXXFLAGS?=-Wno-long-long -Werror
 NACL_LDFLAGS?=-Wl,-as-needed
 
 # Emscripten appears to key off the optimization while linking to deterimine what backend should be used.
+# HACK PPAPI will export a bunch of anonymous function pointers, so we need to reserve slots for them.
+# Eventually we should make these non-anonymous.
 ifeq ($(CONFIG),Release)
-NACL_LDFLAGS+=-O2
+NACL_LDFLAGS+=-O2 -s RESERVED_FUNCTION_POINTERS=1000
 else
 NACL_LDFLAGS+=-O0
 endif

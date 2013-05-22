@@ -6,10 +6,6 @@ EXPORTED_FUNCTIONS['_NativeCreateInstance'] = 1;
 // Actually a JS function. Done to fix minimization problems.
 EXPORTED_FUNCTIONS['CreateInstance'] = 1;
 
-// HACK PPAPI will export a bunch of anonymous function pointers.
-// Eventually we should make these non-anonymous.
-RESERVED_FUNCTION_POINTERS = 1000;
-
 var ppapi_exports = {
   $ppapi_glue: {
     PP_Var: Runtime.generateStructInfo([
