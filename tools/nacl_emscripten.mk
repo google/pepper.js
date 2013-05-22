@@ -105,7 +105,7 @@ $(LIBDIR)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_emscripten))
 endef
 
 JS_LIBRARIES=$(DEPLUG_SRC_ROOT)/library_ppapi.js
-JS_PRE=$(DEPLUG_SRC_ROOT)/deplug.js $(DEPLUG_SRC_ROOT)/ppapi.js
+JS_PRE=$(DEPLUG_SRC_ROOT)/deplug.js
 
 
 # TODO(ncbray): only include needed wrappers.
