@@ -6,7 +6,7 @@
 	} else if (level == 3) {
 	    console.error(value);
 	} else {
-	    console.log(_value);
+	    console.log(value);
 	}
     }
 
