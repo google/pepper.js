@@ -14,6 +14,7 @@ PROJECTS:= \
   geturl \
   pi_generator \
   hello_world_gles \
+  input_events \
 
 HTTPD:=../tools/httpd.py
 

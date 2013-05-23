@@ -1,7 +1,9 @@
 // C functions called by the JavaScript shims.
 EXPORTED_FUNCTIONS['_DoPostMessage'] = 1;
 EXPORTED_FUNCTIONS['_DoChangeView'] = 1;
+EXPORTED_FUNCTIONS['_DoChangeFocus'] = 1;
 EXPORTED_FUNCTIONS['_NativeCreateInstance'] = 1;
+EXPORTED_FUNCTIONS['_HandleInputEvent'] = 1;
 
 // Actually a JS function. Done to fix minimization problems.
 EXPORTED_FUNCTIONS['CreateInstance'] = 1;
@@ -36,8 +38,8 @@ var ppapi_exports = {
     },
 
     jsForVar: function(p) {
-	var o = ppapi_glue.PP_Var;
-	var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
+        var o = ppapi_glue.PP_Var;
+        var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
 
         if (type == 0) {
 	    return undefined;
@@ -57,6 +59,26 @@ var ppapi_exports = {
 	    throw "Var type conversion not implemented: " + type;
         }
     },
+
+    varForJS: function(p, obj) {
+      var o = ppapi_glue.PP_Var;
+      var typen = (typeof obj);
+
+      if (typen === 'undefined') {
+        {{{ makeSetValue('p + o.type', '0', '0', 'i32') }}};
+      } else if (typen === 'boolean') {
+        var value = (obj) ? 1 : 0;
+        {{{ makeSetValue('p + o.type', '0', '2', 'i32') }}};
+        {{{ makeSetValue('p + o.value', '0', 'value', 'i32') }}};
+      } else if (typen === 'number') {
+        // Note this will always pass a double, even when the value can be represented as an int32
+        {{{ makeSetValue('p + o.type', '0', '4', 'i32') }}};
+        {{{ makeSetValue('p + o.value', '0', 'obj', 'double') }}};
+      } else {
+        throw "Var type conversion not implemented: " + typen;
+      }
+    },
+
     convertCompletionCallback: function(callback) {
       // Assumes 4-byte pointers.
       var func = {{{ makeGetValue('callback + 0', '0', 'i32') }}};
@@ -78,12 +100,33 @@ var ppapi_exports = {
 	    height: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
 	};
     },
-    getPos: function(ptr) {
-	return {
-	    x: {{{ makeGetValue('ptr', '0', 'i32') }}},
-	    y: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
-	};
+
+
+    getPoint: function(ptr) {
+  return {
+      x: {{{ makeGetValue('ptr', '0', 'i32') }}},
+      y: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
+  };
     },
+
+    setPoint: function(obj, ptr) {
+  {{{ makeSetValue('ptr', '0', 'obj.x', 'i32') }}};
+  {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'i32') }}};
+    },
+
+
+    getFloatPoint: function(ptr) {
+  return {
+      x: {{{ makeGetValue('ptr', '0', 'float') }}},
+      y: {{{ makeGetValue('ptr + 4', '0', 'float') }}}
+  };
+    },
+
+    setFloatPoint: function(obj, ptr) {
+  {{{ makeSetValue('ptr', '0', 'obj.x', 'float') }}};
+  {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'float') }}};
+    },
+
   },
 
   GetBrowserInterface: function(interface_name) {

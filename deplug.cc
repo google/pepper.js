@@ -3,10 +3,9 @@
 
 #include "ppapi/c/pp_errors.h"
 
-#include "ppapi/c/ppp.h"
 #include "ppapi/c/ppb_var.h"
-
 #include "ppapi/c/ppp.h"
+#include "ppapi/c/ppp_input_event.h"
 #include "ppapi/c/ppp_instance.h"
 #include "ppapi/c/ppp_messaging.h"
 
@@ -39,6 +38,15 @@ extern "C" {
     instance_interface->DidChangeView(instance, resource);
   }
 
+  CALLED_FROM_JS void DoChangeFocus(PP_Instance instance, PP_Bool hasFocus) {
+    const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
+    if (instance_interface == NULL) {
+      printf("STUB: Failed to get instance interface.\n");
+      return;
+    }
+    instance_interface->DidChangeFocus(instance, hasFocus);
+  }
+
   void Shutdown(PP_Instance instance) {
     const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
     if (instance_interface) {
@@ -68,4 +76,14 @@ extern "C" {
       return;
     }
   }
+
+  CALLED_FROM_JS PP_Bool HandleInputEvent(PP_Instance instance, PP_Resource input_event) {
+    const PPP_InputEvent* event_interface = (const PPP_InputEvent*)PPP_GetInterface(PPP_INPUT_EVENT_INTERFACE);
+    if (event_interface == NULL) {
+      printf("STUB: Failed to get input event interface.\n");
+      return PP_FALSE;
+    }
+    return event_interface->HandleInputEvent(instance, input_event);
+  }
+
 }

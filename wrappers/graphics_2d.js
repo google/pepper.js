@@ -2,9 +2,11 @@
 
     var Graphics2D_Create = function(instance, size_ptr, is_always_opaque) {
 	var size = ppapi_glue.getSize(size_ptr);
-	var canvas = document.createElement('canvas');
-	canvas.width = size.width;
-	canvas.height = size.height;
+	var canvas = resources.resolve(instance).canvas;
+	// TODO(grosse): Figure out how to handle size changing properly
+	// canvas.width = size.width;
+	// canvas.height = size.height;
+
 	var resource = resources.register("graphics_2d", {
 	    size: size,
 	    canvas: canvas,
@@ -31,7 +33,7 @@
 	var res = resources.resolve(image_data);
 	res.image_data.data.set(res.view);
 
-	var top_left = ppapi_glue.getPos(top_left_ptr);
+	var top_left = ppapi_glue.getPoint(top_left_ptr);
         g2d.ctx.putImageData(res.image_data, top_left.x, top_left.y);
     };
 

@@ -26,21 +26,21 @@ ResourceManager.prototype.register = function(type, res) {
 
 ResourceManager.prototype.resolve = function(res) {
     if (typeof res === 'number')
-	return this.lut[res]
+        return this.lut[res]
     else
-	return res;
+        return res;
 }
 
 ResourceManager.prototype.is = function(res, type) {
     var res = this.resolve(res);
-    return res && res.type == type;
+    return res && res.type === type;
 }
 
 ResourceManager.prototype.addRef = function(uid) {
     var res = this.resolve(uid);
     //console.log("inc", uid);
     if (res === undefined) {
-	throw "Resource does not exist.";
+    throw "Resource does not exist.";
     }
     res.refcount += 1;
 }
@@ -49,14 +49,14 @@ ResourceManager.prototype.release = function(uid) {
     var res = this.resolve(uid);
     //console.log("dec", uid);
     if (res === undefined) {
-	throw "Resource does not exist.";
+    throw "Resource does not exist.";
     }
     res.refcount -= 1;
     if (res.refcount <= 0) {
-	if (res.destroy) {
-	    res.destroy();
-	}
-	delete this.lut[res.uid];
+    if (res.destroy) {
+        res.destroy();
+    }
+    delete this.lut[res.uid];
     }
 }
 
@@ -68,8 +68,8 @@ var registerInterface = function(name, functions) {
     // TODO(ncbray): static alloc?
     var ptr = allocate(functions.length * 4, 'i8', ALLOC_NORMAL);
     for (var i in functions) {
-	// TODO what is the sig?
-	setValue(ptr + i * 4, Runtime.addFunction(functions[i], 1), 'i32');
+    // TODO what is the sig?
+    setValue(ptr + i * 4, Runtime.addFunction(functions[i], 1), 'i32');
     }
     interfaces[name] = ptr;
 };
@@ -80,38 +80,57 @@ var CreateInstance = function(width, height) {
     var shadow_instance = document.createElement('span');
     shadow_instance.setAttribute('name', 'nacl_module');
     shadow_instance.setAttribute('id', 'nacl_module');
+
+    shadow_instance.style.display = "inline-block";
     shadow_instance.style.width = width + "px";
     shadow_instance.style.height = height + "px";
     shadow_instance.style.padding = "0px";
     shadow_instance.postMessage = postMessage;
 
+    var canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    shadow_instance.appendChild(canvas);
+
     shadow_instance.addEventListener('DOMNodeInserted', function(evt) {
-	if (evt.target !== shadow_instance) return;
+        if (evt.target !== shadow_instance) return;
 
-	var instance = resources.register("instance", {
-	    element: shadow_instance
-	});
-	// Allows shadow_instance.postMessage to work.
-	// This is only a UID so there is no circular reference.
-	shadow_instance.instance = instance;
-	_NativeCreateInstance(instance);
+        var instance = resources.register("instance", {
+            element: shadow_instance,
+            canvas: canvas
+        });
+        // Allows shadow_instance.postMessage to work.
+        // This is only a UID so there is no circular reference.
+        shadow_instance.instance = instance;
+        _NativeCreateInstance(instance);
 
-	// Create and send a bogus view resource.
-	var view = resources.register("view", {
-	    rect: {x: 0, y: 0, width: width, height: height},
-	    fullscreen: true,
-	    visible: true,
-	    page_visible: true,
-	    clip_rect: {x: 0, y: 0, width: width, height: height}
-	});
-	_DoChangeView(instance, view);
-	resources.release(view);
+        // Create and send a bogus view resource.
+        var view = resources.register("view", {
+            rect: {x: 0, y: 0, width: width, height: height},
+            fullscreen: true,
+            visible: true,
+            page_visible: true,
+            clip_rect: {x: 0, y: 0, width: width, height: height}
+        });
+        _DoChangeView(instance, view);
+        resources.release(view);
 
-	// Fake the load event.
+        // Fake the load event.
         var evt = document.createEvent('Event');
         evt.initEvent('load', true, true);  // bubbles, cancelable
         shadow_instance.dispatchEvent(evt);
     }, true);
+
+    var makeCallback = function(hasFocus){
+        return function(event) {
+            _DoChangeFocus(shadow_instance.instance, hasFocus);
+            return true;
+        };
+    };
+
+    canvas.setAttribute('tabindex', '0'); // make it focusable
+    canvas.addEventListener('focus', makeCallback(true));
+    canvas.addEventListener('blur', makeCallback(false));
 
     // TODO handle removal events.
     return shadow_instance;

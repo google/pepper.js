@@ -5,9 +5,7 @@
     };
 
     var Graphics3D_Create = function(instance, share_context, attrib_list) {
-	var canvas = document.createElement('canvas');
-	canvas.width = 400;
-	canvas.height = 400;
+	   var canvas = resources.resolve(instance).canvas;
 
         var resource = resources.register("graphics_3d", {
 	    canvas: canvas,

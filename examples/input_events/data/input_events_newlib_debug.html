@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<!--
+Copyright (c) 2012 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+-->
+<head>
+  <title>Input Events</title>
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <title>Input Events</title>
+  <script type="text/javascript" src="../../common.js"></script>
+  <script type="text/javascript" src="example.js"></script>
+</head>
+<body data-name="input_events" data-tc="newlib" data-path="../newlib/Debug">
+  <h1>Input Events</h1>
+  <h2>Status: <code id="statusField">NO-STATUS</code></h2>
+  <button id="killButton">Kill worker thread and queue</button>
+
+  <p>This example demonstrates handling of input events in PPAPI.</p>
+  <p>Each time an input event happens in the context of the gray box, the main
+  thread in the embedded NaCl module converts it from a Pepper input event to a
+  non-Pepper event and puts this custom event onto a shared queue.  A worker
+  thread in the embedded NaCl module reads events from the queue, and converts
+  each event to a string and then uses CallOnMainThread to post a message
+  describing the event back to JavaScript, which prints a message to the
+  JavaScript console in Chrome and to a string on the page.</p>
+  <p>If you press the 'Kill worker thread and queue' button, then the main
+  thread (which puts events on the queue) will call CancelQueue, indicating
+  that the main thread will no longer put events on the queue.  When the worker
+  sees that the shared queue has been cancelled, the worker thread will
+  terminate.</p>
+
+  <!-- The NaCl plugin will be embedded inside the element with id "listener".
+      See common.js.-->
+  <div id="listener"></div>
+  <h2>Events</h2>
+  <pre>
+    <p><b id='eventString'>None</b></p>
+  </pre>
+</body>
+</html>
