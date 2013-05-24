@@ -38,26 +38,26 @@ var ppapi_exports = {
     },
 
     jsForVar: function(p) {
-        var o = ppapi_glue.PP_Var;
-        var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
+      var o = ppapi_glue.PP_Var;
+      var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
 
-        if (type == 0) {
-	    return undefined;
-        } else if (type == 1) {
-	    return null;
-        } else if (type == ppapi_glue.PP_VARTYPE_BOOL) {
-	    // PP_Bool is guarenteed to be 4 bytes.
-	    return 0 != {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-        } else if (type == 3) {
-	    return {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-        } else if (type == 4) {
-	    return {{{ makeGetValue('p + o.value', '0', 'double') }}};
-	} else if (type == ppapi_glue.PP_VARTYPE_STRING) {
-	    var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-	    return resources.resolve(uid).value;
-	} else {
-	    throw "Var type conversion not implemented: " + type;
-        }
+      if (type == 0) {
+	return undefined;
+      } else if (type == 1) {
+	return null;
+      } else if (type == ppapi_glue.PP_VARTYPE_BOOL) {
+	// PP_Bool is guarenteed to be 4 bytes.
+	return 0 != {{{ makeGetValue('p + o.value', '0', 'i32') }}};
+      } else if (type == 3) {
+	return {{{ makeGetValue('p + o.value', '0', 'i32') }}};
+      } else if (type == 4) {
+	return {{{ makeGetValue('p + o.value', '0', 'double') }}};
+      } else if (type == ppapi_glue.PP_VARTYPE_STRING) {
+	var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
+	return resources.resolve(uid).value;
+      } else {
+	throw "Var type conversion not implemented: " + type;
+      }
     },
 
     varForJS: function(p, obj) {
@@ -89,53 +89,53 @@ var ppapi_exports = {
       };
     },
     setRect: function(rect, ptr) {
-	{{{ makeSetValue('ptr', '0', 'rect.x', 'i32') }}};
-	{{{ makeSetValue('ptr + 4', '0', 'rect.y', 'i32') }}};
-	{{{ makeSetValue('ptr + 8', '0', 'rect.width', 'i32') }}};
-	{{{ makeSetValue('ptr + 12', '0', 'rect.height', 'i32') }}};
+      {{{ makeSetValue('ptr', '0', 'rect.x', 'i32') }}};
+      {{{ makeSetValue('ptr + 4', '0', 'rect.y', 'i32') }}};
+      {{{ makeSetValue('ptr + 8', '0', 'rect.width', 'i32') }}};
+      {{{ makeSetValue('ptr + 12', '0', 'rect.height', 'i32') }}};
     },
     getSize: function(ptr) {
-	return {
-	    width: {{{ makeGetValue('ptr', '0', 'i32') }}},
-	    height: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
-	};
+      return {
+	width: {{{ makeGetValue('ptr', '0', 'i32') }}},
+	height: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
+      };
     },
 
 
     getPoint: function(ptr) {
-  return {
-      x: {{{ makeGetValue('ptr', '0', 'i32') }}},
-      y: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
-  };
+      return {
+	x: {{{ makeGetValue('ptr', '0', 'i32') }}},
+	y: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
+      };
     },
 
     setPoint: function(obj, ptr) {
-  {{{ makeSetValue('ptr', '0', 'obj.x', 'i32') }}};
-  {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'i32') }}};
+      {{{ makeSetValue('ptr', '0', 'obj.x', 'i32') }}};
+      {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'i32') }}};
     },
 
 
     getFloatPoint: function(ptr) {
-  return {
-      x: {{{ makeGetValue('ptr', '0', 'float') }}},
-      y: {{{ makeGetValue('ptr + 4', '0', 'float') }}}
-  };
+      return {
+	x: {{{ makeGetValue('ptr', '0', 'float') }}},
+	y: {{{ makeGetValue('ptr + 4', '0', 'float') }}}
+      };
     },
 
     setFloatPoint: function(obj, ptr) {
-  {{{ makeSetValue('ptr', '0', 'obj.x', 'float') }}};
-  {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'float') }}};
+      {{{ makeSetValue('ptr', '0', 'obj.x', 'float') }}};
+      {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'float') }}};
     },
 
   },
 
   GetBrowserInterface: function(interface_name) {
-      var name = Pointer_stringify(interface_name);
-      var inf = interfaces[name]|0;
-      if (inf == 0) {
-	  console.error('Requested unknown interface: ' + name);
-      }
-      return inf;
+    var name = Pointer_stringify(interface_name);
+    var inf = interfaces[name]|0;
+    if (inf == 0) {
+      console.error('Requested unknown interface: ' + name);
+    }
+    return inf;
   },
 };
 
