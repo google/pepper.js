@@ -109,7 +109,7 @@ JS_PRE=$(DEPLUG_SRC_ROOT)/deplug.js
 
 
 # TODO(ncbray): only include needed wrappers.
-WRAPPERS=base.js url_loader.js graphics_2d.js view.js graphics_3d.js gles.js gles_ext.js input_events.js
+WRAPPERS=base.js url_loader.js graphics_2d.js view.js graphics_3d.js gles.js gles_ext.js input_events.js audio.js
 # Resolve the paths.
 WRAPPERS:=$(foreach wrapper,$(WRAPPERS),$(DEPLUG_SRC_ROOT)/wrappers/$(wrapper))
 
