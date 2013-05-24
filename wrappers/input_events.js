@@ -123,6 +123,14 @@
       return {x: x, y: y};
     };
 
+    var GetMovement = function(e) {
+      return {
+          //will be e.movementX once standardized, but for now we need to polyfill
+          x: e.webkitMovementX || e.mozMovementX || 0,
+          y: e.webkitMovementY || e.mozMovementY || 0
+      };
+    };
+
     var RegisterHandlers = function(instance, event_classes, filtering) {
       var resource = resources.resolve(instance);
 
@@ -139,7 +147,7 @@
             modifiers |= mod_buttons[event.button];
           }
 
-          var obj = {
+          var obj_uid = resources.register("input_event", {
             // can't use type as attribute name since deplug uses that internally
             ie_type: event_type,
             pos: GetEventPos(event),
@@ -147,12 +155,13 @@
             // TODO(grosse): Make sure this actually follows the Pepper API
             time: event.timeStamp,
             modifiers: modifiers,
+            movement: GetMovement(event),
             delta: GetWheelScroll(event),
             scrollByPage: (event.deltaMode === 2),
-            keyCode: event.keyCode
-          };
+            keyCode: event.keyCode,
+          });
 
-          var rval = _HandleInputEvent(instance, resources.register("input_event", obj));
+          var rval = _HandleInputEvent(instance, obj_uid);
           if (!filtering || rval) {
             // Don't prevent default on mousedown so we can get focus when clicked
             if (event_type !== PPIE_Type.MOUSEDOWN) {
@@ -253,8 +262,9 @@
       // TODO(grosse): Find way to implement this
       return 0;
     };
-    var MouseInputEvent_Movement = function(event) {
-      throw "MouseInputEvent_Movement not implemented";
+
+    var MouseInputEvent_Movement = function(ptr, event) {
+      ppapi_glue.setPoint(resources.resolve(event).movement, ptr);
     };
 
     registerInterface("PPB_MouseInputEvent;1.1", [

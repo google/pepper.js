@@ -15,6 +15,7 @@ PROJECTS:= \
   pi_generator \
   hello_world_gles \
   input_events \
+  mouselock \
   sine_synth \
 
 HTTPD:=../tools/httpd.py

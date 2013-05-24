@@ -28,12 +28,15 @@
     };
 
     var Graphics2D_PaintImageData = function(resource, image_data, top_left_ptr, src_rect_ptr) {
+        if (src_rect_ptr !== 0){
+            throw "Graphics2D_PaintImageData doesn't support nonnull src_rect argument yet";
+        }
+
         var g2d = resources.resolve(resource);
+        var res = resources.resolve(image_data);
+        res.image_data.data.set(res.view);
 
-	var res = resources.resolve(image_data);
-	res.image_data.data.set(res.view);
-
-	var top_left = ppapi_glue.getPoint(top_left_ptr);
+        var top_left = ppapi_glue.getPoint(top_left_ptr);
         g2d.ctx.putImageData(res.image_data, top_left.x, top_left.y);
     };
 
@@ -42,7 +45,11 @@
     };
 
     var Graphics2D_ReplaceContents = function(resource, image_data) {
-		throw "Graphics2D_ReplaceContents not implemented";
+        var g2d = resources.resolve(resource);
+        var res = resources.resolve(image_data);
+        res.image_data.data.set(res.view);
+
+        g2d.ctx.putImageData(res.image_data, 0, 0);
     };
 
     var Graphics2D_Flush = function(resource, callback) {
@@ -91,7 +98,7 @@
             view: view,
             image_data: image_data,
             destroy: function() {
-                throw "Destroying image data not implemented!";
+                _free(memory);
             }
 	});
 	return uid;
