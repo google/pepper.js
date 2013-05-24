@@ -24,7 +24,7 @@
     };
 
     var Graphics2D_Describe = function(resource, size_ptr, is_always_opqaue_ptr) {
-	NotImplemented;
+		throw "Graphics2D_Describe not implemented";
     };
 
     var Graphics2D_PaintImageData = function(resource, image_data, top_left_ptr, src_rect_ptr) {
@@ -38,11 +38,11 @@
     };
 
     var Graphics2D_Scroll = function(resource, clip_rect_ptr, amount_ptr) {
-	NotImplemented;
+		throw "Graphics2D_Scroll not implemented";
     };
 
     var Graphics2D_ReplaceContents = function(resource, image_data) {
-	NotImplemented;
+		throw "Graphics2D_ReplaceContents not implemented";
     };
 
     var Graphics2D_Flush = function(resource, callback) {
@@ -65,11 +65,11 @@
 
 
     var ImageData_GetNativeImageDataFormat = function() {
-	NotImplemented;
+		throw "ImageData_GetNativeImageDataFormat not implemented";
     };
 
     var ImageData_IsImageDataFormatSupported = function(format) {
-	NotImplemented;
+		throw "ImageData_IsImageDataFormatSupported not implemented";
     };
 
     var ImageData_Create = function(instance, format, size_ptr, init_to_zero) {

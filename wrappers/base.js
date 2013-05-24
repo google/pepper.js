@@ -37,7 +37,7 @@
     };
 
     var Core_GetTimeTicks = function() {
-	return NotImplemented;
+		throw "Core_GetTimeTicks is not implemented";
     };
 
     var Core_CallOnMainThread = function(delay, callback, result) {

@@ -70,8 +70,12 @@
 	return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
     };
 
-    var URLLoader_FollowRedirect = function() { NotImplemented; };
-    var URLLoader_GetUploadProgress = function() { NotImplemented; };
+    var URLLoader_FollowRedirect = function() {
+        throw "URLLoader_FollowRedirect not implemented";
+    };
+    var URLLoader_GetUploadProgress = function() {
+        throw "URLLoader_GetUploadProgress not implemented";
+    };
 
     var URLLoader_GetDownloadProgress = function(loader, bytes_ptr, total_ptr) {
 	var l = resources.resolve(loader);
@@ -80,7 +84,9 @@
 	return 1;
     };
 
-    var URLLoader_GetResponseInfo = function() { NotImplemented; };
+    var URLLoader_GetResponseInfo = function() {
+        throw "URLLoader_GetResponseInfo not implemented";
+    };
 
     var URLLoader_ReadResponseBody = function(loader, buffer_ptr, read_size, callback) {
 	var loader = resources.resolve(loader);
@@ -96,8 +102,12 @@
 
     };
 
-    var URLLoader_FinishStreamingToFile = function() { NotImplemented; };
-    var URLLoader_Close = function() { NotImplemented; };
+    var URLLoader_FinishStreamingToFile = function() {
+        throw "URLLoader_FinishStreamingToFile not implemented";
+    };
+    var URLLoader_Close = function() {
+        throw "URLLoader_Close not implemented";
+    };
 
     registerInterface("PPB_URLLoader;1.0", [
 	URLLoader_Create,
@@ -135,12 +145,12 @@
     };
 
     var URLRequestInfo_AppendDataToBody = function(request, data, len) {
-	console.log(request, data, len);
-	NotImplemented;
+		console.log(request, data, len);
+		throw "URLRequestInfo_AppendDataToBody not implemented";
     };
 
     var URLRequestInfo_AppendFileToBody = function(request, file_ref, start_offset, number_of_bytes, expect_last_time_modified) {
-	NotImplemented;
+		throw "URLRequestInfo_AppendFileToBody not implemented";
     };
 
     registerInterface("PPB_URLRequestInfo;1.0", [
