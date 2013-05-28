@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<!--
+Copyright (c) 2013 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+-->
+<head>
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <title>Multi-threaded Voronoi Demo</title>
+  <script type="text/javascript" src="../../common.js"></script>
+  <script type="text/javascript" src="example.js"></script>
+</head>
+<body
+  data-name="voronoi" data-width="512" data-height="512"
+  data-tc="newlib" data-path="../newlib/Debug">
+  <h1>Voronoi</h1>
+  <h2>Status: <code id="statusField">NO-STATUS</code></h2>
+  <div>
+    This demo renders the Voronoi diagram for a moving set of points using a
+    brute force technique.
+    <br />
+    Number of points:
+    <input type="range" id="point_range"
+        min="1" max="1024" step="1" value="256" />
+    <label id="point_count" >256 points</label>
+    <br />
+    Number of threads:
+    <input type="radio" name="thread_count" id="one" value="1"
+        checked="checked" />
+    <label for="one">1</label>
+    <input type="radio" name="thread_count" id="two" value="2" />
+    <label for="two">2</label>
+    <input type="radio" name="thread_count" id="four" value="4" />
+    <label for="four">4</label>
+    <input type="radio" name="thread_count" id="six" value="6" />
+    <label for="six">6</label>
+    <input type="radio" name="thread_count" id="eight" value="8" />
+    <label for="eight">8</label>
+    <input type="radio" name="thread_count" id="twelve" value="12" />
+    <label for="twelve">12</label>
+    <input type="radio" name="thread_count" id="sixteen" value="16" />
+    <label for="sixteen">16</label>
+    <input type="radio" name="thread_count" id="twentyfour" value="24" />
+    <label for="twentyfour">24</label>
+    <input type="radio" name="thread_count" id="thirtytwo" value="32" />
+    <label for="thirtytwo">32</label>
+    <br />
+    <input type="checkbox" id="draw_points" checked="checked" />
+    <label for="draw_points">Draw Points</label>
+    <input type="checkbox" id="draw_interiors" checked="checked" />
+    <label for="draw_interiors">Draw Interiors</label>
+    <input type="submit" id="benchmark" value="Run Benchmark"/>
+    <label id="result" name="result"> </label>
+  </div>
+  <!-- The NaCl plugin will be embedded inside the element with id "listener".
+      See common.js.-->
+  <div id="listener"></div>
+</body>
+</html>
