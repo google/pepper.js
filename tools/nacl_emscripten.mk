@@ -48,6 +48,8 @@ else
 NACL_LDFLAGS+=-O0
 endif
 
+NACL_LDFLAGS+=-s TOTAL_MEMORY=33554432
+
 # No threads.
 POSIX_FLAGS:=$(filter-out -pthread,$(POSIX_FLAGS))
 #
