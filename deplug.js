@@ -160,6 +160,17 @@ var CreateInstance = function(width, height) {
         page_visible: true,
         clip_rect: {x: 0, y: 0, width: width, height: height}
       });
+
+      // Chrome doesn't currently add the required CSS for fullscreen, so we have to add it manually
+      // which means removing it when leaving fullscreen
+      if (!entering_fullscreen && canvas.webkitRequestFullscreen && !canvas.requestFullscreen) {
+        var style = canvas.style;
+        for (var key in style) {
+          if (style.hasOwnProperty(key)) {
+            style[key] = null;
+          }
+        }
+      }
     };
 
     // Keep track of current fullscreen element

@@ -30,11 +30,14 @@
 #include "ppapi/c/ppb.h"
 #include "ppapi/c/ppb_core.h"
 #include "ppapi/c/ppb_graphics_3d.h"
+#include "ppapi/c/ppb_fullscreen.h"
 #include "ppapi/c/ppb_instance.h"
+#include "ppapi/c/ppb_input_event.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_opengles2.h"
 #include "ppapi/c/ppb_var.h"
 #include "ppapi/c/ppp.h"
+#include "ppapi/c/ppp_input_event.h"
 #include "ppapi/c/ppp_instance.h"
 #include "ppapi/c/ppp_messaging.h"
 #include "ppapi/c/ppb_url_loader.h"
@@ -48,7 +51,9 @@
 static PPB_Messaging* ppb_messaging_interface = NULL;
 static PPB_Var* ppb_var_interface = NULL;
 static PPB_Core* ppb_core_interface = NULL;
+static PPB_Fullscreen* ppb_fullscreen_interface = NULL;
 static PPB_Graphics3D* ppb_g3d_interface = NULL;
+static PPB_InputEvent* ppb_input_event_interface = NULL;
 static PPB_Instance* ppb_instance_interface = NULL;
 static PPB_URLRequestInfo* ppb_urlrequestinfo_interface = NULL;
 static PPB_URLLoader* ppb_urlloader_interface = NULL;
@@ -155,7 +160,7 @@ void InitGL(void)
 
   g_context =  ppb_g3d_interface->Create(g_instance, 0, attribs);
   int32_t success = ppb_instance_interface->BindGraphics(g_instance, g_context);
-  if (success == PP_FALSE) 
+  if (success == PP_FALSE)
   {
     glSetCurrentContextPPAPI(0);
     printf("Failed to set context.\n");
@@ -232,7 +237,7 @@ void BuildQuad(Vertex* verts, int axis[3], float depth, float color[3]) {
     verts[i].loc[axis[0]] = X[i] * depth;
     verts[i].loc[axis[1]] = Y[i] * depth;
     verts[i].loc[axis[2]] = depth;
-    for (int j = 0; j < 3; j++) 
+    for (int j = 0; j < 3; j++)
       verts[i].color[j] = color[j] * (Y[i] + 1.0f) / 2.0f;
   }
 }
@@ -369,8 +374,8 @@ static void URLPartialRead(void* user_data, int mode) {
       URLPartialRead(user_data, bytes);
     }
     return;
-  } 
-  
+  }
+
   // Nothing left, so signal complete.
   req->cb_(req);
   printf("Loaded %d\n", (int) req->size_);
@@ -424,14 +429,14 @@ void LoadURL(PP_Instance inst, const char *url, OpenCB cb, void *data) {
     return;
   }
 
-  ppb_urlrequestinfo_interface->SetProperty(req->request_, 
+  ppb_urlrequestinfo_interface->SetProperty(req->request_,
       PP_URLREQUESTPROPERTY_URL, CStrToVar(url));
   ppb_urlrequestinfo_interface->SetProperty(req->request_,
       PP_URLREQUESTPROPERTY_METHOD, CStrToVar("GET"));
   ppb_urlrequestinfo_interface->SetProperty(req->request_,
       PP_URLREQUESTPROPERTY_RECORDDOWNLOADPROGRESS, PP_MakeBool(PP_TRUE));
 
-  int val = ppb_urlloader_interface->Open(req->loader_, req->request_, 
+  int val = ppb_urlloader_interface->Open(req->loader_, req->request_,
       PP_MakeCompletionCallback(URLOpened, req));
 
   if (val != PP_OK_COMPLETIONPENDING) {
@@ -483,6 +488,9 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
   LoadURL(instance, "vertex_shader_es2.vert", Loaded, &g_VShaderData);
   LoadURL(instance, "fragment_shader_es2.frag", Loaded, &g_FShaderData);
   g_quadVertices = BuildCube();
+
+  // Set up handler to go fullscreen on clicks
+  ppb_input_event_interface->RequestInputEvents(instance, PP_INPUTEVENT_CLASS_MOUSE);
   return PP_TRUE;
 }
 
@@ -558,6 +566,17 @@ static PP_Bool Instance_HandleDocumentLoad(PP_Instance instance,
   return PP_FALSE;
 }
 
+static PP_Bool InputEvent_HandleInputEvent(PP_Instance instance, PP_Resource input_event) {
+
+  PP_InputEvent_Type type = ppb_input_event_interface->GetType(input_event);
+  if (type == PP_INPUTEVENT_TYPE_MOUSEDOWN) {
+    ppb_fullscreen_interface->SetFullscreen(instance, PP_TRUE);
+    return PP_TRUE;
+  }
+
+  return PP_FALSE;
+}
+
 
 /**
  * Entry points for the module.
@@ -578,6 +597,10 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   ppb_urlrequestinfo_interface =
       (PPB_URLRequestInfo*)(get_browser(PPB_URLREQUESTINFO_INTERFACE));
   ppb_g3d_interface = (PPB_Graphics3D*)get_browser(PPB_GRAPHICS_3D_INTERFACE);
+
+  ppb_fullscreen_interface = (PPB_Fullscreen*)get_browser(PPB_FULLSCREEN_INTERFACE);
+  ppb_input_event_interface = (PPB_InputEvent*)get_browser(PPB_INPUT_EVENT_INTERFACE);
+
   if (!glInitializePPAPI(get_browser))
     return PP_ERROR_FAILED;
   return PP_OK;
@@ -600,7 +623,14 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
       &Instance_HandleDocumentLoad,
     };
     return &instance_interface;
+  } else if (strcmp(interface_name, PPP_INPUT_EVENT_INTERFACE) == 0) {
+    static PPP_InputEvent input_event_interface = {
+      &InputEvent_HandleInputEvent
+    };
+    return &input_event_interface;
   }
+
+
   return NULL;
 }
 
