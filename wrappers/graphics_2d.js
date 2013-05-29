@@ -3,9 +3,8 @@
     var Graphics2D_Create = function(instance, size_ptr, is_always_opaque) {
 	var size = ppapi_glue.getSize(size_ptr);
 	var canvas = resources.resolve(instance).canvas;
-	// TODO(grosse): Figure out how to handle size changing properly
-	// canvas.width = size.width;
-	// canvas.height = size.height;
+    canvas.width = size.width;
+	canvas.height = size.height;
 
 	var resource = resources.register("graphics_2d", {
 	    size: size,
@@ -13,7 +12,8 @@
 	    ctx: canvas.getContext('2d'),
 	    always_opaque: true,
 	    destroy: function() {
-		throw "Canvas destroy not implemented.";
+              //TODO(grosse): recreate canvas when necessary
+		      // throw "Canvas destroy not implemented.";
             }
 	});
 	return resource;

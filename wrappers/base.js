@@ -62,9 +62,6 @@
 
 
   var Instance_BindGraphics = function(instance, device) {
-    var inst = resources.resolve(instance);
-    var dev = resources.resolve(device);
-    inst.element.appendChild(dev.canvas);
     return 1;
   };
 

@@ -92,12 +92,23 @@ var CreateInstance = function(width, height) {
   canvas.height = height;
   shadow_instance.appendChild(canvas);
 
+  var sendViewEvent = function(instance_id, view_obj) {
+    var view = resources.register("view", view_obj);
+    _DoChangeView(instance_id, view);
+    resources.release(view);
+  };
+
   shadow_instance.addEventListener('DOMNodeInserted', function(evt) {
     if (evt.target !== shadow_instance) return;
 
     var instance = resources.register("instance", {
       element: shadow_instance,
-      canvas: canvas
+      canvas: canvas,
+      // Save original size so it can be restored later
+      size: {
+            width: canvas.width,
+            height: canvas.height
+        }
     });
     // Allows shadow_instance.postMessage to work.
     // This is only a UID so there is no circular reference.
@@ -105,15 +116,13 @@ var CreateInstance = function(width, height) {
     _NativeCreateInstance(instance);
 
     // Create and send a bogus view resource.
-    var view = resources.register("view", {
+    sendViewEvent(instance, {
       rect: {x: 0, y: 0, width: width, height: height},
-      fullscreen: true,
+      fullscreen: false,
       visible: true,
       page_visible: true,
       clip_rect: {x: 0, y: 0, width: width, height: height}
     });
-    _DoChangeView(instance, view);
-    resources.release(view);
 
     // Fake the load event.
     var evt = document.createEvent('Event');
@@ -131,6 +140,58 @@ var CreateInstance = function(width, height) {
   canvas.setAttribute('tabindex', '0'); // make it focusable
   canvas.addEventListener('focus', makeCallback(true));
   canvas.addEventListener('blur', makeCallback(false));
+
+
+  // TODO(grosse): Make this work when creating multiple instances or modules.
+  // It should only be called once when the page loads.
+  // Currently it's called everytime an instance is created.
+  var fullscreenChange = function() {
+    var doSend = function(entering_fullscreen, canvas) {
+      var instance_id = canvas.parentElement.instance;
+      var origsize = resources.resolve(instance_id).size;
+
+      var width = entering_fullscreen ? window.screen.width : origsize.width;
+      var height = entering_fullscreen ? window.screen.height : origsize.height;
+
+      sendViewEvent(instance_id, {
+        rect: {x: 0, y: 0, width: width, height: height},
+        fullscreen: entering_fullscreen,
+        visible: true,
+        page_visible: true,
+        clip_rect: {x: 0, y: 0, width: width, height: height}
+      });
+    };
+
+    // Keep track of current fullscreen element
+    var lastTarget = null;
+    return function(event) {
+      // When an event occurs because fullscreen is lost, the element will be null but we have no direct way of determining
+      // which element lost fullscreen. So we keep track of the previous element ot enter fullscreen.
+      var target = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || null;
+      var entering_fullscreen = (target !== null);
+
+      if (target !== lastTarget) {
+        // Send a fullscreen lost event to previous element if any
+        if (lastTarget !== null) {
+          doSend(false, lastTarget);
+          lastTarget = null;
+        }
+
+        if (target !== null) {
+          doSend(true, target);
+        }
+        lastTarget = target;
+      }
+    };
+  }();
+
+  if (canvas.requestFullscreen) {
+    document.addEventListener('fullscreenchange', fullscreenChange);
+  } else if (canvas.mozRequestFullScreen) {
+    document.addEventListener('mozfullscreenchange', fullscreenChange);
+  } else if (canvas.webkitRequestFullscreen) {
+    document.addEventListener('webkitfullscreenchange', fullscreenChange);
+  }
 
   // TODO handle removal events.
   return shadow_instance;

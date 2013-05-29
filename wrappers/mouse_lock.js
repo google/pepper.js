@@ -34,4 +34,39 @@
       MouseLock_UnlockMouse,
     ]);
 
+    var FullScreen_IsFullscreen = function(instance) {
+      var element = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+      return element === resources.resolve(instance).canvas;
+    };
+
+    var FullScreen_SetFullscreen = function(instance, fullscreen) {
+      var resource = resources.resolve(instance)
+      var element = resource.canvas;
+
+      if (fullscreen) {
+        if (element.requestFullscreen) {
+          element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+          element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+          element.webkitRequestFullscreen();
+        }
+      } else {
+        throw "FullScreen_SetFullscreen(..., false) not supported";
+      }
+
+      return true;
+    };
+
+
+    var FullScreen_GetScreenSize = function() {
+      throw "FullScreen_GetScreenSize not implemented";
+    };
+
+    registerInterface("PPB_Fullscreen;1.0", [
+      FullScreen_IsFullscreen,
+      FullScreen_SetFullscreen,
+      FullScreen_GetScreenSize
+    ]);
+
 })();
