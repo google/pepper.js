@@ -314,11 +314,11 @@ endef
 # macros and targets.
 #
 ifneq (,$(findstring $(TOOLCHAIN),glibc newlib))
-include ../../tools/nacl_gcc.mk
+include $(DEPLUG_SRC_ROOT)/tools/nacl_gcc.mk
 endif
 
 ifneq (,$(findstring $(TOOLCHAIN),emscripten))
-include ../../tools/nacl_emscripten.mk
+include $(DEPLUG_SRC_ROOT)/tools/nacl_emscripten.mk
 endif
 
 #
