@@ -105,6 +105,13 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
   SendMessage(instance, post_msg);
   LogMessage(instance, console_msg);
 
+  // Dump the argument to the console.
+  char buffer[1024];
+  for (int i = 0; i < argc; i++) {
+    snprintf(buffer, sizeof(buffer), "Arg %d: %s = %s", i, argn[i], argv[i]);
+    LogMessage(instance, buffer);
+  }
+
   return PP_TRUE;
 }
 

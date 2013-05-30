@@ -76,10 +76,15 @@ var registerInterface = function(name, functions) {
 
 var Module = {};
 
-var CreateInstance = function(width, height) {
-  var shadow_instance = document.createElement('span');
-  shadow_instance.setAttribute('name', 'nacl_module');
-  shadow_instance.setAttribute('id', 'nacl_module');
+var CreateInstance = function(width, height, shadow_instance) {
+  if (shadow_instance === undefined) {
+    shadow_instance = document.createElement("span");
+    shadow_instance.setAttribute("name", "nacl_module");
+    shadow_instance.setAttribute("id", "nacl_module");
+  }
+
+  shadow_instance.setAttribute("width", width);
+  shadow_instance.setAttribute("height", height);
 
   shadow_instance.style.display = "inline-block";
   shadow_instance.style.width = width + "px";
@@ -98,9 +103,7 @@ var CreateInstance = function(width, height) {
     resources.release(view);
   };
 
-  shadow_instance.addEventListener('DOMNodeInserted', function(evt) {
-    if (evt.target !== shadow_instance) return;
-
+  var instanceInserted = function() {
     var instance = resources.register("instance", {
       element: shadow_instance,
       canvas: canvas,
@@ -110,10 +113,31 @@ var CreateInstance = function(width, height) {
             height: canvas.height
         }
     });
+
     // Allows shadow_instance.postMessage to work.
     // This is only a UID so there is no circular reference.
     shadow_instance.instance = instance;
-    _NativeCreateInstance(instance);
+
+    // Turn the element's attributes into PPAPI's arguments.
+    // TODO(ncbray): filter out style attribute?
+    var argc = shadow_instance.attributes.length;
+    var argn = allocate(argc * 4, 'i8', ALLOC_NORMAL);
+    var argv = allocate(argc * 4, 'i8', ALLOC_NORMAL);
+    for (var i = 0; i < argc; i++) {
+      var attribute = shadow_instance.attributes[i];
+      setValue(argn + i * 4, allocate(intArrayFromString(attribute.name), 'i8', ALLOC_NORMAL), 'i32');
+      setValue(argv + i * 4, allocate(intArrayFromString(attribute.value), 'i8', ALLOC_NORMAL), 'i32');
+    }
+
+    _NativeCreateInstance(instance, argc, argn, argv);
+
+    // Clean up the arguments.
+    for (var i = 0; i < argc; i++) {
+      _free(getValue(argn + i * 4, 'i32'));
+      _free(getValue(argv + i * 4, 'i32'));
+    }
+    _free(argn);
+    _free(argv);
 
     // Create and send a bogus view resource.
     sendViewEvent(instance, {
@@ -128,7 +152,17 @@ var CreateInstance = function(width, height) {
     var evt = document.createEvent('Event');
     evt.initEvent('load', true, true);  // bubbles, cancelable
     shadow_instance.dispatchEvent(evt);
-  }, true);
+  };
+
+  if (shadow_instance.parentNode === null) {
+    shadow_instance.addEventListener('DOMNodeInserted', function (evt) {
+      if (evt.target === shadow_instance) {
+	instanceInserted();
+      }
+    }, true);
+  } else {
+    instanceInserted();
+  }
 
   var makeCallback = function(hasFocus){
     return function(event) {

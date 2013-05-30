@@ -55,7 +55,7 @@ extern "C" {
     PPP_ShutdownModule();
   }
 
-  CALLED_FROM_JS void NativeCreateInstance(PP_Instance instance) {
+  CALLED_FROM_JS void NativeCreateInstance(PP_Instance instance, uint32_t argc, const char *argn[], const char *argv[]) {
     int32_t status = PPP_InitializeModule(1, &GetBrowserInterface);
     if (status != PP_OK) {
       printf("STUB: Failed to initialize module.\n");
@@ -68,8 +68,7 @@ extern "C" {
       return;
     }
 
-    // TODO arguments.
-    status = instance_interface->DidCreate(instance, 0, NULL, NULL);
+    status = instance_interface->DidCreate(instance, argc, argn, argv);
     if (status != PP_TRUE) {
       printf("STUB: Failed to create instance.\n");
       Shutdown(instance);
