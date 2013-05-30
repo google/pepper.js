@@ -17,6 +17,7 @@ PROJECTS:= \
   input_events \
   mouselock \
   sine_synth \
+  ppapi/tests \
 
 HTTPD:=../tools/httpd.py
 

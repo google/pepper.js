@@ -1,0 +1,360 @@
+<html><head>
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<link rel="stylesheet" href="test_page.css">
+<script>
+function AdjustHeight(frameWin) {
+  var div = frameWin.document.getElementsByTagName("div")[0];
+  var height = frameWin.getComputedStyle(div).height;
+  frameWin.frameElement.style.height = height;
+}
+
+function DidExecuteTests() {
+  var plugin = document.getElementById("plugin");
+  plugin.parentNode.removeChild(plugin);
+  plugin = undefined;
+  CheckPostConditions();
+
+  if (window == top)
+    return;
+
+  // Otherwise, we are in a subframe, so we can use this opportunity to resize
+  // ourselves.
+  AdjustHeight(window);
+}
+
+function AppendFrame(testcase, i) {
+  console.log(testcase, i)
+  var p = document.createElement("P");
+  p.setAttribute("class", "frame-container");
+
+  var title = document.createElement("H2");
+  title.appendChild(document.createTextNode(testcase));
+  p.appendChild(title);
+
+  var frame = document.createElement("IFRAME");
+  var mode = ExtractSearchParameter("mode");
+  var websocket_host = ExtractSearchParameter("websocket_host");
+  var websocket_port = ExtractSearchParameter("websocket_port");
+  var ssl_server_port = ExtractSearchParameter("ssl_server_port");
+  var src = "?testcase=" + testcase;
+  console.log(mode)
+  if (mode.slice(0, 4) === "nacl")
+    src += "&mode=" + mode;
+  if (websocket_host != "")
+    src += "&websocket_host=" + websocket_host;
+  if (websocket_port != "")
+    src += "&websocket_port=" + websocket_port;
+  if (ssl_server_port != "")
+    src += "&ssl_server_port=" + ssl_server_port;
+  frame.setAttribute("src", src);
+
+  frame.setAttribute("onload", "LoadNext(" + (i + 1) + ")");
+  p.appendChild(frame);
+
+  document.body.appendChild(p);
+}
+
+function LoadNext(i) {
+  var links = document.links;
+  if (links.length > i)
+    AppendFrame(links[i].firstChild.nodeValue, i);
+}
+
+function RunAll() {
+  // Remove any existing frames.
+  var existing = document.getElementsByClassName("frame-container");
+  while (existing.length)
+    existing[0].parentNode.removeChild(existing[0]);
+
+  // Add new frames for each test, but do so one frame at a time.
+  LoadNext(0);
+}
+
+function ExtractSearchParameter(name) {
+  var nameIndex = location.search.indexOf(name + "=");
+  if (nameIndex != -1) {
+    var value = location.search.substring(nameIndex + name.length + 1);
+    var endIndex = value.indexOf("&");
+    if (endIndex != -1)
+      value = value.substring(0, endIndex);
+    return value;
+  }
+  return "";
+}
+
+// Parses the message, looking for strings of the form:
+// TESTING_MESSAGE:<message_type>:<message_contents>
+//
+// If the message_data is not a string or does not match the above format, then
+// undefined is returned.
+//
+// Otherwise, returns an array containing 2 items. The 0th element is the
+// message_type, one of:
+//  - ClearContents
+//  - DidExecuteTests
+//  - LogHTML
+//  - SetCookie
+//  - EvalScript
+//  - AddPostCondition
+// The second item is the verbatim message_contents.
+function ParseTestingMessage(message_data) {
+  if (typeof(message_data) != "string")
+    return undefined;
+  var testing_message_prefix = "TESTING_MESSAGE";
+  var delim_str = ":";
+  var delim1 = message_data.indexOf(delim_str);
+  if (message_data.substring(0, delim1) !== testing_message_prefix)
+    return undefined;
+  var delim2 = message_data.indexOf(delim_str, delim1 + 1);
+  if (delim2 == -1)
+    delim2 = message_data.length;
+  var message_type = message_data.substring(delim1 + 1, delim2);
+  var message_contents = message_data.substring(delim2 + 1);
+  return [message_type, message_contents];
+}
+
+function ClearConsole() {
+  window.document.getElementById("console").innerHTML = "";
+}
+
+function LogHTML(html) {
+  window.document.getElementById("console").innerHTML += html;
+}
+
+function sendAutomationMessage(msg) {
+  if (window.domAutomationController) {
+    window.domAutomationController.setAutomationId(0);
+    window.domAutomationController.send(msg);
+  }
+}
+
+// If something goes really wrong, the test running inside the plugin may not
+// terminate.  For example, if the plugin does not load, the test will never
+// send "PASS" to the browser.  In this case we should explicitly use the
+// automation controller to terminate the test.
+function InternalError(msg) {
+  LogHTML("<p>" + msg);
+  sendAutomationMessage(msg);
+}
+
+function SetCookie(key_value_string) {
+  window.document.cookie = key_value_string + "; path=/";
+}
+
+function EvalScript(script) {
+  try {
+    eval(script);
+  } catch(ex) {
+  }
+}
+
+var conditions = [];
+// Add a "PostCondition". These are bits of script that are run after the plugin
+// is destroyed. If they evaluate to false or throw an exception, it's
+// considered a failure.
+function AddPostCondition(script) {
+  conditions.push(script);
+}
+// Update the HTML to show the failure and update cookies so that ui_tests
+// doesn't count this as a pass.
+function ConditionFailed(error) {
+  error_string = "Post condition check failed: " + error;
+  var i = 0;
+  // If the plugin thinks the test passed but a post-condition failed, we want
+  // to clear the PASS cookie so that ui_tests doesn't count it is a passed
+  // test.
+  if (window.document.cookie.indexOf("PASS") != -1) {
+    while (window.document.cookie.indexOf("PPAPI_PROGRESS_" + i) != -1) {
+      window.document.cookie = "PPAPI_PROGRESS_" + i + "=; max-age=0";
+      ++i;
+    }
+    window.document.cookie = "PPAPI_PROGRESS_0=" + error_string
+  }
+  LogHTML("<p>" + error_string);
+}
+// Iterate through the post conditions defined in |conditions| and check that
+// they all pass.
+function CheckPostConditions() {
+  for (var i = 0; i < conditions.length; ++i) {
+    var script = conditions[i];
+    try {
+      if (!eval(script)) {
+        ConditionFailed("\"" + script + "\"");
+      }
+    } catch (ex) {
+      ConditionFailed("\"" + script + "\"" + " failed with exception: " +
+                      "\"" + ex.toString() + "\"");
+    }
+  }
+}
+
+function IsTestingMessage(message_data) {
+  return (ParseTestingMessage(message_data) != undefined);
+}
+
+function handleTestingMessage(message_event) {
+  var type_contents_tuple = ParseTestingMessage(message_event.data);
+  if (type_contents_tuple) {
+    var type = type_contents_tuple[0];
+    var contents = type_contents_tuple[1];
+    if (type === "ClearConsole")
+      ClearConsole();
+    else if (type === "DidExecuteTests")
+      DidExecuteTests();
+    else if (type === "LogHTML")
+      LogHTML(contents);
+    else if (type === "SetCookie")
+      SetCookie(contents);
+    else if (type === "EvalScript")
+      EvalScript(contents);
+    else if (type == "AddPostCondition")
+      AddPostCondition(contents);
+  }
+}
+
+function sendProgress() {
+  // We send "..." to signal that we're still working. See
+  // ppapi/tests/testing_instance.h for how this works.
+  sendAutomationMessage("...");
+}
+
+function createEmscriptenEmbed(script_url) {
+  var shadow_instance = document.createElement('span');
+
+  script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src = script_url;
+  script.onload = script.onreadystatechange = function() {
+    if (!this.readyState || this.readyState == 'complete') {
+      CreateInstance(80, 80, shadow_instance);
+    }
+  };
+  target = document.getElementsByTagName('head')[0];
+  target.appendChild(script);
+
+  return shadow_instance;
+}
+
+onload = function() {
+  var testcase = ExtractSearchParameter("testcase");
+  var mode = ExtractSearchParameter("mode");
+  document.title = 'Test ' + testcase;
+  var obj;
+  if (mode == "nacl_emscripten_debug") {
+    obj = createEmscriptenEmbed("../emscripten/Debug/ppapi_test.js");
+    obj.setAttribute("mode", mode);
+  } else if (mode == "nacl_emscripten_release") {
+    obj = createEmscriptenEmbed("../emscripten/Release/ppapi_test.js");
+    obj.setAttribute("mode", mode);
+  } else if (mode == "nacl_newlib_debug") {
+    obj = document.createElement("EMBED");
+    obj.setAttribute("src", "../newlib/Debug/ppapi_test.nmf");
+    obj.setAttribute("type", "application/x-nacl");
+    obj.setAttribute("mode", mode);
+  } else if (mode == "nacl_newlib_release") {
+    obj = document.createElement("EMBED");
+    obj.setAttribute("src", "../newlib/Release/ppapi_test.nmf");
+    obj.setAttribute("type", "application/x-nacl");
+    obj.setAttribute("mode", mode);
+  } else if (mode == "nacl_glibc") {
+    obj = document.createElement("EMBED");
+    obj.setAttribute("src", "ppapi_nacl_tests_glibc.nmf");
+    obj.setAttribute("type", "application/x-nacl");
+    obj.setAttribute("mode", mode);
+  } else if (mode == "nacl_pnacl") {
+    obj = document.createElement("EMBED");
+    obj.setAttribute("src", "ppapi_nacl_tests_pnacl.nmf");
+    obj.setAttribute("type", "application/x-nacl");
+    obj.setAttribute("mode", mode);
+  } else {
+    var mimeType = "application/x-ppapi-tests";
+    if (mimeType in navigator.mimeTypes) {
+      obj = document.createElement("EMBED");
+      obj.setAttribute("src", "http://a.b.c/test");
+      obj.setAttribute("type", mimeType);
+    } else {
+      document.getElementById("console").innerHTML =
+          '<span class="fail">FAIL</span>: ' +
+          '<span class="err_msg">Test plug-in is not registered.</span>';
+    }
+  }
+  if (obj) {
+    obj.setAttribute("width", 80);
+    obj.setAttribute("height", 80);
+    obj.setAttribute("style",
+                     "background-color:#AAAAAA;border:1px solid black;");
+    obj.setAttribute("id", "plugin");
+    obj.setAttribute("testcase", testcase);
+    obj.setAttribute("protocol", window.location.protocol);
+    var websocket_host = ExtractSearchParameter("websocket_host");
+    if (websocket_host != "")
+      obj.setAttribute("websocket_host", websocket_host);
+    var websocket_port = ExtractSearchParameter("websocket_port");
+    if (websocket_port != "")
+      obj.setAttribute("websocket_port", websocket_port);
+    var ssl_server_port = ExtractSearchParameter("ssl_server_port");
+    if (ssl_server_port != "")
+      obj.setAttribute("ssl_server_port", ssl_server_port);
+
+    var container = document.getElementById("container");
+    container.addEventListener("message", handleTestingMessage, true);
+
+    // "error" and "crash" events will only fire for NaCl, but adding these
+    // listeners doesn't hurt in the non-NaCl cases.
+    obj.addEventListener("error", function() {
+      InternalError("Plugin did not load. '" + obj.lastError + "'");
+    }, true);
+    obj.addEventListener("crash", function() {
+      InternalError("Plugin crashed. '" + obj.lastError + "'");
+    }, true);
+
+    // NaCl sends progress events while loading. When we get one, notify the
+    // domAutomationController so that it knows we're still working.
+    obj.addEventListener("loadstart", sendProgress, true);
+    obj.addEventListener("progress", sendProgress, true);
+    obj.addEventListener("load", sendProgress, true);
+    obj.addEventListener("loadend", sendProgress, true);
+
+    // Register a bad dispatchEvent to make sure it isn't used. See 'EVIL' note
+    // below.
+    var original = obj.dispatchEvent;
+    obj.dispatchEvent = function() {
+      // TODO(dmichael): NaCl triggers this; take out the special case for NaCl
+      //                 when crbug.com/109775 is fixed.
+      if (mode.indexOf("nacl") !== 0)
+        InternalError("Bad dispatchEvent called!");
+
+      // Pass it on anyways, we need the event to detect load progress and
+      // errors.
+      return original.apply(obj, arguments);
+    }
+    container.appendChild(obj);
+  }
+}
+
+// EVIL Note:
+// This part of the script does some nefarious things to make sure that it
+// doesn't affect the behavior of PostMessage (on which all the tests rely). In
+// particular, we replace document.createEvent, MessageEvent.initMessageEvent,
+// and the MessageEvent constructor. Previous versions of the PostMessage
+// implementation made use of these and would fail (http://crbug.com/82604).
+// The NaCl plugin uses dispatchEvent for progress events, hence we are careful
+// to make that still pass for NaCl (see above, and see crbug.com/109775).
+//document.createEvent = function() {
+//  InternalError("Bad document.createEvent called!");
+//}
+//function MessageEvent() {
+//  InternalError("Bad MessageEvent constructor called!");
+//}
+//MessageEvent.prototype.initMessageEvent = function() {
+//  InternalError("Bad MessageEvent.initMessageEvent called!");
+//}
+
+</script>
+</head><body>
+<div>
+  <div id="container"></div>
+  <div id="console"><span class="load_msg">loading...</span></div>
+</div>
+</body></html>
