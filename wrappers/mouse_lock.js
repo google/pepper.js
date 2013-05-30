@@ -69,7 +69,13 @@
         }
       }
     } else {
-      throw "FullScreen_SetFullscreen(..., false) not supported";
+      if (document.cancelFullscreen) {
+        document.cancelFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
+      }
     }
 
     return true;
