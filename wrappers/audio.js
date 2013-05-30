@@ -1,6 +1,24 @@
 (function() {
 
+  var createAudioContext = function() {
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    return new AudioContext();
+  }
+
+  // The Web Audio API currently does not allow user-specified sample rates.
+  var supportedSampleRate = function() {
+    return createAudioContext().sampleRate;
+  }
+
   var AudioConfig_CreateStereo16Bit = function(instance, sample_rate, sample_frame_count) {
+    if (sample_rate !== supportedSampleRate()) {
+      return 0;
+    }
+    // PP_AUDIOMINSAMPLEFRAMECOUNT = 64
+    // PP_AUDIOMAXSAMPLEFRAMECOUNT = 32768
+    if (sample_frame_count < 64 || sample_frame_count > 32768) {
+      return 0;
+    }
     return resources.register("audio_config", {
       sample_rate: sample_rate,
       sample_frame_count: sample_frame_count
@@ -17,16 +35,23 @@
   };
 
   var AudioConfig_GetSampleRate = function(config) {
-    return resources.resolve(config).sample_rate;
+    var c = resources.resolve(config);
+    if (c === undefined) {
+      return 0;
+    }
+    return c.sample_rate;
   };
 
   var AudioConfig_GetSampleFrameCount = function(config) {
-    return resources.resolve(config).sample_frame_count;
+    var c = resources.resolve(config);
+    if (c === undefined) {
+      return 0;
+    }
+    return c.sample_frame_count;
   };
 
   var AudioConfig_RecommendSampleRate = function(instance) {
-    // TODO(ncbray): be smarter?
-    return 44100;
+    return supportedSampleRate();
   };
 
   registerInterface("PPB_AudioConfig;1.1", [
@@ -65,8 +90,7 @@
     var buffer_bytes = config_js.sample_frame_count * 2 * 2;
     var buffer =  _malloc(buffer_bytes);
 
-    var AudioContext = window.AudioContext || window.webkitAudioContext;
-    var context = new AudioContext();
+    var context = createAudioContext();
     // Note requires power-of-two buffer size.
     var processor = context.createScriptProcessor(config_js.sample_frame_count, 0, 2);
     processor.onaudioprocess = function (e) {
@@ -75,7 +99,7 @@
       var r = e.outputBuffer.getChannelData(1);
       var base = buffer>>1;
       var offset = 0;
-      var scale = 1 / ((1<<16)-1);
+      var scale = 1 / ((1<<15)-1);
       for (var i = 0; i < e.outputBuffer.length; i++) {
         l[i] = HEAP16[base + offset] * scale;
         offset += 1;

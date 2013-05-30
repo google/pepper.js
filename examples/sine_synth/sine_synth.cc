@@ -74,7 +74,7 @@ class SineSynthInstance : public pp::Instance {
     SineSynthInstance* sine_synth_instance =
         reinterpret_cast<SineSynthInstance*>(data);
     const double frequency = sine_synth_instance->frequency();
-    const double delta = kTwoPi * frequency / PP_AUDIOSAMPLERATE_44100;
+    const double delta = kTwoPi * frequency / sine_synth_instance->sample_rate_;
     const int16_t max_int16 = std::numeric_limits<int16_t>::max();
 
     int16_t* buff = reinterpret_cast<int16_t*>(samples);
@@ -105,6 +105,9 @@ class SineSynthInstance : public pp::Instance {
   // skips on buffer boundaries.
   double theta_;
 
+  // The sample rate of the audio output.
+  PP_AudioSampleRate sample_rate_;
+
   // The count of sample frames per channel in an audio buffer.
   uint32_t sample_frame_count_;
 };
@@ -112,14 +115,15 @@ class SineSynthInstance : public pp::Instance {
 bool SineSynthInstance::Init(uint32_t argc,
                              const char* argn[],
                              const char* argv[]) {
+  sample_rate_ = pp::AudioConfig::RecommendSampleRate(this);
   // Ask the device for an appropriate sample count size.
   sample_frame_count_ =
       pp::AudioConfig::RecommendSampleFrameCount(this,
-                                                 PP_AUDIOSAMPLERATE_44100,
+                                                 sample_rate_,
                                                  kSampleFrameCount);
   audio_ = pp::Audio(this,
                      pp::AudioConfig(this,
-                                     PP_AUDIOSAMPLERATE_44100,
+                                     sample_rate_,
                                      sample_frame_count_),
                      SineWaveCallback,
                      this);

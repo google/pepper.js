@@ -13,7 +13,7 @@ var ResourceManager = function() {
 }
 
 ResourceManager.prototype.register = function(type, res) {
-  while (this.uid in this.lut) {
+  while (this.uid in this.lut || this.uid === 0) {
     this.uid = (this.uid + 1) & 0xffffffff;
   }
   res.type = type;

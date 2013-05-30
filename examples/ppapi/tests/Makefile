@@ -46,6 +46,7 @@ TARGET=ppapi_test
 # List of sources to compile
 #
 ppapi_test_SOURCES= \
+  test_audio_config.cc \
   test_case.cc \
   test_console.cc \
   test_core.cc \
