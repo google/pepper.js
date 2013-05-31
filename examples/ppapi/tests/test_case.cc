@@ -203,6 +203,9 @@ PP_TimeTicks TestCase::NowInTimeTicks() {
 }
 
 std::string TestCase::CheckResourcesAndVars(std::string errors) {
+  // TODO(ncbray): support enumeration of var objects.
+  return errors;
+
   if (!errors.empty())
     return errors;
 

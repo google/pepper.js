@@ -52,6 +52,7 @@ ppapi_test_SOURCES= \
   test_core.cc \
   test_image_data.cc \
   test_utils.cc \
+  test_var.cc \
   testing_instance.cc \
 
 # TODO(ncbray): find a better way to inject the shim

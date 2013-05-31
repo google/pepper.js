@@ -10,6 +10,7 @@ var postMessage = function(message) {
 var ResourceManager = function() {
   this.lut = {};
   this.uid = 1;
+  this.num_resources = 0;
 }
 
 ResourceManager.prototype.register = function(type, res) {
@@ -20,6 +21,7 @@ ResourceManager.prototype.register = function(type, res) {
   res.uid = this.uid;
   res.refcount = 1;
   this.lut[res.uid] = res;
+  this.num_resources += 1;
   //console.log("create", res.uid);
   return this.uid;
 }
@@ -60,7 +62,12 @@ ResourceManager.prototype.release = function(uid) {
       res.destroy();
     }
     delete this.lut[res.uid];
+    this.num_resources -= 1;
   }
+}
+
+ResourceManager.prototype.getNumResources = function() {
+  return this.num_resources;
 }
 
 var resources = new ResourceManager();

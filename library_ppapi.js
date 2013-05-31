@@ -15,6 +15,7 @@ var ppapi_exports = {
       ['i32', 'padding'],
       ['i64', 'value'],
     ]),
+    PP_VARTYPE_NULL: 1,
     PP_VARTYPE_BOOL: 2,
     PP_VARTYPE_STRING: 5,
 
