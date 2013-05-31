@@ -72,24 +72,49 @@
 
 
   var ImageData_GetNativeImageDataFormat = function() {
-    throw "ImageData_GetNativeImageDataFormat not implemented";
+    // PP_IMAGEDATAFORMAT_RGBA_PREMUL
+    return 1;
   };
 
+  // We only support RGBA.
+  // To simplify porting we're pretending that we also support BGRA and really giving an RGBA buffer instead.
   var ImageData_IsImageDataFormatSupported = function(format) {
-    throw "ImageData_IsImageDataFormatSupported not implemented";
+    return format == 0 || format == 1;
   };
 
   var ImageData_Create = function(instance, format, size_ptr, init_to_zero) {
+    if (!ImageData_IsImageDataFormatSupported(format)) {
+      return 0;
+    }
     var size = ppapi_glue.getSize(size_ptr);
+    if (size.width <= 0 || size.height <= 0) {
+      return 0;
+    }
     var bytes = size.width * size.height * 4
     var memory = _malloc(bytes);
-    // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
-    var view = new Uint8ClampedArray(buffer, memory, bytes);
-    // Due to limitations of the canvas API, we need to create an intermediate "ImageData" buffer.
-    // HACK for creating an image data without having a 2D context available.
-    var c = document.createElement('canvas');
-    var ctx = c.getContext('2d')
-    var image_data = ctx.createImageData(size.width, size.height);
+    if (memory === 0) {
+      return 0;
+    }
+    var view;
+    var image_data;
+    try {
+      // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
+      view = new Uint8ClampedArray(buffer, memory, bytes);
+      // Due to limitations of the canvas API, we need to create an intermediate "ImageData" buffer.
+      // HACK for creating an image data without having a 2D context available.
+      var c = document.createElement('canvas');
+      var ctx = c.getContext('2d')
+     image_data = ctx.createImageData(size.width, size.height);
+    } catch(err) {
+      // Calls in the try block may return range errors if the sizes are too big.
+      // TODO(ncbray): be more precise about the exceptions that are swallowed.
+      _free(memory);
+      return 0;
+    }
+
+    if (init_to_zero) {
+      _memset(memory, 0, bytes);
+    }
 
     var uid = resources.register("image_data", {
       format: format,
@@ -105,18 +130,21 @@
   };
 
   var ImageData_IsImageData = function (image_data) {
-    return resources.is("image_data", image_data);
+    return resources.is(image_data, "image_data");
   };
 
   var ImageData_Describe = function(image_data, desc_ptr) {
-    //if (!resources.is("image_data", image_data)) return 0;
-
     var res = resources.resolve(image_data);
-    setValue(desc_ptr + 0, res.format, 'i32');
-    setValue(desc_ptr + 4, res.size.width, 'i32');
-    setValue(desc_ptr + 8, res.size.height, 'i32');
-    setValue(desc_ptr + 12, res.size.width*4, 'i32');
-    return 1;
+    if (res !== undefined) {
+      setValue(desc_ptr + 0, res.format, 'i32');
+      setValue(desc_ptr + 4, res.size.width, 'i32');
+      setValue(desc_ptr + 8, res.size.height, 'i32');
+      setValue(desc_ptr + 12, res.size.width*4, 'i32');
+      return 1;
+    } else {
+      _memset(desc_ptr, 0, 16);
+      return 0;
+    }
   };
 
   var ImageData_Map = function(image_data) {

@@ -25,15 +25,18 @@ ResourceManager.prototype.register = function(type, res) {
 }
 
 ResourceManager.prototype.resolve = function(res) {
-  if (typeof res === 'number')
+  if (typeof res === "number")
     return this.lut[res]
   else
     return res;
 }
 
 ResourceManager.prototype.is = function(res, type) {
-  var res = this.resolve(res);
-  return res && res.type === type;
+  if (typeof res !== "number" || typeof type !== "string") {
+    throw "Wrong argument types: (" + typeof type + ", " + typeof res + ")";
+  }
+  var js_obj = this.resolve(res);
+  return js_obj !== undefined && js_obj.type === type;
 }
 
 ResourceManager.prototype.addRef = function(uid) {
