@@ -10,6 +10,16 @@
     return createAudioContext().sampleRate;
   }
 
+  var createScriptNode = function(context, sample_count, channels) {
+    if (context.createScriptProcessor) {
+      return context.createScriptProcessor(sample_count, 0, channels);
+    } else {
+      // Safari has a differently named API and is buggy if there are zero input channels.
+      return context.createJavaScriptNode(sample_count, 1, channels);
+    }
+  }
+
+
   var AudioConfig_CreateStereo16Bit = function(instance, sample_rate, sample_frame_count) {
     if (sample_rate !== supportedSampleRate()) {
       return 0;
@@ -92,7 +102,7 @@
 
     var context = createAudioContext();
     // Note requires power-of-two buffer size.
-    var processor = context.createScriptProcessor(config_js.sample_frame_count, 0, 2);
+    var processor = createScriptNode(context, config_js.sample_frame_count, 2);
     processor.onaudioprocess = function (e) {
       Runtime.dynCall('viii', audio_callback, [buffer, buffer_bytes, user_data]);
       var l = e.outputBuffer.getChannelData(0);

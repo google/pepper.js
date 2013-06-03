@@ -2,7 +2,8 @@
 <head>
   <title>Deplug Examples</title>
 </head>
-<body>
+<body style="font-family: Verdana, Geneva, sans-serif; background-color: gray">
+<div style="background-color: white; padding: 20px; display: inline-block">
 <h2>Deplug Examples</h2>
 <table>
   <tr>
@@ -76,12 +77,48 @@
     <td><a href="ppapi/tests/data/test_case.html?mode=nacl_newlib_release">Run</a></td>
   </tr>
 </table>
-<h3>Notes</h3>
+<div style="width: 800px">
+<h3>Browser Support</h3>
+<h4>Chrome</h4>
 <ul>
   <li>To run the NaCl examples, either enable NaCl in about:flags or pass --enable-nacl to Chrome on the command line.</li>
-  <li>Sine Synth works on Firefox nightly, but not stable.</li>
-  <li>WebGL must be <a href="https://discussions.apple.com/thread/3300585">manually enabled</a> on Safari.</li>
-  <li>Pointer Lock on Firefox requires fullscreen to be activated before pointer lock is possible</li>
+  <li>This is currently the only platform that supports the NaCl examples.
 </ul>
+<h4>Firefox</h4>
+<ul>
+  <li>Firefox <a href="http://nightly.mozilla.org/">nightly</a> is required.  The Web Audio API, etc, are only starting to be supported.</li>
+  <li>Switching to fullscreen with unlock the mouse in Firefox.  Locking the mouse outside of fullscreen is only supported in nightly.</li>
+</ul>
+
+<h4>Safari</h4>
+<ul>
+  <li>WebGL must be <a href="https://discussions.apple.com/thread/3300585">manually enabled</a> on Safari.</li>
+  <li>Mouse lock is not supported in Safari.</li>
+  <li>Voronoi appears to be <i>brutally</i> slow on Safari.</li>
+</ul>
+
+<h4>Internet Explorer</h4>
+<ul>
+  <li>Internet Explorer has not been tested and will have partial support at best (at least until WebGL is added in 11).</li>
+</ul>
+
+<h4>Mobile</h4>
+<ul>
+  <li>Not yet tested.</li>
+</ul>
+
+<h3>Developer Errata</h3>
+<ul>
+  <li>Threads are now allowed.  Blocking calls are not allowed.  Only purely asynchonous code can be compiled into both NaCl and JavaScript.</li>
+  <li>The JS Opt builds are not minimized.  The Closure compiler is currently incompatabile with asm.js.</li>
+  <li>The ImageData API only supports RGBA, not BGRA.  BGRA could be supported with swizzling, but this would be slow.  The SDK examples assume BGRA is supported, so the JS versions will swap red and blue.</li>
+  <li>The Graphics2D and Graphics3D interfaces will automatically swap buffers every frame, even if Flush or SwapBuffers is not called.  This behavior should not be noticible for most applications.  Explicit swapping could be emulated by creating an offscreen buffer, but this would cost time and memory.</li>
+  <li>The Audio API only supports one sample rate - whatever the underlying Web Audio API uses, in many cases 48k.  Resampling could be performed as a polyfill, but this would be slow.</li>
+  <li>URLLoader does not stream - the data appears all at once.</li>
+  <li>Input support is a little fiddly due to inconsitencies between platforms.</li>
+  <li>Most of the PPAPI tests have not been ported because they wait for blocking callbacks.</li>
+</ul>
+</div>
+</div>
 </body>
 </html>
