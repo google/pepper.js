@@ -10,6 +10,14 @@
 // code.
 var common = (function () {
 
+  var addListener = function(elt, event_name, callback) {
+    if (elt.addEventListener) {
+      elt.addEventListener(event_name, callback, false);
+    } else {
+      elt.attachEvent("on" + event_name, callback);
+    }
+  }
+
   function createEmscriptenModule(name, tool, path, width, height) {
     var e = CreateInstance(width, height);
     document.getElementById('listener').appendChild(e);
@@ -232,6 +240,7 @@ var common = (function () {
     /** A reference to the NaCl module, once it is loaded. */
     naclModule: null,
 
+    addListener: addListener,
     attachDefaultListeners: attachDefaultListeners,
     domContentLoaded: domContentLoaded,
     createNaClModule: createNaClModule,
@@ -243,7 +252,7 @@ var common = (function () {
 
 // Listen for the DOM content to be loaded. This event is fired when parsing of
 // the page's document has finished.
-document.addEventListener('DOMContentLoaded', function() {
+common.addListener(document, 'DOMContentLoaded', function() {
   var body = document.querySelector('body');
 
   // The data-* attributes on the body can be referenced via body.dataset.

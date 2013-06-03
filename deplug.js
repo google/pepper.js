@@ -1,5 +1,16 @@
 "use strict";
 
+// Polyfill for Safari.
+if (window.performance === undefined) {
+  window.performance = {};
+}
+if (window.performance.now === undefined) {
+  var nowStart = Date.now();
+  window.performance.now = function() {
+    return Date.now() - nowStart;
+  }
+}
+
 var postMessage = function(message) {
   // HACK assumes string.
   var ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);

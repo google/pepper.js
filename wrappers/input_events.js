@@ -158,7 +158,7 @@
           movement: GetMovement(event),
           delta: GetWheelScroll(event),
           scrollByPage: (event.deltaMode === 2),
-          keyCode: event.keyCode,
+          keyCode: event.keyCode
         });
 
         var rval = _HandleInputEvent(instance, obj_uid);

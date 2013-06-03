@@ -59,7 +59,7 @@
             'box-sizing':'border-box',
             width:'100%',
             height:'100%',
-            'object-fit':'contain',
+            'object-fit':'contain'
         };
 
         for (var key in fsstyles) {
