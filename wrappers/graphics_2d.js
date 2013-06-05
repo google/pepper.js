@@ -31,11 +31,16 @@
     if (src_rect_ptr !== 0){
       throw "Graphics2D_PaintImageData doesn't support nonnull src_rect argument yet";
     }
-
     var g2d = resources.resolve(resource);
+    // Eat any errors that occur, same as the implementation in Chrome.
+    if (g2d === undefined) {
+      return;
+    }
     var res = resources.resolve(image_data);
-    res.image_data.data.set(res.view);
-
+    if (res === undefined) {
+      return;
+    }
+    syncImageData(res);
     var top_left = ppapi_glue.getPoint(top_left_ptr);
     g2d.ctx.putImageData(res.image_data, top_left.x, top_left.y);
   };
@@ -46,9 +51,15 @@
 
   var Graphics2D_ReplaceContents = function(resource, image_data) {
     var g2d = resources.resolve(resource);
+    // Eat any errors that occur, same as the implementation in Chrome.
+    if (g2d === undefined) {
+      return;
+    }
     var res = resources.resolve(image_data);
-    res.image_data.data.set(res.view);
-
+    if (res === undefined) {
+      return;
+    }
+    syncImageData(res);
     g2d.ctx.putImageData(res.image_data, 0, 0);
   };
 
@@ -70,6 +81,34 @@
     Graphics2D_Flush
   ]);
 
+  // Copy the data from Emscripten's memory space into the ImageData object.
+  var syncImageData = function(res) {
+    if (res.view !== null) {
+      res.image_data.data.set(res.view);
+    } else {
+      var image_data = res.image_data;
+      var base = res.memory;
+      var bytes = res.size.width * res.size.height * 4;
+
+      if (res.format === 0) {
+	// BGRA
+	for (var i = 0; i < bytes; i += 4) {
+	  image_data.data[i]     = HEAPU8[base + i + 2];
+	  image_data.data[i + 1] = HEAPU8[base + i + 1];
+	  image_data.data[i + 2] = HEAPU8[base + i];
+	  image_data.data[i + 3] = HEAPU8[base + i + 3];
+	}
+      } else {
+	// RGBA
+	for (var i = 0; i < bytes; i += 4) {
+	  image_data.data[i]     = HEAPU8[base + i];
+	  image_data.data[i + 1] = HEAPU8[base + i + 1];
+	  image_data.data[i + 2] = HEAPU8[base + i + 2];
+	  image_data.data[i + 3] = HEAPU8[base + i + 3];
+	}
+      }
+    }
+  }
 
   var ImageData_GetNativeImageDataFormat = function() {
     // PP_IMAGEDATAFORMAT_RGBA_PREMUL
@@ -90,30 +129,42 @@
     if (size.width <= 0 || size.height <= 0) {
       return 0;
     }
-    var bytes = size.width * size.height * 4
+
+    // HACK for creating an image data without having a 2D context available.
+    var c = document.createElement('canvas');
+    var ctx = c.getContext('2d');
+    var image_data;
+    try {
+      // Due to limitations of the canvas API, we need to create an intermediate "ImageData" buffer.
+      image_data = ctx.createImageData(size.width, size.height);
+    } catch(err) {
+      // Calls in the try block may return range errors if the sizes are too big.
+      return 0;
+    }
+
+    var bytes = size.width * size.height * 4;
     var memory = _malloc(bytes);
     if (memory === 0) {
       return 0;
     }
-    var view;
-    var image_data;
-    try {
-      // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
-      view = new Uint8ClampedArray(buffer, memory, bytes);
-      // Due to limitations of the canvas API, we need to create an intermediate "ImageData" buffer.
-      // HACK for creating an image data without having a 2D context available.
-      var c = document.createElement('canvas');
-      var ctx = c.getContext('2d')
-     image_data = ctx.createImageData(size.width, size.height);
-    } catch(err) {
-      // Calls in the try block may return range errors if the sizes are too big.
-      // TODO(ncbray): be more precise about the exceptions that are swallowed.
-      _free(memory);
-      return 0;
-    }
-
     if (init_to_zero) {
       _memset(memory, 0, bytes);
+    }
+
+    var view = null;
+    // Direct copies are only supported if:
+    // 1) The image format is RGBA
+    // 2) The canvas API implements image_data.data as a typed array.
+    // 3) Uint8ClampedArray is defined (this is likely redundant with condition 2)
+    var fast_path_supported = format === 1 && "set" in image_data.data && window.Uint8ClampedArray !== undefined;
+    if (fast_path_supported) {
+      try {
+	// Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
+	view = new Uint8ClampedArray(buffer, memory, bytes);
+      } catch(err) {
+	_free(memory);
+	return 0;
+      }
     }
 
     var uid = resources.register("image_data", {

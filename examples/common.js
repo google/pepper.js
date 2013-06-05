@@ -16,11 +16,12 @@ var common = (function () {
     } else {
       elt.attachEvent("on" + event_name, callback);
     }
-  }
+  };
 
   function createEmscriptenModule(name, tool, path, width, height) {
     var e = CreateInstance(width, height);
     document.getElementById('listener').appendChild(e);
+    e.finishLoading();
     return e;
   }
 
@@ -252,21 +253,16 @@ var common = (function () {
 
 // Listen for the DOM content to be loaded. This event is fired when parsing of
 // the page's document has finished.
-common.addListener(document, 'DOMContentLoaded', function() {
+//common.addListener(document, 'DOMContentLoaded', function() {
+window.onload = function() {
   var body = document.querySelector('body');
 
+  var loadFunction = common.domContentLoaded;
   // The data-* attributes on the body can be referenced via body.dataset.
-  if (body.dataset) {
-    var loadFunction;
-    if (!body.dataset.customLoad) {
-      loadFunction = common.domContentLoaded;
-    } else if (typeof window.domContentLoaded !== 'undefined') {
-      loadFunction = window.domContentLoaded;
-    }
-
-    if (loadFunction) {
-      loadFunction(body.dataset.name, body.dataset.tc, body.dataset.path,
-          body.dataset.width, body.dataset.height);
-    }
+  if (body.dataset && body.dataset.customLoad && typeof window.domContentLoaded !== 'undefined') {
+    loadFunction = window.domContentLoaded;
   }
-});
+  loadFunction(body.getAttribute("data-name"), body.getAttribute("data-tc"), body.getAttribute("data-path"),
+               body.getAttribute("data-width") || undefined, body.getAttribute("data-height") || undefined);
+};
+//});

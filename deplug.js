@@ -124,7 +124,7 @@ var CreateInstance = function(width, height, shadow_instance) {
     resources.release(view);
   };
 
-  var instanceInserted = function() {
+  shadow_instance.finishLoading = function() {
     var instance = resources.register("instance", {
       element: shadow_instance,
       canvas: canvas,
@@ -174,16 +174,6 @@ var CreateInstance = function(width, height, shadow_instance) {
     evt.initEvent('load', true, true);  // bubbles, cancelable
     shadow_instance.dispatchEvent(evt);
   };
-
-  if (shadow_instance.parentNode === null) {
-    shadow_instance.addEventListener('DOMNodeInserted', function (evt) {
-      if (evt.target === shadow_instance) {
-	instanceInserted();
-      }
-    }, true);
-  } else {
-    instanceInserted();
-  }
 
   var makeCallback = function(hasFocus){
     return function(event) {
