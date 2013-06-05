@@ -89,54 +89,6 @@
     Messaging_PostMessage
   ]);
 
-
-  var decodeUTF8 = function(ptr, len) {
-    var chars = [];
-    var i = 0;
-    var val;
-    var n;
-    var b;
-    while (i < len) {
-      b = HEAPU8[ptr + i];
-      i += 1;
-      if (b < 0x80) {
-	val = b;
-	n = 0;
-      } else if ((b & 0xE0) === 0xC0) {
-	val = b & 0x1f;
-	n = 1;
-      } else if ((b & 0xF0) === 0xE0) {
-	val = b & 0x0f;
-	n = 2;
-      } else if ((b & 0xF8) === 0xF0) {
-	val = b & 0x07;
-	n = 3;
-      } else if ((b & 0xFC) === 0xF8) {
-	val = b & 0x03;
-	n = 4;
-      } else if ((b & 0xFE) === 0xFC) {
-	val = b & 0x01;
-	n = 5;
-      } else {
-	return null;
-      }
-      if (i + n > len) {
-	return null;
-      }
-      while (n > 0) {
-	b = HEAPU8[ptr + i];
-	if ((b & 0xC0) !== 0x80) {
-	  return null;
-	}
-	val = (val << 6) | (b & 0x3f);
-	i += 1;
-	n -= 1;
-      }
-      chars.push(String.fromCharCode(val));
-    }
-    return chars.join("");
-  };
-
   var Var_AddRef = function(v) {
     // TODO check var type.
     var o = ppapi_glue.PP_Var;
@@ -157,7 +109,7 @@
 
   var Var_VarFromUtf8_1_1 = function(result, ptr, len) {
     var o = ppapi_glue.PP_Var;
-    var value = decodeUTF8(ptr, len);
+    var value = util.decodeUTF8(ptr, len);
 
     // Not a valid UTF-8 string.  Return null.
     if (value === null) {

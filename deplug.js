@@ -33,15 +33,16 @@ ResourceManager.prototype.register = function(type, res) {
   res.refcount = 1;
   this.lut[res.uid] = res;
   this.num_resources += 1;
-  //console.log("create", res.uid);
+  this.dead = false;
   return this.uid;
 }
 
 ResourceManager.prototype.resolve = function(res) {
-  if (typeof res === "number")
+  if (typeof res === "number") {
     return this.lut[res]
-  else
-    return res;
+  } else {
+    throw "resources.resolve arg must be an int";
+  }
 }
 
 ResourceManager.prototype.is = function(res, type) {
@@ -54,7 +55,6 @@ ResourceManager.prototype.is = function(res, type) {
 
 ResourceManager.prototype.addRef = function(uid) {
   var res = this.resolve(uid);
-  //console.log("inc", uid);
   if (res === undefined) {
     throw "Resource does not exist.";
   }
@@ -63,15 +63,17 @@ ResourceManager.prototype.addRef = function(uid) {
 
 ResourceManager.prototype.release = function(uid) {
   var res = this.resolve(uid);
-  //console.log("dec", uid);
   if (res === undefined) {
     throw "Resource does not exist.";
   }
+
   res.refcount -= 1;
   if (res.refcount <= 0) {
     if (res.destroy) {
       res.destroy();
     }
+
+    res.dead = true;
     delete this.lut[res.uid];
     this.num_resources -= 1;
   }
@@ -255,6 +257,75 @@ var CreateInstance = function(width, height, shadow_instance) {
 
 // Entry point
 window["CreateInstance"] = CreateInstance;
+
+var util = (function() {
+  return {
+
+    k2_32: 0x100000000,
+    ToI64: function(low, high){
+      var val = low + (high * util.k2_32);
+      if (((val - low) / util.k2_32) !== high || (val % util.k2_32) !== low) {
+        throw "Value " + String([low,high]) + " cannot be represented as a Javascript number";
+      }
+
+      return val;
+    },
+
+    decodeUTF8: function(ptr, len) {
+      var chars = [];
+      var i = 0;
+      var val;
+      var n;
+      var b;
+
+      // If no len is provided, assume null termination
+      while (len === undefined || i < len) {
+        b = HEAPU8[ptr + i];
+        if (len === undefined && b === 0) {
+          break;
+        }
+
+        i += 1;
+        if (b < 0x80) {
+          val = b;
+          n = 0;
+        } else if ((b & 0xE0) === 0xC0) {
+          val = b & 0x1f;
+          n = 1;
+        } else if ((b & 0xF0) === 0xE0) {
+          val = b & 0x0f;
+          n = 2;
+        } else if ((b & 0xF8) === 0xF0) {
+          val = b & 0x07;
+          n = 3;
+        } else if ((b & 0xFC) === 0xF8) {
+          val = b & 0x03;
+          n = 4;
+        } else if ((b & 0xFE) === 0xFC) {
+          val = b & 0x01;
+          n = 5;
+        } else {
+          return null;
+        }
+        if (i + n > len) {
+          return null;
+        }
+        while (n > 0) {
+          b = HEAPU8[ptr + i];
+          if ((b & 0xC0) !== 0x80) {
+            return null;
+          }
+          val = (val << 6) | (b & 0x3f);
+          i += 1;
+          n -= 1;
+        }
+        chars.push(String.fromCharCode(val));
+      }
+      return chars.join("");
+    }
+  };
+})();
+
 
 var ppapi = (function() {
   var ppapi = {};

@@ -86,6 +86,10 @@ var ppapi_exports = {
       var user_data = {{{ makeGetValue('callback + 4', '0', 'i32') }}};
       // TODO correct way to call?
       return function(result) {
+        if (typeof result !== 'number') {
+          throw "Invalid argument to callback";
+        }
+
         Runtime.dynCall('vii', func, [user_data, result]);
       };
     },
@@ -126,6 +130,16 @@ var ppapi_exports = {
     setFloatPoint: function(obj, ptr) {
       {{{ makeSetValue('ptr', '0', 'obj.x', 'float') }}};
       {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'float') }}};
+    },
+
+    setFileInfo: function(obj, ptr) {
+      {{{ makeSetValue('ptr', '0', 'obj.size_low', 'i32') }}};
+      {{{ makeSetValue('ptr + 4', '0', 'obj.size_high', 'i32') }}};
+      {{{ makeSetValue('ptr + 8', '0', 'obj.type', 'i32') }}};
+      {{{ makeSetValue('ptr + 12', '0', 'obj.system_type', 'i32') }}};
+      {{{ makeSetValue('ptr + 16', '0', 'obj.creation_time', 'double') }}};
+      {{{ makeSetValue('ptr + 24', '0', 'obj.last_access_time', 'double') }}};
+      {{{ makeSetValue('ptr + 32', '0', 'obj.last_modified_time', 'double') }}};
     },
 
   },

@@ -70,6 +70,13 @@
     <td><a href="voronoi/data/voronoi_newlib_release.html">Run</a></td>
   </tr>
   <tr>
+    <td>File IO</td>
+    <td><a href="file_io/data/file_io_emscripten_debug.html">Run</a></td>
+    <td><a href="file_io/data/file_io_emscripten_release.html">Run</a></td>
+    <td><a href="file_io/data/file_io_newlib_debug.html">Run</a></td>
+    <td><a href="file_io/data/file_io_newlib_release.html">Run</a></td>
+  </tr>
+  <tr>
     <td>PPAPI Test Suite</td>
     <td><a href="ppapi/tests/data/test_case.html?mode=nacl_emscripten_debug">Run</a></td>
     <td><a href="ppapi/tests/data/test_case.html?mode=nacl_emscripten_release">Run</a></td>
@@ -87,7 +94,7 @@
 <h4>Firefox</h4>
 <ul>
   <li>Firefox <a href="http://nightly.mozilla.org/">nightly</a> is required.  The Web Audio API, etc, are only starting to be supported.</li>
-  <li>Switching to fullscreen with unlock the mouse in Firefox.  Locking the mouse outside of fullscreen is only supported in nightly.</li>
+  <li>Switching to fullscreen will unlock the mouse in Firefox.  Locking the mouse outside of fullscreen is only supported in nightly.</li>
 </ul>
 
 <h4>Safari</h4>
@@ -118,6 +125,7 @@
   <li>URLLoader does not stream - the data appears all at once.</li>
   <li>Input support is a little fiddly due to inconsitencies between platforms.</li>
   <li>Most of the PPAPI tests have not been ported because they wait for blocking callbacks.</li>
+  <li>Filesystem is currently supported only by Chrome. Creation and last access time are not supported.</li>
 </ul>
 </div>
 </div>

@@ -18,6 +18,7 @@ PROJECTS:= \
   mouselock \
   sine_synth \
   voronoi \
+  file_io \
   ppapi/tests \
 
 HTTPD:=../tools/httpd.py
