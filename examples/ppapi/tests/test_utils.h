@@ -236,7 +236,7 @@ do { \
 #define PPAPI_OS_MACOSX 1
 #elif defined(ANDROID)
 #define PPAPI_OS_ANDROID 1
-#elif defined(__native_client__)
+#elif defined(__native_client__) || defined(__EMSCRIPTEN__)
 #define PPAPI_OS_NACL 1
 #elif defined(__linux__)
 #define PPAPI_OS_LINUX 1
@@ -254,7 +254,7 @@ do { \
 
 /* These are used to determine POSIX-like implementations vs Windows. */
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || \
-    defined(__OpenBSD__) || defined(__sun) || defined(__native_client__)
+    defined(__OpenBSD__) || defined(__sun) || defined(__native_client__) || defined(__EMSCRIPTEN__)
 #define PPAPI_POSIX 1
 #endif
 

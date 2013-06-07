@@ -112,7 +112,7 @@ std::string TestCase::MakeFailureMessage(const char* file,
   return output.str();
 }
 
-#if !(defined __native_client__)
+#if !(defined(__native_client__) || defined(__EMSCRIPTEN__))
 pp::VarPrivate TestCase::GetTestObject() {
   if (test_object_.is_undefined()) {
     pp::deprecated::ScriptableObject* so = CreateTestObject();
@@ -156,7 +156,7 @@ void TestCase::IgnoreLeakedVar(int64_t id) {
   ignored_leaked_vars_.insert(id);
 }
 
-#if !(defined __native_client__)
+#if !(defined(__native_client__) || defined(__EMSCRIPTEN__))
 pp::deprecated::ScriptableObject* TestCase::CreateTestObject() {
   return NULL;
 }

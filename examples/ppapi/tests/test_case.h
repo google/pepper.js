@@ -20,7 +20,7 @@
 #include "ppapi/tests/test_utils.h"
 #include "ppapi/tests/testing_instance.h"
 
-#if (defined __native_client__)
+#if (defined(__native_client__) || defined(__EMSCRIPTEN__))
 #include "ppapi/cpp/var.h"
 #else
 #include "ppapi/cpp/private/var_private.h"
@@ -58,7 +58,7 @@ class TestCase {
   static std::string MakeFailureMessage(const char* file, int line,
                                         const char* cmd);
 
-#if !(defined __native_client__)
+#if !(defined(__native_client__) || defined(__EMSCRIPTEN__))
   // Returns the scriptable test object for the current test, if any.
   // Internally, this uses CreateTestObject which each test overrides.
   pp::VarPrivate GetTestObject();
@@ -96,7 +96,7 @@ class TestCase {
   }
 
  protected:
-#if !(defined __native_client__)
+#if !(defined(__native_client__) || defined(__EMSCRIPTEN__))
   // Overridden by each test to supply a ScriptableObject corresponding to the
   // test. There can only be one object created for all tests in a given class,
   // so be sure your object is designed to be re-used.
@@ -251,7 +251,7 @@ class TestCase {
   // TestingInstance to detect when not all tests were listed.
   std::set<std::string> skipped_tests_;
 
-#if !(defined __native_client__)
+#if !(defined(__native_client__) || defined(__EMSCRIPTEN__))
   // Holds the test object, if any was retrieved from CreateTestObject.
   pp::VarPrivate test_object_;
 #endif

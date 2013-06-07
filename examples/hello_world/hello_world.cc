@@ -23,7 +23,7 @@
 #include "ppapi/c/ppp_instance.h"
 #include "ppapi/c/ppp_messaging.h"
 
-#if defined(__native_client__)
+#if defined(__native_client__) || defined(__EMSCRIPTEN__)
 #if defined(__CLANG__)
 #define TCNAME "pnacl"
 #elif defined(__GLIBC__)

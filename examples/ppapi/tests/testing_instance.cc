@@ -25,7 +25,7 @@ static const char kProgressSignal[] = "...";
 // Returns a new heap-allocated test case for the given test, or NULL on
 // failure.
 TestingInstance::TestingInstance(PP_Instance instance)
-#if (defined __native_client__)
+#if (defined(__native_client__) || defined(__EMSCRIPTEN__))
     : pp::Instance(instance),
 #else
     : pp::InstancePrivate(instance),
@@ -82,7 +82,7 @@ bool TestingInstance::Init(uint32_t argc,
   return true;
 }
 
-#if !(defined __native_client__)
+#if !(defined(__native_client__) || defined(__EMSCRIPTEN__))
 pp::Var TestingInstance::GetInstanceObject() {
   if (current_case_)
     return current_case_->GetTestObject();

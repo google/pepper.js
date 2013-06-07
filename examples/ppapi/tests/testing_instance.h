@@ -9,7 +9,7 @@
 
 #include "ppapi/utility/completion_callback_factory.h"
 
-#if defined(__native_client__)
+#if defined(__native_client__) || defined(__EMSCRIPTEN__)
 #include "ppapi/cpp/instance.h"
 #else
 #include "ppapi/cpp/private/instance_private.h"
@@ -42,7 +42,7 @@ class TestCase;
 // In trusted builds, we use InstancePrivate and allow tests that use
 // synchronous scripting. NaCl does not support synchronous scripting.
 class TestingInstance : public
-#if defined(__native_client__)
+#if defined(__native_client__) || defined(__EMSCRIPTEN__)
 pp::Instance {
 #else
 pp::InstancePrivate {
@@ -56,7 +56,7 @@ pp::InstancePrivate {
   virtual void DidChangeView(const pp::View& view);
   virtual bool HandleInputEvent(const pp::InputEvent& event);
 
-#if !(defined __native_client__)
+#if !(defined(__native_client__) || defined(__EMSCRIPTEN__))
   virtual pp::Var GetInstanceObject();
 #endif
 
