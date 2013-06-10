@@ -39,11 +39,15 @@ NACL_CFLAGS?=-Wno-long-long -Werror
 NACL_CXXFLAGS?=-Wno-long-long -Werror
 NACL_LDFLAGS?=-Wl,-as-needed
 
+# HACK closure currently does not have audio exports defined.
+export EMCC_CLOSURE_ARGS=--externs $(DEPLUG_SRC_ROOT)/externs.js --externs $(DEPLUG_SRC_ROOT)/third_party/w3c_audio.js
+
 # Emscripten appears to key off the optimization while linking to deterimine what backend should be used.
 # HACK PPAPI will export a bunch of anonymous function pointers, so we need to reserve slots for them.
 # Eventually we should make these non-anonymous.
+# NOTE set minify to 0 to make the Release mode more readable.
 ifeq ($(CONFIG),Release)
-NACL_LDFLAGS+=-O2 -s RESERVED_FUNCTION_POINTERS=1000
+NACL_LDFLAGS+=-O2 -s RESERVED_FUNCTION_POINTERS=1000 --closure 1 --minify 1
 else
 NACL_LDFLAGS+=-O0
 endif
@@ -108,7 +112,6 @@ endef
 
 JS_LIBRARIES=$(DEPLUG_SRC_ROOT)/library_ppapi.js
 JS_PRE=$(DEPLUG_SRC_ROOT)/deplug.js
-
 
 # TODO(ncbray): only include needed wrappers, testing.js in particular.
 WRAPPERS=base.js url_loader.js graphics_2d.js view.js graphics_3d.js gles.js gles_ext.js input_events.js audio.js mouse_lock.js testing.js \

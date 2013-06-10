@@ -1,8 +1,11 @@
 (function() {
 
   var createAudioContext = function() {
-    var AudioContext = window.AudioContext || window.webkitAudioContext;
-    return new AudioContext();
+    if (window["AudioContext"] !== undefined) {
+      return new AudioContext();
+    } else {
+      return new webkitAudioContext();
+    }
   }
 
   // The Web Audio API currently does not allow user-specified sample rates.

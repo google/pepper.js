@@ -113,7 +113,9 @@ var CreateInstance = function(width, height, shadow_instance) {
   shadow_instance.style.width = width + "px";
   shadow_instance.style.height = height + "px";
   shadow_instance.style.padding = "0px";
-  shadow_instance.postMessage = postMessage;
+
+  // Called from external code.
+  shadow_instance["postMessage"] = postMessage;
 
   var canvas = document.createElement('canvas');
   canvas.width = width;
@@ -126,7 +128,8 @@ var CreateInstance = function(width, height, shadow_instance) {
     resources.release(view);
   };
 
-  shadow_instance.finishLoading = function() {
+  // Called from external code.
+  shadow_instance["finishLoading"] = function() {
     var instance = resources.register("instance", {
       element: shadow_instance,
       canvas: canvas,

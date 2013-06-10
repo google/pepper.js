@@ -37,7 +37,7 @@
     throw "Testing_Dev_SetMinimumArrayBufferSizeForShmem not implemented";
   };
 
-  registerInterface("PPB_Testing(Dev);0.92", [
+  registerInterface("PPB_Testing(Dev);0.91", [
     Testing_Dev_ReadImageData,
     Testing_Dev_RunMessageLoop,
     Testing_Dev_QuitMessageLoop,

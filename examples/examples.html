@@ -95,6 +95,7 @@
 <ul>
   <li>Firefox <a href="http://nightly.mozilla.org/">nightly</a> is required.  The Web Audio API, etc, are only starting to be supported.</li>
   <li>Switching to fullscreen will unlock the mouse in Firefox.  Locking the mouse outside of fullscreen is only supported in nightly.</li>
+  <li>Scaling 3D to fullscreen appears to be slow? TODO: check non-scaled 3D.</li>
 </ul>
 
 <h4>Safari</h4>
@@ -118,12 +119,14 @@
 <h3>Developer Errata</h3>
 <ul>
   <li>Threads are now allowed.  Blocking calls are not allowed.  Only purely asynchonous code can be compiled into both NaCl and JavaScript.</li>
-  <li>The JS Opt builds are not minimized.  The Closure compiler is currently incompatabile with asm.js.</li>
   <li>Using BGRA image formats will result in a silent performance penalty.</li>
   <li>The Graphics2D and Graphics3D interfaces will automatically swap buffers every frame, even if Flush or SwapBuffers is not called.  This behavior should not be noticible for most applications.  Explicit swapping could be emulated by creating an offscreen buffer, but this would cost time and memory.</li>
   <li>The Audio API only supports one sample rate - whatever the underlying Web Audio API uses, in many cases 48k.  Resampling could be performed as a polyfill, but this would be slow.</li>
   <li>URLLoader does not stream - the data appears all at once.</li>
   <li>Input support is a little fiddly due to inconsitencies between platforms.</li>
+  <ul>
+    <li>Only one mouse button can be "down" for modifiers, and the left mouse button will be "down" if no buttons are pressed. (Will be polyfilled.)</li>
+  </ul>
   <li>Most of the PPAPI tests have not been ported because they wait for blocking callbacks.</li>
   <li>Filesystem is currently supported only by Chrome. Creation and last access time are not supported.</li>
   <li>Emscripten forcibly undefines __native_client__, and currently this cannot be overriden.  Use __EMSCRIPTEN__ instead.</li>

@@ -60,10 +60,10 @@
   var PPIE_Class = PP_InputEvent_Class;
 
   var mod_masks = {
-    shiftKey:PP_InputEvent_Modifier.SHIFTKEY,
-    ctrlKey:PP_InputEvent_Modifier.CONTROLKEY,
-    altKey:PP_InputEvent_Modifier.ALTKEY,
-    metaKey:PP_InputEvent_Modifier.METAKEY
+    "shiftKey": PP_InputEvent_Modifier.SHIFTKEY,
+    "ctrlKey": PP_InputEvent_Modifier.CONTROLKEY,
+    "altKey": PP_InputEvent_Modifier.ALTKEY,
+    "metaKey": PP_InputEvent_Modifier.METAKEY
   };
 
   var mod_buttons = [
@@ -74,33 +74,24 @@
 
   var eventclassdata = {
     MOUSE: {
-      mousedown: PPIE_Type.MOUSEDOWN,
-      mouseup: PPIE_Type.MOUSEUP,
-      mousemove: PPIE_Type.MOUSEMOVE,
-      mouseenter: PPIE_Type.MOUSEENTER,
-      mouseout: PPIE_Type.MOUSELEAVE,
-      contextmenu: PPIE_Type.CONTEXTMENU
+      "mousedown": PPIE_Type.MOUSEDOWN,
+      "mouseup": PPIE_Type.MOUSEUP,
+      "mousemove": PPIE_Type.MOUSEMOVE,
+      "mouseenter": PPIE_Type.MOUSEENTER,
+      "mouseout": PPIE_Type.MOUSELEAVE,
+      "contextmenu": PPIE_Type.CONTEXTMENU
     },
 
     KEYBOARD: {
-      keydown: PPIE_Type.KEYDOWN,
-      keyup: PPIE_Type.KEYUP,
-      keypress: PPIE_Type.CHAR
+      "keydown": PPIE_Type.KEYDOWN,
+      "keyup": PPIE_Type.KEYUP,
+      "keypress": PPIE_Type.CHAR
     },
 
     WHEEL: {
-      mousewheel: PPIE_Type.WHEEL,  // Chrome
-      wheel: PPIE_Type.WHEEL        // Firefox
+      "mousewheel": PPIE_Type.WHEEL,  // Chrome
+      "wheel": PPIE_Type.WHEEL        // Firefox
     }
-  };
-
-
-  var ResolveOrElse = function(event, key, alternative) {
-    var resource = resources.resolve(event);
-    if (resource === undefined) {
-      return alternative;
-    }
-    return resource[key];
   };
 
   var GetEventPos = function(event) {
@@ -113,8 +104,8 @@
   };
 
   var GetWheelScroll = function(e) {
-    var x = ('deltaX' in e) ? e.deltaX : -e.wheelDeltaX;
-    var y = ('deltaY' in e) ? e.deltaY : -e.wheelDeltaY;
+    var x = e.deltaX !== undefined ? e.deltaX : -e.wheelDeltaX;
+    var y = e.deltaY !== undefined ? e.deltaY : -e.wheelDeltaY;
     // scroll by lines, not pixels/pages
     if (e.deltaMode === 1) {
       x *= 40;
@@ -143,21 +134,24 @@
             modifiers |= mod_masks[key];
           }
         }
-        if (typeof event.button === 'number' && event.button !== -1) {
-          modifiers |= mod_buttons[event.button];
+	// Note that button defaults to zero (left mouse button), which means that it's tricky to distinguish between left button and no button.
+	// This also means that holding multiple buttons does not work.
+	var button = event.button;
+        if (typeof button === 'number' && button !== -1) {
+          modifiers |= mod_buttons[button];
         }
 
         var obj_uid = resources.register("input_event", {
           // can't use type as attribute name since deplug uses that internally
           ie_type: event_type,
           pos: GetEventPos(event),
-          button: event.button,
+          button: button,
           // TODO(grosse): Make sure this actually follows the Pepper API
           time: event.timeStamp,
           modifiers: modifiers,
           movement: GetMovement(event),
           delta: GetWheelScroll(event),
-          scrollByPage: (event.deltaMode === 2),
+          scrollByPage: event.deltaMode === 2,
           keyCode: event.keyCode
         });
 
@@ -204,16 +198,31 @@
   };
 
   var InputEvent_GetType = function(event) {
-    return ResolveOrElse(event, 'ie_type', PPIE_Type.UNDEFINED);
+    var resource = resources.resolve(event);
+    if (resource !== undefined) {
+      return resource.ie_type;
+    } else {
+      return PPIE_Type.UNDEFINED;
+    }
   };
 
   var InputEvent_GetTimeStamp = function(event) {
-    return ResolveOrElse(event, 'time', 0.0);
+    var resource = resources.resolve(event);
+    if (resource !== undefined) {
+      return resource.time;
+    } else {
+      return 0.0;
+    }
   };
 
 
   var InputEvent_GetModifiers = function(event) {
-    return ResolveOrElse(event, 'modifiers', 0);
+    var resource = resources.resolve(event);
+    if (resource !== undefined) {
+      return resource.modifiers;
+    } else {
+      return 0;
+    }
   };
 
   registerInterface("PPB_InputEvent;1.0", [
@@ -247,7 +256,12 @@
   };
 
   var MouseInputEvent_GetButton = function(event) {
-    return ResolveOrElse(event, 'button', PPIE_MouseButton.NONE);
+    var resource = resources.resolve(event);
+    if (resource !== undefined) {
+      return resource.button;
+    } else {
+      return PPIE_MouseButton.NONE;
+    }
   };
 
   var MouseInputEvent_GetPosition = function(ptr, event) {
@@ -300,7 +314,12 @@
   var WheelInputEvent_GetTicks = function(ptr, event) {};
 
   var WheelInputEvent_GetScrollByPage = function(event) {
-    return ResolveOrElse(event, 'scrollByPage', false);
+    var resource = resources.resolve(event);
+    if (resource !== undefined) {
+      return resource.scrollByPage;
+    } else {
+      return false;
+    }
   };
 
   registerInterface("PPB_WheelInputEvent;1.0", [
@@ -330,7 +349,12 @@
   };
 
   var KeyboardInputEvent_GetKeyCode = function(event) {
-    return ResolveOrElse(event, 'keyCode', 0);
+    var resource = resources.resolve(event);
+    if (resource !== undefined) {
+      return resource.keyCode;
+    } else {
+      return 0;
+    }
   };
 
   var KeyboardInputEvent_GetCharacterText = function(ptr, event) {

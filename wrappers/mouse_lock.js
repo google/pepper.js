@@ -53,12 +53,12 @@
 
         // Chrome doesn't currently add the required CSS for fullscreen, so we have to add it manually
         var fsstyles = {
-            position:'fixed',
-            top:0, right:0, bottom:0, left:0,
-            margin:0,
+            'position':'fixed',
+            'top':0, 'right':0, 'bottom':0, 'left':0,
+            'margin':0,
             'box-sizing':'border-box',
-            width:'100%',
-            height:'100%',
+            'width':'100%',
+            'height':'100%',
             'object-fit':'contain'
         };
 
