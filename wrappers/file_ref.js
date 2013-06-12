@@ -17,7 +17,7 @@
       });
   };
 
-  var FileRef_IsFileRef_ = function() {
+  var FileRef_IsFileRef = function() {
     throw "FileRef_IsFileRef_ not implemented";
   };
 
@@ -53,9 +53,9 @@
     var error_handler = function(error) {
       var code = error.code;
       if (code === FileError.NOT_FOUND_ERR) {
-        callback(ppapi.PP_Error.PP_ERROR_FILENOTFOUND)
+        callback(ppapi.PP_Error.PP_ERROR_FILENOTFOUND);
       } else {
-        callback(ppapi.PP_Error.PP_ERROR_FAILED)
+        callback(ppapi.PP_Error.PP_ERROR_FAILED);
       }
     };
 
@@ -74,7 +74,7 @@
 
   registerInterface("PPB_FileRef;1.0", [
       FileRef_Create,
-      FileRef_IsFileRef_,
+      FileRef_IsFileRef,
       FileRef_GetFileSystemType,
       FileRef_GetName,
       FileRef_GetPath,

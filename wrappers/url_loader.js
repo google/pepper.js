@@ -140,7 +140,7 @@
     } else if (property === 5) {
       r.record_download_progress = ppapi_glue.boolForVar(value);
     } else {
-      NotImplemented;
+      throw "URLRequestInfo_SetProperty not implemented for " + property;
     }
   };
 

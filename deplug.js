@@ -87,12 +87,24 @@ var resources = new ResourceManager();
 var interfaces = {};
 
 var registerInterface = function(name, functions) {
+  var trace = function(f, i) {
+    return function() {
+      console.log(">>>", name, i, arguments);
+      var result = f.apply(f, arguments);
+      console.log("<<<", name, i, result);
+      return result;
+    }
+  }
+
   // allocate(...) is bugged for non-i8 allocations, so do it manually
   // TODO(ncbray): static alloc?
   var ptr = allocate(functions.length * 4, 'i8', ALLOC_NORMAL);
   for (var i in functions) {
-    // TODO what is the sig?
-    setValue(ptr + i * 4, Runtime.addFunction(functions[i], 1), 'i32');
+    var f = functions[i];
+    if (false) {
+      f = trace(f, i);
+    }
+    setValue(ptr + i * 4, Runtime.addFunction(f, 1), 'i32');
   }
   interfaces[name] = ptr;
 };

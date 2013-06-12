@@ -28,7 +28,8 @@
       return ppapi.PP_Error.PP_ERROR_FAILED;
     }
 
-    window.webkitRequestFileSystem(type, util.ToI64(size_low, size_high), function(fs) {
+    var requestFS = window.requestFileSystem || window.webkitRequestFileSystem;
+    requestFS(type, util.ToI64(size_low, size_high), function(fs) {
       res.fs = fs;
       callback(ppapi.PP_Error.PP_OK);
     }, function(error) {

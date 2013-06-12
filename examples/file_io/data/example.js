@@ -4,14 +4,26 @@
 
 // Called by the common.js module.
 function domContentLoaded(name, tc, config, width, height) {
-  window.webkitStorageInfo.requestQuota(window.PERSISTENT, 1024*1024,
+  var startup = function() {
+    common.attachDefaultListeners();
+    common.createNaClModule(name, tc, config, width, height);
+  }
+  if (window.webkitStorageInfo !== undefined) {
+    window.webkitStorageInfo.requestQuota(
+      window.PERSISTENT,
+      1024*1024,
       function(bytes) {
-        common.updateStatus(
-            'Allocated '+bytes+' bytes of persistant storage.');
-        common.attachDefaultListeners();
-        common.createNaClModule(name, tc, config, width, height);
+	common.updateStatus(
+	  'Allocated '+bytes+' bytes of persistant storage.');
+	startup();
       },
-      function(e) { alert('Failed to allocate space') });
+      function(e) {
+	alert('Failed to allocate space')
+      });
+  } else {
+    // No mechanism to request quota.
+    startup();
+  }
 }
 
 // Called by the common.js module.

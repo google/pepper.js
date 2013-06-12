@@ -12,7 +12,7 @@
 
   var DummyError = function(error) {
     console.log('Unhandled fileio error!', error);
-    throw 'Unhandled fileio error!' + error;
+    throw 'Unhandled fileio error: ' + error;
   };
 
   var FileIO_Create = function(instance) {
@@ -36,6 +36,7 @@
     var ref = resources.resolve(file_ref);
     var file_system = resources.resolve(ref.file_system);
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
+
     if (io.closed || io.entry !== null) {
       return ppapi.PP_Error.PP_ERROR_FAILED;
     }
@@ -72,7 +73,6 @@
         callback(ppapi.PP_Error.PP_ERROR_FAILED)
       }
     });
-
     return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
   };
 
@@ -90,6 +90,7 @@
   var FileIO_Query = function(file_io, info_ptr, callback_ptr) {
     return AccessFile(file_io, callback_ptr, function(io, entry, callback) {
         entry.getMetadata(function(metadata) {
+
           if (io.dead) {
             return callback(ppapi.PP_Error.PP_ERROR_ABORTED);
           }
@@ -101,7 +102,7 @@
               system_type: io.fs_type,
               creation_time: 0.0,
               last_access_time: 0.0,
-              last_modified_time: metadata.modificationTime.valueOf() / 1000
+              last_modified_time: metadata.modificationTime ? metadata.modificationTime.valueOf() / 1000 : 0.0
           };
 
           ppapi_glue.setFileInfo(info, info_ptr);
@@ -116,10 +117,12 @@
 
   var FileIO_Read = function(file_io, offset_low, offset_high, output_ptr, bytes_to_read, callback_ptr) {
     return AccessFile(file_io, callback_ptr, function(io, entry, callback) {
+
         entry.file(function(file) {
 
           var reader = new FileReader();
           reader.onprogress = function(event) {
+
             // Make sure this is the final progress event (everything's loaded)
             if (reader.readyState !== reader.DONE) {
               return;
