@@ -15,3 +15,5 @@ missing_externs.mozRequestPointerLock
 missing_externs.webkitRequestPointerLock;
 
 missing_externs.webkitFullscreenElement;
+
+missing_extens.FileError;

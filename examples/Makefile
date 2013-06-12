@@ -18,6 +18,7 @@ PROJECTS:= \
   mouselock \
   sine_synth \
   voronoi \
+  earth \
   file_io \
   ppapi/tests \
 

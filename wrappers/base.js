@@ -127,14 +127,7 @@
     // Null terminate the string because why not?
     HEAPU8[memory + len] = 0;
 
-    var uid = resources.register("string", {
-      value: value,
-      memory: memory,
-      len: len,
-      destroy: function() {
-	_free(this.memory)
-      }
-    });
+    var uid = resources.registerString(value, memory, len);
 
     // Generate the return value.
     setValue(result + o.type, ppapi_glue.PP_VARTYPE_STRING, 'i32');
@@ -171,4 +164,38 @@
     Var_VarFromUtf8_1_1,
     Var_VarToUtf8
   ]);
+
+  var VarArrayBuffer_Create = function(var_ptr, size_in_bytes) {
+    throw "VarArrayBuffer_Create not implemented";
+  }
+
+  var VarArrayBuffer_ByteLength = function(var_ptr, byte_length_ptr) {
+    throw "VarArrayBuffer_ByteLength not implemented";
+  }
+
+  var VarArrayBuffer_Map = function(var_ptr) {
+    var o = ppapi_glue.PP_Var;
+    var type = getValue(var_ptr + o.type, 'i32');
+    if (type !== ppapi_glue.PP_VARTYPE_ARRAY_BUFFER) {
+      return 0;
+    }
+    var uid = getValue(var_ptr + o.value, 'i32');
+    var resource = resources.resolve(uid);
+    if (resource === undefined) {
+      return 0;
+    }
+    return resource.memory;
+  }
+
+  var VarArrayBuffer_Unmap = function(var_ptr) {
+    // Currently a nop because the data is always mapped.
+  }
+
+  registerInterface("PPB_VarArrayBuffer;1.0", [
+    VarArrayBuffer_Create,
+    VarArrayBuffer_ByteLength,
+    VarArrayBuffer_Map,
+    VarArrayBuffer_Unmap
+  ]);
+
 })();

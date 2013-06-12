@@ -18,6 +18,7 @@ var ppapi_exports = {
     PP_VARTYPE_NULL: 1,
     PP_VARTYPE_BOOL: 2,
     PP_VARTYPE_STRING: 5,
+    PP_VARTYPE_ARRAY_BUFFER: 9,
 
     stringForVar: function(p) {
       var o = ppapi_glue.PP_Var;
@@ -64,8 +65,14 @@ var ppapi_exports = {
     varForJS: function(p, obj) {
       var o = ppapi_glue.PP_Var;
       var typen = (typeof obj);
-
-      if (typen === 'undefined') {
+      if (typen === 'string') {
+	var arr = intArrayFromString(obj);
+	var memory = allocate(arr, 'i8', ALLOC_NORMAL);
+	// Length is adjusted for null terminator.
+	var uid = resources.registerString(obj, memory, arr.length-1);
+        {{{ makeSetValue('p + o.type', '0', '5', 'i32') }}};
+        {{{ makeSetValue('p + o.value', '0', 'uid', 'i32') }}};
+      } else if (typen === 'undefined') {
         {{{ makeSetValue('p + o.type', '0', '0', 'i32') }}};
       } else if (typen === 'boolean') {
         var value = (obj) ? 1 : 0;
@@ -75,6 +82,14 @@ var ppapi_exports = {
         // Note this will always pass a double, even when the value can be represented as an int32
         {{{ makeSetValue('p + o.type', '0', '4', 'i32') }}};
         {{{ makeSetValue('p + o.value', '0', 'obj', 'double') }}};
+      } else if (obj instanceof ArrayBuffer) {
+        var memory = _malloc(obj.byteLength);
+        // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
+        var memory_view = new Int8Array(buffer, memory, obj.byteLength);
+        memory_view.set(new Int8Array(obj));
+        var uid = resources.registerArrayBuffer(memory, obj.byteLength);
+        {{{ makeSetValue('p + o.type', '0', '9', 'i32') }}};
+        {{{ makeSetValue('p + o.value', '0', 'uid', 'i32') }}};
       } else {
         throw "Var type conversion not implemented: " + typen;
       }

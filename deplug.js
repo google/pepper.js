@@ -12,10 +12,19 @@ if (window.performance.now === undefined) {
 }
 
 var postMessage = function(message) {
-  // HACK assumes string.
-  var ptr = allocate(intArrayFromString(message), 'i8', ALLOC_NORMAL);
-  _DoPostMessage(this.instance, ptr);
-  _free(ptr);
+
+  // Fill out the PP_Var structure
+  var o = ppapi_glue.PP_Var
+  var var_ptr = _malloc(o.__size__);
+  ppapi_glue.varForJS(var_ptr, message);
+
+  // Send
+  _DoPostMessage(this.instance, var_ptr);
+
+  // Cleanup
+  // Note: the callee releases the var so we don't need to.
+  // This is different than most interfaces.
+  _free(var_ptr);
 }
 
 var ResourceManager = function() {
@@ -35,6 +44,27 @@ ResourceManager.prototype.register = function(type, res) {
   this.num_resources += 1;
   this.dead = false;
   return this.uid;
+}
+
+ResourceManager.prototype.registerString = function(value, memory, len) {
+  return this.register("string", {
+      value: value,
+      memory: memory,
+      len: len,
+      destroy: function() {
+	_free(this.memory)
+      }
+  });
+}
+
+ResourceManager.prototype.registerArrayBuffer = function(memory, len) {
+  return this.register("array_buffer", {
+      memory: memory,
+      len: len,
+      destroy: function() {
+	_free(this.memory)
+      }
+  });
 }
 
 ResourceManager.prototype.resolve = function(res) {
@@ -64,7 +94,7 @@ ResourceManager.prototype.addRef = function(uid) {
 ResourceManager.prototype.release = function(uid) {
   var res = this.resolve(uid);
   if (res === undefined) {
-    throw "Resource does not exist.";
+    throw "Resource does not exist: " + uid;
   }
 
   res.refcount -= 1;

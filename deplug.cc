@@ -14,18 +14,12 @@
 extern "C" {
   const void* GetBrowserInterface(const char* interface_name);
 
-  CALLED_FROM_JS void DoPostMessage(PP_Instance instance, const char* message) {
+  CALLED_FROM_JS void DoPostMessage(PP_Instance instance, const PP_Var* var) {
     const PPP_Messaging* messaging_interface = (const PPP_Messaging*)PPP_GetInterface(PPP_MESSAGING_INTERFACE);
     if (!messaging_interface) {
       return;
     }
-    const PPB_Var* var_interface = (const PPB_Var*)GetBrowserInterface(PPB_VAR_INTERFACE);
-    if (!var_interface) {
-      return;
-    }
-
-    PP_Var message_var = var_interface->VarFromUtf8(message, strlen(message));
-    messaging_interface->HandleMessage(instance, message_var);
+    messaging_interface->HandleMessage(instance, *var);
     // It appears that the callee own the var, so no need to release it?
   }
 

@@ -47,7 +47,7 @@ export EMCC_CLOSURE_ARGS=--externs $(DEPLUG_SRC_ROOT)/externs.js --externs $(DEP
 # Eventually we should make these non-anonymous.
 # NOTE set minify to 0 to make the Release mode more readable.
 ifeq ($(CONFIG),Release)
-NACL_LDFLAGS+=-O2 -s RESERVED_FUNCTION_POINTERS=1000 --closure 1 --minify 1
+NACL_LDFLAGS+=-O2 -s RESERVED_FUNCTION_POINTERS=1000 --closure 1 --minify 0
 else
 NACL_LDFLAGS+=-O0
 endif
