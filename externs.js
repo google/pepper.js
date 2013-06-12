@@ -16,4 +16,5 @@ missing_externs.webkitRequestPointerLock;
 
 missing_externs.webkitFullscreenElement;
 
-missing_extens.FileError;
+missing_externs.FileError;
+missing_externs.resolveLocalFileSystemURL;
