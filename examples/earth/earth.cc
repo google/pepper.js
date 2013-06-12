@@ -707,6 +707,7 @@ bool Planet::HandleInputEvent(const pp::InputEvent& event) {
         ui_spin_x_ = spin_x / 100.0f;
         ui_spin_y_ = spin_y / 100.0f;
       }
+      break;
     }
     case PP_INPUTEVENT_TYPE_WHEEL: {
       pp::WheelInputEvent wheel = pp::WheelInputEvent(event);

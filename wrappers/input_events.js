@@ -94,6 +94,9 @@
     }
   };
 
+  // TODO reset on focus lost?
+  var button_state = [false, false, false];
+
   var GetEventPos = function(event) {
     // hopefully this will be reasonably cross platform
     var bcr = event.target.getBoundingClientRect();
@@ -127,6 +130,20 @@
 
     var makeCallback = function(event_type) {
       return function(event) {
+        var button = event.button;
+        if (typeof button !== 'number') {
+          button = -1;
+        }
+        if (button !== -1) {
+          if (event_type === PPIE_Type.MOUSEDOWN) {
+            button_state[button] = true;
+          } else if (event_type === PPIE_Type.MOUSEUP) {
+            button_state[button] = false;
+          } else {
+            // Only MOUSEDOWN and MOUSEUP specify a button.
+            button = -1;
+          }
+        }
 
         var modifiers = 0;
         for(var key in mod_masks) {
@@ -134,11 +151,15 @@
             modifiers |= mod_masks[key];
           }
         }
-	// Note that button defaults to zero (left mouse button), which means that it's tricky to distinguish between left button and no button.
-	// This also means that holding multiple buttons does not work.
-	var button = event.button;
-        if (typeof button === 'number' && button !== -1) {
-          modifiers |= mod_buttons[button];
+
+        // This departs slightly from the Chrome's PPAPI implementation.
+        // Webkit will only have modifiers for one of the mouse buttons being held.  (The one with the lowest enum?)
+        // Webkit will only have mouse button modifers for mouse events, too.
+        // But really, this wierd an non-orthogonal, so we don't bother emulating it.
+        for(var i = 0; i < mod_buttons.length; i++) {
+	  if (button_state[i]) {
+            modifiers |= mod_buttons[i];
+          }
         }
 
         var obj_uid = resources.register("input_event", {
@@ -311,7 +332,20 @@
     ppapi_glue.setFloatPoint(point, ptr);
   };
 
-  var WheelInputEvent_GetTicks = function(ptr, event) {};
+  var deltaToTick = function(value) {
+    return (value > 0) ? 1 : ((value < 0) ? -1 : 0);
+  };
+
+  var WheelInputEvent_GetTicks = function(ptr, event) {
+    // TODO(ncbray): get tick directly from event object?
+    var point = {x: 0, y: 0};
+    if (WheelInputEvent_IsWheelInputEvent(event)) {
+      var delta = resources.resolve(event).delta;
+      point.x = deltaToTick(delta.x);
+      point.y = deltaToTick(delta.y);
+    }
+    ppapi_glue.setFloatPoint(point, ptr);
+  };
 
   var WheelInputEvent_GetScrollByPage = function(event) {
     var resource = resources.resolve(event);
