@@ -80,8 +80,17 @@ ResourceManager.prototype.resolve = function(uid, type) {
   if (type !== undefined && typeof type !== "string") {
     throw "resources.resolve type must be a string";
   }
+  if (uid === 0) {
+    console.warn("Attempted to resolve an invalid resource ID (0/" + type + ")");
+    return undefined;
+  }
   var res = this.lut[uid];
-  if (res !== undefined && type !== undefined && res.type !== type) {
+  if (res === undefined) {
+    console.warn("Attempted to resolve a non-existant resource ID (" + uid + "/" + type + ")");
+    return undefined;
+  }
+  if (type !== undefined && res.type !== type) {
+    console.warn("Expected a resource of type " + type + ", but got one of type " + res.type);
     return undefined;
   }
   return res;
@@ -151,6 +160,7 @@ var Module = {};
 
 var INSTANCE_RESOURCE = "instance";
 var VIEW_RESOURCE = "view";
+var GRAPHICS_3D_RESOURCE = "graphics_3d";
 
 var CreateInstance = function(width, height, shadow_instance) {
   if (shadow_instance === undefined) {

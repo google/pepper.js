@@ -1,24 +1,39 @@
 (function() {
+  var PROGRAM_RESOURCE = "program"
+  var SHADER_RESOURCE = "shader";
+  var BUFFER_RESOURCE = "buffer";
+  var TEXTURE_RESOURCE = "texture";
+  var UNIFORM_LOCATION_RESOURCE = "uniform_location";
+
   // (GLenum) => void
   var OpenGLES2_ActiveTexture = function(context, texture) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.activeTexture(texture);
   }
 
   // ppapi (GLuint, GLuint) => void
   // webgl (WebGLProgram, WebGLShader) => void
   var OpenGLES2_AttachShader = function(context, program, shader) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
-    var _shader = resources.resolve(shader).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
+    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
     _context.ctx.attachShader(_program, _shader);
   }
 
   // ppapi (GLuint, GLuint, const char*) => void
   // webgl (WebGLProgram, GLuint, DOMString) => void
   var OpenGLES2_BindAttribLocation = function(context, program, index, name) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
     var _name = Pointer_stringify(name);
     _context.ctx.bindAttribLocation(_program, index, _name);
   }
@@ -26,15 +41,21 @@
   // ppapi (GLenum, GLuint) => void
   // webgl (GLenum, WebGLBuffer) => void
   var OpenGLES2_BindBuffer = function(context, target, buffer) {
-    var _context = resources.resolve(context);
-    var _buffer = resources.resolve(buffer).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _buffer = resources.resolve(buffer, BUFFER_RESOURCE).native;
     _context.ctx.bindBuffer(target, _buffer);
   }
 
   // ppapi (GLenum, GLuint) => void
   // webgl (GLenum, WebGLFramebuffer) => void
   var OpenGLES2_BindFramebuffer = function(context, target, framebuffer) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     var _framebuffer = coerceFramebuffer(framebuffer);
     _context.ctx.bindFramebuffer(target, _framebuffer);
   }
@@ -42,7 +63,10 @@
   // ppapi (GLenum, GLuint) => void
   // webgl (GLenum, WebGLRenderbuffer) => void
   var OpenGLES2_BindRenderbuffer = function(context, target, renderbuffer) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     var _renderbuffer = coerceRenderbuffer(renderbuffer);
     _context.ctx.bindRenderbuffer(target, _renderbuffer);
   }
@@ -50,43 +74,64 @@
   // ppapi (GLenum, GLuint) => void
   // webgl (GLenum, WebGLTexture) => void
   var OpenGLES2_BindTexture = function(context, target, texture) {
-    var _context = resources.resolve(context);
-    var _texture = resources.resolve(texture).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _texture = resources.resolve(texture, TEXTURE_RESOURCE).native;
     _context.ctx.bindTexture(target, _texture);
   }
 
   // (GLclampf, GLclampf, GLclampf, GLclampf) => void
   var OpenGLES2_BlendColor = function(context, red, green, blue, alpha) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.blendColor(red, green, blue, alpha);
   }
 
   // (GLenum) => void
   var OpenGLES2_BlendEquation = function(context, mode) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.blendEquation(mode);
   }
 
   // (GLenum, GLenum) => void
   var OpenGLES2_BlendEquationSeparate = function(context, modeRGB, modeAlpha) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.blendEquationSeparate(modeRGB, modeAlpha);
   }
 
   // (GLenum, GLenum) => void
   var OpenGLES2_BlendFunc = function(context, sfactor, dfactor) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.blendFunc(sfactor, dfactor);
   }
 
   // (GLenum, GLenum, GLenum, GLenum) => void
   var OpenGLES2_BlendFuncSeparate = function(context, srcRGB, dstRGB, srcAlpha, dstAlpha) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.blendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
   }
 
   var OpenGLES2_BufferData = function(context, target, size, data, usage) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     var _data = HEAP8.subarray(data, data + size);
     _context.ctx.bufferData(target, _data, usage);
   }
@@ -96,45 +141,63 @@
 
   // (GLenum) => GLenum
   var OpenGLES2_CheckFramebufferStatus = function(context, target) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return 0x8CDD;
+    }
     return _context.ctx.checkFramebufferStatus(target);
   }
 
   // (GLbitfield) => void
   var OpenGLES2_Clear = function(context, mask) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.clear(mask);
   }
 
   // (GLclampf, GLclampf, GLclampf, GLclampf) => void
   var OpenGLES2_ClearColor = function(context, red, green, blue, alpha) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.clearColor(red, green, blue, alpha);
   }
 
   // (GLclampf) => void
   var OpenGLES2_ClearDepthf = function(context, depth) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
     _context.ctx.clearDepth(depth);
   }
 
   // (GLint) => void
   var OpenGLES2_ClearStencil = function(context, s) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.clearStencil(s);
   }
 
   // (GLboolean, GLboolean, GLboolean, GLboolean) => void
   var OpenGLES2_ColorMask = function(context, red, green, blue, alpha) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.colorMask(red, green, blue, alpha);
   }
 
   // ppapi (GLuint) => void
   // webgl (WebGLShader) => void
   var OpenGLES2_CompileShader = function(context, shader) {
-    var _context = resources.resolve(context);
-    var _shader = resources.resolve(shader).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
     _context.ctx.compileShader(_shader);
   }
 
@@ -148,33 +211,48 @@
 
   // (GLenum, GLint, GLenum, GLint, GLint, GLsizei, GLsizei, GLint) => void
   var OpenGLES2_CopyTexImage2D = function(context, target, level, internalformat, x, y, width, height, border) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.copyTexImage2D(target, level, internalformat, x, y, width, height, border);
   }
 
   // (GLenum, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei) => void
   var OpenGLES2_CopyTexSubImage2D = function(context, target, level, xoffset, yoffset, x, y, width, height) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.copyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
   }
 
   // ppapi () => GLuint
   // webgl () => WebGLProgram
   var OpenGLES2_CreateProgram = function(context) {
-    var _context = resources.resolve(context);
-    return resources.register("gles_program", {native: _context.ctx.createProgram()});
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return 0;
+    }
+    return resources.register(PROGRAM_RESOURCE, {native: _context.ctx.createProgram()});
   }
 
   // ppapi (GLenum) => GLuint
   // webgl (GLenum) => WebGLShader
   var OpenGLES2_CreateShader = function(context, type) {
-    var _context = resources.resolve(context);
-    return resources.register("gles_shader", {native: _context.ctx.createShader(type)});
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return 0;
+    }
+    return resources.register(SHADER_RESOURCE, {native: _context.ctx.createShader(type)});
   }
 
   // (GLenum) => void
   var OpenGLES2_CullFace = function(context, mode) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.cullFace(mode);
   }
 
@@ -189,8 +267,11 @@
   // ppapi (GLuint) => void
   // webgl (WebGLProgram) => void
   var OpenGLES2_DeleteProgram = function(context, program) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
     _context.ctx.deleteProgram(_program);
   }
 
@@ -201,8 +282,11 @@
   // ppapi (GLuint) => void
   // webgl (WebGLShader) => void
   var OpenGLES2_DeleteShader = function(context, shader) {
-    var _context = resources.resolve(context);
-    var _shader = resources.resolve(shader).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
     _context.ctx.deleteShader(_shader);
   }
 
@@ -212,84 +296,123 @@
 
   // (GLenum) => void
   var OpenGLES2_DepthFunc = function(context, func) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.depthFunc(func);
   }
 
   // (GLboolean) => void
   var OpenGLES2_DepthMask = function(context, flag) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.depthMask(flag);
   }
 
   // (GLclampf, GLclampf) => void
   var OpenGLES2_DepthRangef = function(context, zNear, zFar) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.depthRange(zNear, zFar);
   }
 
   // ppapi (GLuint, GLuint) => void
   // webgl (WebGLProgram, WebGLShader) => void
   var OpenGLES2_DetachShader = function(context, program, shader) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
-    var _shader = resources.resolve(shader).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE)
+    if (_context === undefined) {
+      return;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
+    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
     _context.ctx.detachShader(_program, _shader);
   }
 
   // (GLenum) => void
   var OpenGLES2_Disable = function(context, cap) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.disable(cap);
   }
 
   // (GLuint) => void
   var OpenGLES2_DisableVertexAttribArray = function(context, index) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.disableVertexAttribArray(index);
   }
 
   // (GLenum, GLint, GLsizei) => void
   var OpenGLES2_DrawArrays = function(context, mode, first, count) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.drawArrays(mode, first, count);
   }
 
   // ppapi (GLenum, GLsizei, GLenum, const void*) => void
   // webgl (GLenum, GLsizei, GLenum, GLintptr) => void
   var OpenGLES2_DrawElements = function(context, mode, count, type, indices) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.drawElements(mode, count, type, indices);
   }
 
   // (GLenum) => void
   var OpenGLES2_Enable = function(context, cap) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.enable(cap);
   }
 
   // (GLuint) => void
   var OpenGLES2_EnableVertexAttribArray = function(context, index) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.enableVertexAttribArray(index);
   }
 
   // () => void
   var OpenGLES2_Finish = function(context) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.finish();
   }
 
   // () => void
   var OpenGLES2_Flush = function(context) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.flush();
   }
 
   // ppapi (GLenum, GLenum, GLenum, GLuint) => void
   // webgl (GLenum, GLenum, GLenum, WebGLRenderbuffer) => void
   var OpenGLES2_FramebufferRenderbuffer = function(context, target, attachment, renderbuffertarget, renderbuffer) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     var _renderbuffer = coerceRenderbuffer(renderbuffer);
     _context.ctx.framebufferRenderbuffer(target, attachment, renderbuffertarget, _renderbuffer);
   }
@@ -297,26 +420,38 @@
   // ppapi (GLenum, GLenum, GLenum, GLuint, GLint) => void
   // webgl (GLenum, GLenum, GLenum, WebGLTexture, GLint) => void
   var OpenGLES2_FramebufferTexture2D = function(context, target, attachment, textarget, texture, level) {
-    var _context = resources.resolve(context);
-    var _texture = resources.resolve(texture).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _texture = resources.resolve(texture, TEXTURE_RESOURCE).native;
     _context.ctx.framebufferTexture2D(target, attachment, textarget, _texture, level);
   }
 
   // (GLenum) => void
   var OpenGLES2_FrontFace = function(context, mode) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.frontFace(mode);
   }
 
   var OpenGLES2_GenBuffers = function(context, n, buffers) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     for (var i = 0; i < n; i++) {
-      setValue(buffers + i * 4, resources.register("buffer", {native: _context.ctx.createBuffer()}), 'i32');
+      setValue(buffers + i * 4, resources.register(BUFFER_RESOURCE, {native: _context.ctx.createBuffer()}), 'i32');
     }
   }
   // (GLenum) => void
   var OpenGLES2_GenerateMipmap = function(context, target) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.generateMipmap(target);
   }
 
@@ -329,9 +464,12 @@
   }
 
   var OpenGLES2_GenTextures = function(context, n, textures) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     for (var i = 0; i < n; i++) {
-      setValue(textures + i * 4, resources.register("texture", {native: _context.ctx.createTexture()}), 'i32');
+      setValue(textures + i * 4, resources.register(TEXTURE_RESOURCE, {native: _context.ctx.createTexture()}), 'i32');
     }
   }
   var OpenGLES2_GetActiveAttrib = function(context, program, index, bufsize, length, size, type, name) {
@@ -349,8 +487,11 @@
   // ppapi (GLuint, const char*) => GLint
   // webgl (WebGLProgram, DOMString) => GLint
   var OpenGLES2_GetAttribLocation = function(context, program, name) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return -1;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
     var _name = Pointer_stringify(name);
     return _context.ctx.getAttribLocation(_program, _name);
   }
@@ -365,7 +506,10 @@
 
   // () => GLenum
   var OpenGLES2_GetError = function(context) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return 0;
+    }
     return _context.ctx.getError();
   }
 
@@ -432,10 +576,13 @@
   // ppapi (GLuint, const char*) => GLint
   // webgl (WebGLProgram, DOMString) => WebGLUniformLocation
   var OpenGLES2_GetUniformLocation = function(context, program, name) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return 0;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
     var _name = Pointer_stringify(name);
-    return resources.register("gles_uniform_location", {native: _context.ctx.getUniformLocation(_program, _name)});
+    return resources.register(UNIFORM_LOCATION_RESOURCE, {native: _context.ctx.getUniformLocation(_program, _name)});
   }
 
   var OpenGLES2_GetVertexAttribfv = function(context, index, pname, params) {
@@ -452,28 +599,40 @@
 
   // (GLenum, GLenum) => void
   var OpenGLES2_Hint = function(context, target, mode) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.hint(target, mode);
   }
 
   // ppapi (GLuint) => GLboolean
   // webgl (WebGLBuffer) => GLboolean
   var OpenGLES2_IsBuffer = function(context, buffer) {
-    var _context = resources.resolve(context);
-    var _buffer = resources.resolve(buffer).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return false;
+    }
+    var _buffer = resources.resolve(buffer, BUFFER_RESOURCE).native;
     return _context.ctx.isBuffer(_buffer);
   }
 
   // (GLenum) => GLboolean
   var OpenGLES2_IsEnabled = function(context, cap) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return false;
+    }
     return _context.ctx.isEnabled(cap);
   }
 
   // ppapi (GLuint) => GLboolean
   // webgl (WebGLFramebuffer) => GLboolean
   var OpenGLES2_IsFramebuffer = function(context, framebuffer) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return false;
+    }
     var _framebuffer = coerceFramebuffer(framebuffer);
     return _context.ctx.isFramebuffer(_framebuffer);
   }
@@ -481,15 +640,21 @@
   // ppapi (GLuint) => GLboolean
   // webgl (WebGLProgram) => GLboolean
   var OpenGLES2_IsProgram = function(context, program) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return false;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
     return _context.ctx.isProgram(_program);
   }
 
   // ppapi (GLuint) => GLboolean
   // webgl (WebGLRenderbuffer) => GLboolean
   var OpenGLES2_IsRenderbuffer = function(context, renderbuffer) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return false;
+    }
     var _renderbuffer = coerceRenderbuffer(renderbuffer);
     return _context.ctx.isRenderbuffer(_renderbuffer);
   }
@@ -497,42 +662,60 @@
   // ppapi (GLuint) => GLboolean
   // webgl (WebGLShader) => GLboolean
   var OpenGLES2_IsShader = function(context, shader) {
-    var _context = resources.resolve(context);
-    var _shader = resources.resolve(shader).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return false;
+    }
+    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
     return _context.ctx.isShader(_shader);
   }
 
   // ppapi (GLuint) => GLboolean
   // webgl (WebGLTexture) => GLboolean
   var OpenGLES2_IsTexture = function(context, texture) {
-    var _context = resources.resolve(context);
-    var _texture = resources.resolve(texture).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return false;
+    }
+    var _texture = resources.resolve(texture, TEXTURE_RESOURCE).native;
     return _context.ctx.isTexture(_texture);
   }
 
   // (GLfloat) => void
   var OpenGLES2_LineWidth = function(context, width) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.lineWidth(width);
   }
 
   // ppapi (GLuint) => void
   // webgl (WebGLProgram) => void
   var OpenGLES2_LinkProgram = function(context, program) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
     _context.ctx.linkProgram(_program);
   }
 
   // (GLenum, GLint) => void
   var OpenGLES2_PixelStorei = function(context, pname, param) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.pixelStorei(pname, param);
   }
 
   // (GLfloat, GLfloat) => void
   var OpenGLES2_PolygonOffset = function(context, factor, units) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.polygonOffset(factor, units);
   }
 
@@ -546,19 +729,28 @@
 
   // (GLenum, GLenum, GLsizei, GLsizei) => void
   var OpenGLES2_RenderbufferStorage = function(context, target, internalformat, width, height) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.renderbufferStorage(target, internalformat, width, height);
   }
 
   // (GLclampf, GLboolean) => void
   var OpenGLES2_SampleCoverage = function(context, value, invert) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.sampleCoverage(value, invert);
   }
 
   // (GLint, GLint, GLsizei, GLsizei) => void
   var OpenGLES2_Scissor = function(context, x, y, width, height) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.scissor(x, y, width, height);
   }
 
@@ -567,8 +759,11 @@
   }
 
   var OpenGLES2_ShaderSource = function(context, shader, count, str, length) {
-    var _context = resources.resolve(context);
-    var _shader = resources.resolve(shader).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
     var chunks = [];
     for (var i = 0; i < count; i++) {
       var str_ptr = getValue(str + i * 4, 'i32');
@@ -586,42 +781,63 @@
   }
   // (GLenum, GLint, GLuint) => void
   var OpenGLES2_StencilFunc = function(context, func, ref, mask) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.stencilFunc(func, ref, mask);
   }
 
   // (GLenum, GLenum, GLint, GLuint) => void
   var OpenGLES2_StencilFuncSeparate = function(context, face, func, ref, mask) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.stencilFuncSeparate(face, func, ref, mask);
   }
 
   // (GLuint) => void
   var OpenGLES2_StencilMask = function(context, mask) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.stencilMask(mask);
   }
 
   // (GLenum, GLuint) => void
   var OpenGLES2_StencilMaskSeparate = function(context, face, mask) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.stencilMaskSeparate(face, mask);
   }
 
   // (GLenum, GLenum, GLenum) => void
   var OpenGLES2_StencilOp = function(context, fail, zfail, zpass) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.stencilOp(fail, zfail, zpass);
   }
 
   // (GLenum, GLenum, GLenum, GLenum) => void
   var OpenGLES2_StencilOpSeparate = function(context, face, fail, zfail, zpass) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.stencilOpSeparate(face, fail, zfail, zpass);
   }
 
   var OpenGLES2_TexImage2D = function(context, target, level, internalformat, width, height, border, format, type, pixels) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     // TODO handle other pixel formats.
     if (type != 0x1401) throw "Pixel format not supported.";
     var _pixels = HEAPU8.subarray(pixels, pixels + width * height * 4);
@@ -629,7 +845,10 @@
   }
   // (GLenum, GLenum, GLfloat) => void
   var OpenGLES2_TexParameterf = function(context, target, pname, param) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.texParameterf(target, pname, param);
   }
 
@@ -639,7 +858,10 @@
 
   // (GLenum, GLenum, GLint) => void
   var OpenGLES2_TexParameteri = function(context, target, pname, param) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.texParameteri(target, pname, param);
   }
 
@@ -654,8 +876,11 @@
   // ppapi (GLint, GLfloat) => void
   // webgl (WebGLUniformLocation, GLfloat) => void
   var OpenGLES2_Uniform1f = function(context, location, x) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     _context.ctx.uniform1f(_location, x);
   }
 
@@ -666,8 +891,11 @@
   // ppapi (GLint, GLint) => void
   // webgl (WebGLUniformLocation, GLint) => void
   var OpenGLES2_Uniform1i = function(context, location, x) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     _context.ctx.uniform1i(_location, x);
   }
 
@@ -678,8 +906,11 @@
   // ppapi (GLint, GLfloat, GLfloat) => void
   // webgl (WebGLUniformLocation, GLfloat, GLfloat) => void
   var OpenGLES2_Uniform2f = function(context, location, x, y) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     _context.ctx.uniform2f(_location, x, y);
   }
 
@@ -690,8 +921,11 @@
   // ppapi (GLint, GLint, GLint) => void
   // webgl (WebGLUniformLocation, GLint, GLint) => void
   var OpenGLES2_Uniform2i = function(context, location, x, y) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     _context.ctx.uniform2i(_location, x, y);
   }
 
@@ -702,8 +936,11 @@
   // ppapi (GLint, GLfloat, GLfloat, GLfloat) => void
   // webgl (WebGLUniformLocation, GLfloat, GLfloat, GLfloat) => void
   var OpenGLES2_Uniform3f = function(context, location, x, y, z) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     _context.ctx.uniform3f(_location, x, y, z);
   }
 
@@ -714,8 +951,11 @@
   // ppapi (GLint, GLint, GLint, GLint) => void
   // webgl (WebGLUniformLocation, GLint, GLint, GLint) => void
   var OpenGLES2_Uniform3i = function(context, location, x, y, z) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     _context.ctx.uniform3i(_location, x, y, z);
   }
 
@@ -726,8 +966,11 @@
   // ppapi (GLint, GLfloat, GLfloat, GLfloat, GLfloat) => void
   // webgl (WebGLUniformLocation, GLfloat, GLfloat, GLfloat, GLfloat) => void
   var OpenGLES2_Uniform4f = function(context, location, x, y, z, w) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     _context.ctx.uniform4f(_location, x, y, z, w);
   }
 
@@ -738,8 +981,11 @@
   // ppapi (GLint, GLint, GLint, GLint, GLint) => void
   // webgl (WebGLUniformLocation, GLint, GLint, GLint, GLint) => void
   var OpenGLES2_Uniform4i = function(context, location, x, y, z, w) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     _context.ctx.uniform4i(_location, x, y, z, w);
   }
 
@@ -756,30 +1002,42 @@
   }
 
   var OpenGLES2_UniformMatrix4fv = function(context, location, count, transpose, value) {
-    var _context = resources.resolve(context);
-    var _location = resources.resolve(location).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
     var _value = HEAPF32.subarray((value>>2), (value>>2) + 16 * count);
     _context.ctx.uniformMatrix4fv(_location, transpose, _value);
   }
   // ppapi (GLuint) => void
   // webgl (WebGLProgram) => void
   var OpenGLES2_UseProgram = function(context, program) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
     _context.ctx.useProgram(_program);
   }
 
   // ppapi (GLuint) => void
   // webgl (WebGLProgram) => void
   var OpenGLES2_ValidateProgram = function(context, program) {
-    var _context = resources.resolve(context);
-    var _program = resources.resolve(program).native;
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
+    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
     _context.ctx.validateProgram(_program);
   }
 
   // (GLuint, GLfloat) => void
   var OpenGLES2_VertexAttrib1f = function(context, indx, x) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.vertexAttrib1f(indx, x);
   }
 
@@ -789,7 +1047,10 @@
   
   // (GLuint, GLfloat, GLfloat) => void
   var OpenGLES2_VertexAttrib2f = function(context, indx, x, y) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.vertexAttrib2f(indx, x, y);
   }
 
@@ -799,7 +1060,10 @@
   
   // (GLuint, GLfloat, GLfloat, GLfloat) => void
   var OpenGLES2_VertexAttrib3f = function(context, indx, x, y, z) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.vertexAttrib3f(indx, x, y, z);
   }
 
@@ -809,7 +1073,10 @@
   
   // (GLuint, GLfloat, GLfloat, GLfloat, GLfloat) => void
   var OpenGLES2_VertexAttrib4f = function(context, indx, x, y, z, w) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.vertexAttrib4f(indx, x, y, z, w);
   }
 
@@ -820,13 +1087,19 @@
   // ppapi (GLuint, GLint, GLenum, GLboolean, GLsizei, const void*) => void
   // webgl (GLuint, GLint, GLenum, GLboolean, GLsizei, GLintptr) => void
   var OpenGLES2_VertexAttribPointer = function(context, indx, size, type, normalized, stride, ptr) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.vertexAttribPointer(indx, size, type, normalized, stride, ptr);
   }
 
   // (GLint, GLint, GLsizei, GLsizei) => void
   var OpenGLES2_Viewport = function(context, x, y, width, height) {
-    var _context = resources.resolve(context);
+    var _context = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     _context.ctx.viewport(x, y, width, height);
   }
 

@@ -1,7 +1,5 @@
 (function() {
 
-  var GRAPHICS_3D_RESOURCE = "graphics_3d";
-
   var Graphics3D_GetAttribMaxValue = function(instance, attribute, value) {
     throw "Graphics3D_GetAttribMaxValue not implemented";
   };
