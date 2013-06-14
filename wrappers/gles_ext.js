@@ -3,19 +3,28 @@
 
   // (GLenum mode, GLint first, GLsizei count, GLsizei primcount) => void
   var OpenGLES2InstancedArrays_DrawArraysInstancedANGLE = function(context_uid, mode, first, count, primcount) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2InstancedArrays_DrawArraysInstancedANGLE not implemented";
   };
 
   // (GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount) => void
   var OpenGLES2InstancedArrays_DrawElementsInstancedANGLE = function(context_uid, mode, count, type, indices, primcount) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2InstancedArrays_DrawElementsInstancedANGLE not implemented";
   };
 
   // (GLuint index, GLuint divisor) => void
   var OpenGLES2InstancedArrays_VertexAttribDivisorANGLE = function(context_uid, index, divisor) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2InstancedArrays_VertexAttribDivisorANGLE not implemented";
   };
 
@@ -31,7 +40,10 @@
 
   // (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) => void
   var OpenGLES2FramebufferBlit_BlitFramebufferEXT = function(context_uid, srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2FramebufferBlit_BlitFramebufferEXT not implemented";
   };
 
@@ -45,7 +57,10 @@
 
   // (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) => void
   var OpenGLES2FramebufferMultisample_RenderbufferStorageMultisampleEXT = function(context_uid, target, samples, internalformat, width, height) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2FramebufferMultisample_RenderbufferStorageMultisampleEXT not implemented";
   };
 
@@ -59,7 +74,10 @@
 
   // (const char* feature) => GLboolean
   var OpenGLES2ChromiumEnableFeature_EnableFeatureCHROMIUM = function(context_uid, feature) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2ChromiumEnableFeature_EnableFeatureCHROMIUM not implemented";
   };
 
@@ -73,25 +91,37 @@
 
   // (GLuint target, GLintptr offset, GLsizeiptr size, GLenum access) => void*
   var OpenGLES2ChromiumMapSub_MapBufferSubDataCHROMIUM = function(context_uid, target, offset, size, access) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2ChromiumMapSub_MapBufferSubDataCHROMIUM not implemented";
   };
 
   // (const void* mem) => void
   var OpenGLES2ChromiumMapSub_UnmapBufferSubDataCHROMIUM = function(context_uid, mem) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2ChromiumMapSub_UnmapBufferSubDataCHROMIUM not implemented";
   };
 
   // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum access) => void*
   var OpenGLES2ChromiumMapSub_MapTexSubImage2DCHROMIUM = function(context_uid, target, level, xoffset, yoffset, width, height, format, type, access) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2ChromiumMapSub_MapTexSubImage2DCHROMIUM not implemented";
   };
 
   // (const void* mem) => void
   var OpenGLES2ChromiumMapSub_UnmapTexSubImage2DCHROMIUM = function(context_uid, mem) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2ChromiumMapSub_UnmapTexSubImage2DCHROMIUM not implemented";
   };
 
@@ -108,43 +138,64 @@
 
   // (GLsizei n, GLuint* queries) => void
   var OpenGLES2Query_GenQueriesEXT = function(context_uid, n, queries) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2Query_GenQueriesEXT not implemented";
   };
 
   // (GLsizei n, const GLuint* queries) => void
   var OpenGLES2Query_DeleteQueriesEXT = function(context_uid, n, queries) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2Query_DeleteQueriesEXT not implemented";
   };
 
   // (GLuint id) => GLboolean
   var OpenGLES2Query_IsQueryEXT = function(context_uid, id) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2Query_IsQueryEXT not implemented";
   };
 
   // (GLenum target, GLuint id) => void
   var OpenGLES2Query_BeginQueryEXT = function(context_uid, target, id) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2Query_BeginQueryEXT not implemented";
   };
 
   // (GLenum target) => void
   var OpenGLES2Query_EndQueryEXT = function(context_uid, target) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2Query_EndQueryEXT not implemented";
   };
 
   // (GLenum target, GLenum pname, GLint* params) => void
   var OpenGLES2Query_GetQueryivEXT = function(context_uid, target, pname, params) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2Query_GetQueryivEXT not implemented";
   };
 
   // (GLuint id, GLenum pname, GLuint* params) => void
   var OpenGLES2Query_GetQueryObjectuivEXT = function(context_uid, id, pname, params) {
-    var gl = resources.resolve(context_uid).ctx;
+    var _context = resources.resolve(context_uid, GRAPHICS_3D_RESOURCE);
+    if (_context === undefined) {
+      return;
+    }
     throw "OpenGLES2Query_GetQueryObjectuivEXT not implemented";
   };
 

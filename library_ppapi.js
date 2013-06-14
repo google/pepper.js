@@ -26,7 +26,7 @@ var ppapi_exports = {
       if (type != ppapi_glue.PP_VARTYPE_STRING)
         throw "PP_Var is not a string.";
       var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-      return resources.resolve(uid).value;
+      return resources.resolve(uid, STRING_RESOURCE).value;
     },
 
     boolForVar: function(p) {
@@ -56,7 +56,7 @@ var ppapi_exports = {
 	return {{{ makeGetValue('p + o.value', '0', 'double') }}};
       } else if (type == ppapi_glue.PP_VARTYPE_STRING) {
 	var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-	return resources.resolve(uid).value;
+	return resources.resolve(uid, STRING_RESOURCE).value;
       } else {
 	throw "Var type conversion not implemented: " + type;
       }

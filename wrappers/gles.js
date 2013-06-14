@@ -21,9 +21,15 @@
     if (_context === undefined) {
       return;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
-    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
-    _context.ctx.attachShader(_program, _shader);
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
+    var _shader = resources.resolve(shader, SHADER_RESOURCE);
+    if (_shader === undefined) {
+      return;
+    }
+    _context.ctx.attachShader(_program.native, _shader.native);
   }
 
   // ppapi (GLuint, GLuint, const char*) => void
@@ -33,9 +39,12 @@
     if (_context === undefined) {
       return;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
     var _name = Pointer_stringify(name);
-    _context.ctx.bindAttribLocation(_program, index, _name);
+    _context.ctx.bindAttribLocation(_program.native, index, _name);
   }
 
   // ppapi (GLenum, GLuint) => void
@@ -45,8 +54,11 @@
     if (_context === undefined) {
       return;
     }
-    var _buffer = resources.resolve(buffer, BUFFER_RESOURCE).native;
-    _context.ctx.bindBuffer(target, _buffer);
+    var _buffer = resources.resolve(buffer, BUFFER_RESOURCE);
+    if (_buffer === undefined) {
+      return;
+    }
+    _context.ctx.bindBuffer(target, _buffer.native);
   }
 
   // ppapi (GLenum, GLuint) => void
@@ -78,8 +90,11 @@
     if (_context === undefined) {
       return;
     }
-    var _texture = resources.resolve(texture, TEXTURE_RESOURCE).native;
-    _context.ctx.bindTexture(target, _texture);
+    var _texture = resources.resolve(texture, TEXTURE_RESOURCE);
+    if (_texture === undefined) {
+      return;
+    }
+    _context.ctx.bindTexture(target, _texture.native);
   }
 
   // (GLclampf, GLclampf, GLclampf, GLclampf) => void
@@ -197,8 +212,11 @@
     if (_context === undefined) {
       return;
     }
-    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
-    _context.ctx.compileShader(_shader);
+    var _shader = resources.resolve(shader, SHADER_RESOURCE);
+    if (_shader === undefined) {
+      return;
+    }
+    _context.ctx.compileShader(_shader.native);
   }
 
   var OpenGLES2_CompressedTexImage2D = function(context, target, level, internalformat, width, height, border, imageSize, data) {
@@ -271,8 +289,11 @@
     if (_context === undefined) {
       return;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
-    _context.ctx.deleteProgram(_program);
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
+    _context.ctx.deleteProgram(_program.native);
   }
 
   var OpenGLES2_DeleteRenderbuffers = function(context, n, renderbuffers) {
@@ -286,8 +307,11 @@
     if (_context === undefined) {
       return;
     }
-    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
-    _context.ctx.deleteShader(_shader);
+    var _shader = resources.resolve(shader, SHADER_RESOURCE);
+    if (_shader === undefined) {
+      return;
+    }
+    _context.ctx.deleteShader(_shader.native);
   }
 
   var OpenGLES2_DeleteTextures = function(context, n, textures) {
@@ -328,9 +352,15 @@
     if (_context === undefined) {
       return;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
-    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
-    _context.ctx.detachShader(_program, _shader);
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
+    var _shader = resources.resolve(shader, SHADER_RESOURCE);
+    if (_shader === undefined) {
+      return;
+    }
+    _context.ctx.detachShader(_program.native, _shader.native);
   }
 
   // (GLenum) => void
@@ -424,8 +454,11 @@
     if (_context === undefined) {
       return;
     }
-    var _texture = resources.resolve(texture, TEXTURE_RESOURCE).native;
-    _context.ctx.framebufferTexture2D(target, attachment, textarget, _texture, level);
+    var _texture = resources.resolve(texture, TEXTURE_RESOURCE);
+    if (_texture === undefined) {
+      return;
+    }
+    _context.ctx.framebufferTexture2D(target, attachment, textarget, _texture.native, level);
   }
 
   // (GLenum) => void
@@ -491,9 +524,12 @@
     if (_context === undefined) {
       return -1;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
     var _name = Pointer_stringify(name);
-    return _context.ctx.getAttribLocation(_program, _name);
+    return _context.ctx.getAttribLocation(_program.native, _name);
   }
 
   var OpenGLES2_GetBooleanv = function(context, pname, params) {
@@ -580,9 +616,12 @@
     if (_context === undefined) {
       return 0;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
     var _name = Pointer_stringify(name);
-    return resources.register(UNIFORM_LOCATION_RESOURCE, {native: _context.ctx.getUniformLocation(_program, _name)});
+    return resources.register(UNIFORM_LOCATION_RESOURCE, {native: _context.ctx.getUniformLocation(_program.native, _name)});
   }
 
   var OpenGLES2_GetVertexAttribfv = function(context, index, pname, params) {
@@ -613,8 +652,11 @@
     if (_context === undefined) {
       return false;
     }
-    var _buffer = resources.resolve(buffer, BUFFER_RESOURCE).native;
-    return _context.ctx.isBuffer(_buffer);
+    var _buffer = resources.resolve(buffer, BUFFER_RESOURCE);
+    if (_buffer === undefined) {
+      return;
+    }
+    return _context.ctx.isBuffer(_buffer.native);
   }
 
   // (GLenum) => GLboolean
@@ -644,8 +686,11 @@
     if (_context === undefined) {
       return false;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
-    return _context.ctx.isProgram(_program);
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
+    return _context.ctx.isProgram(_program.native);
   }
 
   // ppapi (GLuint) => GLboolean
@@ -666,8 +711,11 @@
     if (_context === undefined) {
       return false;
     }
-    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
-    return _context.ctx.isShader(_shader);
+    var _shader = resources.resolve(shader, SHADER_RESOURCE);
+    if (_shader === undefined) {
+      return;
+    }
+    return _context.ctx.isShader(_shader.native);
   }
 
   // ppapi (GLuint) => GLboolean
@@ -677,8 +725,11 @@
     if (_context === undefined) {
       return false;
     }
-    var _texture = resources.resolve(texture, TEXTURE_RESOURCE).native;
-    return _context.ctx.isTexture(_texture);
+    var _texture = resources.resolve(texture, TEXTURE_RESOURCE);
+    if (_texture === undefined) {
+      return;
+    }
+    return _context.ctx.isTexture(_texture.native);
   }
 
   // (GLfloat) => void
@@ -697,8 +748,11 @@
     if (_context === undefined) {
       return;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
-    _context.ctx.linkProgram(_program);
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
+    _context.ctx.linkProgram(_program.native);
   }
 
   // (GLenum, GLint) => void
@@ -763,7 +817,10 @@
     if (_context === undefined) {
       return;
     }
-    var _shader = resources.resolve(shader, SHADER_RESOURCE).native;
+    var _shader = resources.resolve(shader, SHADER_RESOURCE);
+    if (_shader === undefined) {
+      return;
+    }
     var chunks = [];
     for (var i = 0; i < count; i++) {
       var str_ptr = getValue(str + i * 4, 'i32');
@@ -777,7 +834,7 @@
         chunks.push(Pointer_stringify(str_ptr, l));
       }
     }
-    _context.ctx.shaderSource(_shader, chunks.join(""));
+    _context.ctx.shaderSource(_shader.native, chunks.join(""));
   }
   // (GLenum, GLint, GLuint) => void
   var OpenGLES2_StencilFunc = function(context, func, ref, mask) {
@@ -880,8 +937,11 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
-    _context.ctx.uniform1f(_location, x);
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
+    _context.ctx.uniform1f(_location.native, x);
   }
 
   var OpenGLES2_Uniform1fv = function(context, location, count, v) {
@@ -895,8 +955,11 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
-    _context.ctx.uniform1i(_location, x);
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
+    _context.ctx.uniform1i(_location.native, x);
   }
 
   var OpenGLES2_Uniform1iv = function(context, location, count, v) {
@@ -910,8 +973,11 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
-    _context.ctx.uniform2f(_location, x, y);
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
+    _context.ctx.uniform2f(_location.native, x, y);
   }
 
   var OpenGLES2_Uniform2fv = function(context, location, count, v) {
@@ -925,8 +991,11 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
-    _context.ctx.uniform2i(_location, x, y);
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
+    _context.ctx.uniform2i(_location.native, x, y);
   }
 
   var OpenGLES2_Uniform2iv = function(context, location, count, v) {
@@ -940,8 +1009,11 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
-    _context.ctx.uniform3f(_location, x, y, z);
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
+    _context.ctx.uniform3f(_location.native, x, y, z);
   }
 
   var OpenGLES2_Uniform3fv = function(context, location, count, v) {
@@ -955,8 +1027,11 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
-    _context.ctx.uniform3i(_location, x, y, z);
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
+    _context.ctx.uniform3i(_location.native, x, y, z);
   }
 
   var OpenGLES2_Uniform3iv = function(context, location, count, v) {
@@ -970,8 +1045,11 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
-    _context.ctx.uniform4f(_location, x, y, z, w);
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
+    _context.ctx.uniform4f(_location.native, x, y, z, w);
   }
 
   var OpenGLES2_Uniform4fv = function(context, location, count, v) {
@@ -985,8 +1063,11 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
-    _context.ctx.uniform4i(_location, x, y, z, w);
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
+    _context.ctx.uniform4i(_location.native, x, y, z, w);
   }
 
   var OpenGLES2_Uniform4iv = function(context, location, count, v) {
@@ -1006,9 +1087,12 @@
     if (_context === undefined) {
       return;
     }
-    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE).native;
+    var _location = resources.resolve(location, UNIFORM_LOCATION_RESOURCE);
+    if (_location === undefined) {
+      return;
+    }
     var _value = HEAPF32.subarray((value>>2), (value>>2) + 16 * count);
-    _context.ctx.uniformMatrix4fv(_location, transpose, _value);
+    _context.ctx.uniformMatrix4fv(_location.native, transpose, _value);
   }
   // ppapi (GLuint) => void
   // webgl (WebGLProgram) => void
@@ -1017,8 +1101,11 @@
     if (_context === undefined) {
       return;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
-    _context.ctx.useProgram(_program);
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
+    _context.ctx.useProgram(_program.native);
   }
 
   // ppapi (GLuint) => void
@@ -1028,8 +1115,11 @@
     if (_context === undefined) {
       return;
     }
-    var _program = resources.resolve(program, PROGRAM_RESOURCE).native;
-    _context.ctx.validateProgram(_program);
+    var _program = resources.resolve(program, PROGRAM_RESOURCE);
+    if (_program === undefined) {
+      return;
+    }
+    _context.ctx.validateProgram(_program.native);
   }
 
   // (GLuint, GLfloat) => void

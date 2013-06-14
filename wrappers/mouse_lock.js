@@ -1,7 +1,11 @@
 (function() {
 
   var MouseLock_LockMouse = function(instance, callback) {
-    var canvas = resources.resolve(instance).canvas;
+    var res = resources.resolve(instance, INSTANCE_RESOURCE);
+    if (res === undefined) {
+      return;
+    }
+    var canvas = res.canvas;
     var cb_func = ppapi_glue.convertCompletionCallback(callback);
 
     var makeCallback = function(return_code) {
@@ -35,13 +39,20 @@
   ]);
 
   var FullScreen_IsFullscreen = function(instance) {
+    var res = resources.resolve(instance, INSTANCE_RESOURCE);
+    if (res === undefined) {
+      return 0;
+    }
     var element = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
-    return element === resources.resolve(instance).canvas;
+    return element === res.canvas ? 1 : 0;
   };
 
   var FullScreen_SetFullscreen = function(instance, fullscreen) {
-    var resource = resources.resolve(instance)
-    var element = resource.canvas;
+    var res = resources.resolve(instance, INSTANCE_RESOURCE);
+    if (res == undefined) {
+      return 0;
+    }
+    var element = res.canvas;
 
     if (fullscreen) {
       if (element.requestFullscreen) {
@@ -78,7 +89,7 @@
       }
     }
 
-    return true;
+    return 1;
   };
 
 

@@ -261,7 +261,11 @@ var CreateInstance = function(width, height, shadow_instance) {
   var fullscreenChange = function() {
     var doSend = function(entering_fullscreen, canvas) {
       var instance_id = canvas.parentElement.instance;
-      var origsize = resources.resolve(instance_id).size;
+      var inst = resources.resolve(instance_id, INSTANCE_RESOURCE);
+      if (inst === undefined) {
+	return;
+      }
+      var origsize = inst.size;
 
       var width = entering_fullscreen ? window.screen.width : origsize.width;
       var height = entering_fullscreen ? window.screen.height : origsize.height;
