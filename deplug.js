@@ -34,6 +34,9 @@ var ResourceManager = function() {
 }
 
 ResourceManager.prototype.register = function(type, res) {
+  if (typeof type !== "string") {
+    throw "resources.register type must be a string";
+  }
   while (this.uid in this.lut || this.uid === 0) {
     this.uid = (this.uid + 1) & 0xffffffff;
   }
@@ -52,7 +55,7 @@ ResourceManager.prototype.registerString = function(value, memory, len) {
       memory: memory,
       len: len,
       destroy: function() {
-	_free(this.memory)
+	_free(this.memory);
       }
   });
 }
@@ -62,29 +65,31 @@ ResourceManager.prototype.registerArrayBuffer = function(memory, len) {
       memory: memory,
       len: len,
       destroy: function() {
-	_free(this.memory)
+	_free(this.memory);
       }
   });
 }
 
-ResourceManager.prototype.resolve = function(res) {
-  if (typeof res === "number") {
-    return this.lut[res]
-  } else {
-    throw "resources.resolve arg must be an int";
+ResourceManager.prototype.resolve = function(uid, type) {
+  if (typeof uid !== "number") {
+    throw "resources.resolve uid must be an int";
   }
+  if (type !== undefined && typeof type !== "string") {
+    throw "resources.resolve type must be a string";
+  }
+  var res = this.lut[uid];
+  if (res !== undefined && type !== undefined && res.type !== type) {
+    return undefined;
+  }
+  return res;
 }
 
-ResourceManager.prototype.is = function(res, type) {
-  if (typeof res !== "number" || typeof type !== "string") {
-    throw "Wrong argument types: (" + typeof type + ", " + typeof res + ")";
-  }
-  var js_obj = this.resolve(res);
-  return js_obj !== undefined && js_obj.type === type;
+ResourceManager.prototype.is = function(uid, type) {
+  return this.resolve(uid, type) !== undefined;
 }
 
 ResourceManager.prototype.addRef = function(uid) {
-  var res = this.resolve(uid);
+  var res = this.lut[uid];
   if (res === undefined) {
     throw "Resource does not exist.";
   }
@@ -92,7 +97,7 @@ ResourceManager.prototype.addRef = function(uid) {
 }
 
 ResourceManager.prototype.release = function(uid) {
-  var res = this.resolve(uid);
+  var res = this.lut[uid];
   if (res === undefined) {
     throw "Resource does not exist: " + uid;
   }

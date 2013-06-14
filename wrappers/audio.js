@@ -32,7 +32,7 @@
     if (sample_frame_count < 64 || sample_frame_count > 32768) {
       return 0;
     }
-    return resources.register("audio_config", {
+    return resources.register(AUDIO_CONFIG_RESOURCE, {
       sample_rate: sample_rate,
       sample_frame_count: sample_frame_count
     });
@@ -43,12 +43,14 @@
     return 2048;
   };
 
+  var AUDIO_CONFIG_RESOURCE = "audio_config";
+
   var AudioConfig_IsAudioConfig = function(resource) {
-    return resources.is(resource, "audio_config");
+    return resources.is(resource, AUDIO_CONFIG_RESOURCE);
   };
 
   var AudioConfig_GetSampleRate = function(config) {
-    var c = resources.resolve(config);
+    var c = resources.resolve(config, AUDIO_CONFIG_RESOURCE);
     if (c === undefined) {
       return 0;
     }
@@ -56,7 +58,7 @@
   };
 
   var AudioConfig_GetSampleFrameCount = function(config) {
-    var c = resources.resolve(config);
+    var c = resources.resolve(config, AUDIO_CONFIG_RESOURCE);
     if (c === undefined) {
       return 0;
     }
@@ -97,8 +99,13 @@
     }
   };
 
+  var AUDIO_RESOURCE = "audio";
+
   var Audio_Create = function(instance, config, audio_callback, user_data) {
-    var config_js = resources.resolve(config);
+    var config_js = resources.resolve(config, AUDIO_CONFIG_RESOURCE);
+    if (config_js === undefined) {
+      return 0;
+    }
     // Assumes 16-bit stereo.
     var buffer_bytes = config_js.sample_frame_count * 2 * 2;
     var buffer =  _malloc(buffer_bytes);
@@ -123,7 +130,7 @@
 
     // TODO(ncbray): capture and ref/unref the config?
     // TODO(ncbray): destructor?
-    return resources.register("audio", {
+    return resources.register(AUDIO_RESOURCE, {
       context: context,
       processor: processor,
       playing: false,
@@ -135,7 +142,7 @@
   };
 
   var Audio_IsAudio = function(resource) {
-    return resources.is(resource, "audio");
+    return resources.is(resource, AUDIO_RESOURCE);
   };
 
   var Audio_GetCurrentConfig = function(audio) {
@@ -143,11 +150,21 @@
   };
 
   var Audio_StartPlayback = function(audio) {
-    SetPlaybackState(resources.resolve(audio), true);
+    var res = resources.resolve(audio, AUDIO_RESOURCE);
+    if (res === undefined) {
+      return 0;
+    }
+    SetPlaybackState(res, true);
+    return 1;
   };
 
   var Audio_StopPlayback = function(audio) {
-    SetPlaybackState(resources.resolve(audio), false);
+    var res = resources.resolve(audio, AUDIO_RESOURCE);
+    if (res === undefined) {
+      return 0;
+    }
+    SetPlaybackState(res, false);
+    return 1;
   };
 
   registerInterface("PPB_Audio;1.0", [
