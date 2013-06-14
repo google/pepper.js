@@ -77,7 +77,10 @@
 
 
   var Messaging_PostMessage = function(instance, value) {
-    var inst = resources.resolve(instance);
+    var inst = resources.resolve(instance, INSTANCE_RESOURCE);
+    if (inst == undefined) {
+      return;
+    }
     var val = ppapi_glue.jsForVar(value);
     var evt = document.createEvent('Event');
     evt.initEvent('message', true, true);  // bubbles, cancelable
@@ -135,19 +138,21 @@
   };
 
   var Var_VarToUtf8 = function(v, lenptr) {
+    // Defensively set the length to zero so that we can early out at any point.
+    setValue(lenptr, 0, 'i32');
+
     var o = ppapi_glue.PP_Var;
     var type = getValue(v + o.type, 'i32');
-    if (type == ppapi_glue.PP_VARTYPE_STRING) {
-      var uid = getValue(v + o.value, 'i32');
-      var resource = resources.resolve(uid);
-      if (resource) {
-	setValue(lenptr, resource.len, 'i32');
-	return resource.memory;
-      }
+    if (type !== ppapi_glue.PP_VARTYPE_STRING) {
+      return 0;
     }
-    // Something isn't right, return a null pointer.
-    setValue(lenptr, 0, 'i32');
-    return 0;
+    var uid = getValue(v + o.value, 'i32');
+    var resource = resources.resolve(uid, STRING_RESOURCE);
+    if (resource === undefined) {
+      return 0;
+    }
+    setValue(lenptr, resource.len, 'i32');
+    return resource.memory;
   };
 
   registerInterface("PPB_Var;1.0", [
@@ -180,7 +185,7 @@
       return 0;
     }
     var uid = getValue(var_ptr + o.value, 'i32');
-    var resource = resources.resolve(uid);
+    var resource = resources.resolve(uid, ARRAY_BUFFER_RESOURCE);
     if (resource === undefined) {
       return 0;
     }

@@ -1,28 +1,50 @@
 (function() {
   var View_IsView = function(resource) {
-    return resources.is(resource, "view");
+    return resources.is(resource, VIEW_RESOURCE);
   };
 
   var View_GetRect = function(resource, rectptr) {
-    ppapi_glue.setRect(resources.resolve(resource).rect, rectptr);
-    return true;
+    var view = resources.resolve(resource, VIEW_RESOURCE);
+    if (view === undefined) {
+      return 0;
+    }
+    ppapi_glue.setRect(view.rect, rectptr);
+    return 1;
   };
 
   var View_IsFullscreen = function(resource) {
-    return resources.resolve(resource).fullscreen;
+    var view = resources.resolve(resource, VIEW_RESOURCE);
+    if (view === undefined) {
+      return 0;
+    }
+    return view.fullscreen;
   };
 
   var View_IsVisible = function(resource) {
-    return resources.resolve(resource).visible;
+    var view = resources.resolve(resource, VIEW_RESOURCE);
+    if (view === undefined) {
+      // Be conservative.
+      return 1;
+    }
+    return view.visible;
   };
 
   var View_IsPageVisible = function(resource) {
-    return resources.resolve(resource).page_visible;
+    var view = resources.resolve(resource, VIEW_RESOURCE);
+    if (view === undefined) {
+      // Be conservative.
+      return 1;
+    }
+    return view.page_visible;
   };
 
   var View_GetClipRect = function(resource, rectptr) {
-    ppapi_glue.setRect(resources.resolve(resource).clip_rect, rectptr);
-    return true;
+    var view = resources.resolve(resource, VIEW_RESOURCE);
+    if (view === undefined) {
+      return 0;
+    }
+    ppapi_glue.setRect(view.clip_rect, rectptr);
+    return 1;
   };
 
   registerInterface("PPB_View;1.0", [

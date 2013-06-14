@@ -221,9 +221,9 @@ var CreateInstance = function(width, height, shadow_instance) {
     // Create and send a bogus view resource.
     sendViewEvent(instance, {
       rect: {x: 0, y: 0, width: width, height: height},
-      fullscreen: false,
-      visible: true,
-      page_visible: true,
+      fullscreen: 0,
+      visible: 1,
+      page_visible: 1,
       clip_rect: {x: 0, y: 0, width: width, height: height}
     });
 
@@ -258,9 +258,9 @@ var CreateInstance = function(width, height, shadow_instance) {
 
       sendViewEvent(instance_id, {
         rect: {x: 0, y: 0, width: width, height: height},
-        fullscreen: entering_fullscreen,
-        visible: true,
-        page_visible: true,
+        fullscreen: entering_fullscreen ? 1 : 0,
+        visible: 1,
+        page_visible: 1,
         clip_rect: {x: 0, y: 0, width: width, height: height}
       });
 

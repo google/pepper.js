@@ -1,24 +1,35 @@
 (function() {
 
+  var GRAPHICS_3D_RESOURCE = "graphics_3d";
+
   var Graphics3D_GetAttribMaxValue = function(instance, attribute, value) {
     throw "Graphics3D_GetAttribMaxValue not implemented";
   };
 
   var Graphics3D_Create = function(instance, share_context, attrib_list) {
-    var canvas = resources.resolve(instance).canvas;
+    var i = resources.resolve(instance, INSTANCE_RESOURCE);
+    if (i === undefined) {
+      return 0;
+    }
+    var canvas = i.canvas;
 
-    var resource = resources.register("graphics_3d", {
+    if (share_context !== 0) {
+      throw "Graphics3D shared contexts not supported.";
+    }
+
+    // TODO(ncbray): support attribs.
+
+    return resources.register(GRAPHICS_3D_RESOURCE, {
       canvas: canvas,
       ctx: canvas.getContext('webgl') || canvas.getContext("experimental-webgl"),
       destroy: function() {
 	throw "Graphics3D destroy not implemented.";
       }
     });
-    return resource;
   };
 
   var Graphics3D_IsGraphics3D = function(resource) {
-    return resources.is(resource, "graphics_3d");
+    return resources.is(resource, GRAPHICS_3D_RESOURCE);
   };
 
   var Graphics3D_GetAttribs = function(context, attrib_list) {
