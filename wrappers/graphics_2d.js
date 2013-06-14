@@ -1,12 +1,18 @@
 (function() {
 
+  var GRAPHICS_2D_RESOURCE = "graphics_2d";
+
   var Graphics2D_Create = function(instance, size_ptr, is_always_opaque) {
     var size = ppapi_glue.getSize(size_ptr);
-    var canvas = resources.resolve(instance).canvas;
+    var i = resources.resolve(instance, INSTANCE_RESOURCE);
+    if (i === undefined) {
+      return 0;
+    }
+    var canvas = i.canvas;
     canvas.width = size.width;
     canvas.height = size.height;
 
-    var resource = resources.register("graphics_2d", {
+    return resources.register(GRAPHICS_2D_RESOURCE, {
       size: size,
       canvas: canvas,
       ctx: canvas.getContext('2d'),
@@ -16,11 +22,10 @@
 	// throw "Canvas destroy not implemented.";
       }
     });
-    return resource;
   };
 
   var Graphics2D_IsGraphics2D = function(resource) {
-    return resources.is(resource, "graphics_2d");
+    return resources.is(resource, GRAPHICS_2D_RESOURCE);
   };
 
   var Graphics2D_Describe = function(resource, size_ptr, is_always_opqaue_ptr) {
@@ -31,12 +36,12 @@
     if (src_rect_ptr !== 0){
       throw "Graphics2D_PaintImageData doesn't support nonnull src_rect argument yet";
     }
-    var g2d = resources.resolve(resource);
+    var g2d = resources.resolve(resource, GRAPHICS_2D_RESOURCE);
     // Eat any errors that occur, same as the implementation in Chrome.
     if (g2d === undefined) {
       return;
     }
-    var res = resources.resolve(image_data);
+    var res = resources.resolve(image_data, IMAGE_DATA_RESOURCE);
     if (res === undefined) {
       return;
     }
@@ -50,12 +55,12 @@
   };
 
   var Graphics2D_ReplaceContents = function(resource, image_data) {
-    var g2d = resources.resolve(resource);
+    var g2d = resources.resolve(resource, GRAPHICS_2D_RESOURCE);
     // Eat any errors that occur, same as the implementation in Chrome.
     if (g2d === undefined) {
       return;
     }
-    var res = resources.resolve(image_data);
+    var res = resources.resolve(image_data, IMAGE_DATA_RESOURCE);
     if (res === undefined) {
       return;
     }
@@ -109,6 +114,9 @@
       }
     }
   }
+
+
+  var IMAGE_DATA_RESOURCE = "image_data";
 
   var ImageData_GetNativeImageDataFormat = function() {
     // PP_IMAGEDATAFORMAT_RGBA_PREMUL
@@ -167,7 +175,7 @@
       }
     }
 
-    var uid = resources.register("image_data", {
+    var uid = resources.register(IMAGE_DATA_RESOURCE, {
       format: format,
       size: size,
       memory: memory,
@@ -181,11 +189,11 @@
   };
 
   var ImageData_IsImageData = function (image_data) {
-    return resources.is(image_data, "image_data");
+    return resources.is(image_data, IMAGE_DATA_RESOURCE);
   };
 
   var ImageData_Describe = function(image_data, desc_ptr) {
-    var res = resources.resolve(image_data);
+    var res = resources.resolve(image_data, IMAGE_DATA_RESOURCE);
     if (res !== undefined) {
       setValue(desc_ptr + 0, res.format, 'i32');
       setValue(desc_ptr + 4, res.size.width, 'i32');
@@ -199,7 +207,11 @@
   };
 
   var ImageData_Map = function(image_data) {
-    return resources.resolve(image_data).memory;
+    var res = resources.resolve(image_data, IMAGE_DATA_RESOURCE);
+    if (res === undefined) {
+      return 0;
+    }
+    return res.memory;
   };
 
   var ImageData_Unmap = function(image_data) {

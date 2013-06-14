@@ -27,6 +27,9 @@ var postMessage = function(message) {
   _free(var_ptr);
 }
 
+var STRING_RESOURCE = "string";
+var ARRAY_BUFFER_RESOURCE = "array_buffer";
+
 var ResourceManager = function() {
   this.lut = {};
   this.uid = 1;
@@ -50,7 +53,7 @@ ResourceManager.prototype.register = function(type, res) {
 }
 
 ResourceManager.prototype.registerString = function(value, memory, len) {
-  return this.register("string", {
+  return this.register(STRING_RESOURCE, {
       value: value,
       memory: memory,
       len: len,
@@ -61,7 +64,7 @@ ResourceManager.prototype.registerString = function(value, memory, len) {
 }
 
 ResourceManager.prototype.registerArrayBuffer = function(memory, len) {
-  return this.register("array_buffer", {
+  return this.register(ARRAY_BUFFER_RESOURCE, {
       memory: memory,
       len: len,
       destroy: function() {
@@ -146,6 +149,9 @@ var registerInterface = function(name, functions) {
 
 var Module = {};
 
+var INSTANCE_RESOURCE = "instance";
+var VIEW_RESOURCE = "view";
+
 var CreateInstance = function(width, height, shadow_instance) {
   if (shadow_instance === undefined) {
     shadow_instance = document.createElement("span");
@@ -170,14 +176,14 @@ var CreateInstance = function(width, height, shadow_instance) {
   shadow_instance.appendChild(canvas);
 
   var sendViewEvent = function(instance_id, view_obj) {
-    var view = resources.register("view", view_obj);
+    var view = resources.register(VIEW_RESOURCE, view_obj);
     _DoChangeView(instance_id, view);
     resources.release(view);
   };
 
   // Called from external code.
   shadow_instance["finishLoading"] = function() {
-    var instance = resources.register("instance", {
+    var instance = resources.register(INSTANCE_RESOURCE, {
       element: shadow_instance,
       canvas: canvas,
       // Save original size so it can be restored later
