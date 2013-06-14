@@ -135,7 +135,7 @@
     <li>Only one mouse button can be "down" for modifiers, and the left mouse button will be "down" if no buttons are pressed. (Will be polyfilled.)</li>
   </ul>
   <li>Most of the PPAPI tests have not been ported because they wait for blocking callbacks.</li>
-  <li>Filesystem is currently supported only by Chrome. Creation and last access time are not supported.</li>
+  <li>Filesystem is currently supported only by Chrome. (Creation and last access time are not supported.)  A polyfill for Firefox and IE is available, but it is buggy.</li>
   <li>Emscripten forcibly undefines __native_client__, and currently this cannot be overriden.  Use __EMSCRIPTEN__ instead.</li>
 </ul>
 

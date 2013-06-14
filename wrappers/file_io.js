@@ -106,6 +106,7 @@
           };
 
           ppapi_glue.setFileInfo(info, info_ptr);
+
           callback(ppapi.PP_Error.PP_OK);
         }, DummyError);
     });
@@ -117,16 +118,9 @@
 
   var FileIO_Read = function(file_io, offset_low, offset_high, output_ptr, bytes_to_read, callback_ptr) {
     return AccessFile(file_io, callback_ptr, function(io, entry, callback) {
-
         entry.file(function(file) {
-
           var reader = new FileReader();
-          reader.onprogress = function(event) {
-
-            // Make sure this is the final progress event (everything's loaded)
-            if (reader.readyState !== reader.DONE) {
-              return;
-            }
+          reader.onload = function(event) {
 
             var offset = util.ToI64(offset_low, offset_high);
             var buffer = reader.result.slice(offset, offset + bytes_to_read);
@@ -146,12 +140,8 @@
           var offset = util.ToI64(offset_low, offset_high);
 
           writer.seek(offset);
-          writer.onprogress = function(event) {
-            // Make sure this is the final progress event (everything's loaded)
-            if (writer.readyState !== writer.DONE) {
-              return;
-            }
-
+          // TODO(ncbray): listen to onwrite.  The polyfill for firefox currently doesn't fire onwrite.
+          writer.onwrite = function(event) {
             callback(buffer.byteLength);
           }
           writer.onerror = DummyError;
