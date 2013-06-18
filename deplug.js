@@ -77,15 +77,17 @@ var uidInfo = function(uid, type) {
   return "(" + uid + " as " + type + ")";
 }
 
-ResourceManager.prototype.resolve = function(uid, type) {
+ResourceManager.prototype.resolve = function(uid, type, speculative) {
   if (typeof uid !== "number") {
     throw "resources.resolve uid must be an int";
   }
-  if (type !== undefined && typeof type !== "string") {
+  if (typeof type !== "string") {
     throw "resources.resolve type must be a string";
   }
   if (uid === 0) {
-    console.error("Attempted to resolve an invalid resource ID " + uidInfo(uid, type));
+    if (!speculative) {
+      console.error("Attempted to resolve an invalid resource ID " + uidInfo(uid, type));
+    }
     return undefined;
   }
   var res = this.lut[uid];
@@ -93,15 +95,17 @@ ResourceManager.prototype.resolve = function(uid, type) {
     console.error("Attempted to resolve a non-existant resource ID " + uidInfo(uid, type));
     return undefined;
   }
-  if (type !== undefined && res.type !== type) {
-    console.error("Expected resource " + uidInfo(uid, type) + ", but it was " + uidInfo(uid, res.type));
+  if (res.type !== type) {
+    if (!speculative) {
+      console.error("Expected resource " + uidInfo(uid, type) + ", but it was " + uidInfo(uid, res.type));
+    }
     return undefined;
   }
   return res;
 }
 
 ResourceManager.prototype.is = function(uid, type) {
-  return this.resolve(uid, type) !== undefined;
+  return this.resolve(uid, type, true) !== undefined;
 }
 
 ResourceManager.prototype.addRef = function(uid) {

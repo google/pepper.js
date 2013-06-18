@@ -1,5 +1,161 @@
 (function() {
 
+  var FILE_SYSTEM_RESOURCE = "file_system";
+  var FILE_REF_RESOURCE = "file_ref";
+  var FILE_IO_RESOURCE = "file_io";
+
+  var PP_FILESYSTEMTYPE_INVALID = 0;
+  var PP_FILESYSTEMTYPE_EXTERNAL = 1;
+  var PP_FILESYSTEMTYPE_LOCALPERSISTENT = 2;
+  var PP_FILESYSTEMTYPE_LOCALTEMPORARY = 3;
+
+  var fsTypeMap = {};
+  fsTypeMap[PP_FILESYSTEMTYPE_LOCALPERSISTENT] = window.PERSISTENT;
+  fsTypeMap[PP_FILESYSTEMTYPE_LOCALTEMPORARY] = window.TEMPORARY;
+
+  var FileSystem_Create = function(instance, type) {
+    // Creating a filesystem is asynchronous, so just store args for later
+    return resources.register(FILE_SYSTEM_RESOURCE, {fs_type: type, fs: null});
+  };
+
+  var FileSystem_IsFileSystem = function(res) {
+    return resources.is(res, FILE_SYSTEM_RESOURCE);
+  };
+
+  // Note that int64s are passed as two arguments, with high word second
+  var FileSystem_Open = function(file_system, size_low, size_high, callback_ptr) {
+    var res = resources.resolve(file_system, FILE_SYSTEM_RESOURCE);
+    if (res === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
+    var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
+
+    var type = fsTypeMap[res.fs_type];
+    if (type === undefined) {
+      return ppapi.PP_Error.PP_ERROR_FAILED;
+    }
+
+    var requestFS = window.requestFileSystem || window.webkitRequestFileSystem;
+    requestFS(type, util.ToI64(size_low, size_high), function(fs) {
+      res.fs = fs;
+      callback(ppapi.PP_Error.PP_OK);
+    }, function(error) {
+      console.log('Error!', error);
+      callback(ppapi.PP_Error.PP_ERROR_FAILED);
+    });
+
+    return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
+  };
+
+  var FileSystem_GetType = function() {
+    throw "FileSystem_GetType not implemented";
+  };
+
+
+  registerInterface("PPB_FileSystem;1.0", [
+      FileSystem_Create,
+      FileSystem_IsFileSystem,
+      FileSystem_Open,
+      FileSystem_GetType
+  ]);
+
+
+  var FileRef_Create = function(file_system, path_ptr) {
+    var path = util.decodeUTF8(path_ptr);
+    if (path === null) {
+      // Not UTF8
+      return 0;
+    }
+    resources.addRef(file_system);
+    return resources.register(FILE_REF_RESOURCE, {
+        path: path,
+        file_system: file_system,
+        destroy: function () {
+          resources.release(file_system);
+        }
+      });
+  };
+
+  var FileRef_IsFileRef = function(res) {
+    return resources.is(res, FILE_REF_RESOURCE);
+  };
+
+  var FileRef_GetFileSystemType = function() {
+    throw "FileRef_GetFileSystemType not implemented";
+  };
+
+  var FileRef_GetName = function() {
+    throw "FileRef_GetName not implemented";
+  };
+
+  var FileRef_GetPath = function() {
+    throw "FileRef_GetPath not implemented";
+  };
+
+  var FileRef_GetParent = function() {
+    throw "FileRef_GetParent not implemented";
+  };
+
+  var FileRef_MakeDirectory = function() {
+    throw "FileRef_MakeDirectory not implemented";
+  };
+
+  var FileRef_Touch = function() {
+    throw "FileRef_Touch not implemented";
+  };
+
+  var FileRef_Delete = function(file_ref, callback_ptr) {
+    var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
+    var ref = resources.resolve(file_ref, FILE_REF_RESOURCE);
+    if (ref === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
+    var file_system = resources.resolve(ref.file_system, FILE_SYSTEM_RESOURCE);
+    if (file_system  === undefined) {
+      // This is an internal error.
+      return ppapi.PP_Error.PP_ERROR_FAILED;
+    }
+
+    var error_handler = function(error) {
+      var code = error.code;
+      if (code === FileError.NOT_FOUND_ERR) {
+        callback(ppapi.PP_Error.PP_ERROR_FILENOTFOUND);
+      } else {
+        callback(ppapi.PP_Error.PP_ERROR_FAILED);
+      }
+    };
+
+    file_system.fs.root.getFile(ref.path, {}, function(entry) {
+      entry.remove(function() {
+        callback(ppapi.PP_Error.PP_OK);
+      }, function(error) {
+        console.log('Unhandled fileref error!', error);
+        throw 'Unhandled fileref error!' + error;
+      });
+    }, error_handler);
+
+    return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
+  };
+
+  var FileRef_Rename = function() {
+    throw "FileRef_Rename not implemented";
+  };
+
+
+  registerInterface("PPB_FileRef;1.0", [
+      FileRef_Create,
+      FileRef_IsFileRef,
+      FileRef_GetFileSystemType,
+      FileRef_GetName,
+      FileRef_GetPath,
+      FileRef_GetParent,
+      FileRef_MakeDirectory,
+      FileRef_Touch,
+      FileRef_Delete,
+      FileRef_Rename
+  ]);
+
+
   var PP_FLAGS_WRITE = 1 << 1;
   var PP_FLAGS_CREATE = 1 << 2;
   var PP_FLAGS_TRUNCATE = 1 << 3;
@@ -8,8 +164,6 @@
   var PP_FILETYPE_REGULAR = 0;
   var PP_FILETYPE_DIRECTORY = 1;
   var PP_FILETYPE_OTHER = 2;
-
-  var FILE_IO_RESOURCE = "file_io";
 
   var DummyError = function(error) {
     console.log('Unhandled fileio error!', error);
@@ -37,8 +191,15 @@
     if (io === undefined) {
       return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
     }
-    var ref = resources.resolve(file_ref);
-    var file_system = resources.resolve(ref.file_system);
+    var ref = resources.resolve(file_ref, FILE_REF_RESOURCE);
+    if (ref === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
+    var file_system = resources.resolve(ref.file_system, FILE_SYSTEM_RESOURCE);
+    if (file_system  === undefined) {
+      // This is an internal error.
+      return ppapi.PP_Error.PP_ERROR_FAILED;
+    }
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
 
     if (io.closed || io.entry !== null) {

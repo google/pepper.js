@@ -114,8 +114,19 @@ JS_LIBRARIES=$(DEPLUG_SRC_ROOT)/library_ppapi.js
 JS_PRE=$(DEPLUG_SRC_ROOT)/deplug.js $(DEPLUG_SRC_ROOT)/third_party/idb.filesystem.js
 
 # TODO(ncbray): only include needed wrappers, testing.js in particular.
-WRAPPERS=base.js url_loader.js graphics_2d.js view.js graphics_3d.js gles.js gles_ext.js input_events.js audio.js mouse_lock.js testing.js \
-	file_system.js file_io.js file_ref.js
+WRAPPERS= \
+    base.js \
+    url_loader.js \
+    graphics_2d.js \
+    view.js \
+    graphics_3d.js \
+    gles.js \
+    gles_ext.js \
+    input_events.js \
+    audio.js \
+    mouse_lock.js \
+    testing.js \
+    file.js \
 
 # Resolve the paths.
 WRAPPERS:=$(foreach wrapper,$(WRAPPERS),$(DEPLUG_SRC_ROOT)/wrappers/$(wrapper))
