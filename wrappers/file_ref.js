@@ -1,5 +1,7 @@
 (function() {
 
+  var FILE_REF_RESOURCE = "file_ref";
+
   var DummyError = function(error) {
     console.log('Unhandled fileref error!', error);
     throw 'Unhandled fileref error!' + error;
@@ -7,8 +9,12 @@
 
   var FileRef_Create = function(file_system, path_ptr) {
     var path = util.decodeUTF8(path_ptr);
+    if (path === null) {
+      // Not UTF8
+      return 0;
+    }
     resources.addRef(file_system);
-    return resources.register('fileref', {
+    return resources.register(FILE_REF_RESOURCE, {
         path: path,
         file_system: file_system,
         destroy: function () {
@@ -17,8 +23,8 @@
       });
   };
 
-  var FileRef_IsFileRef = function() {
-    throw "FileRef_IsFileRef_ not implemented";
+  var FileRef_IsFileRef = function(res) {
+    return resources.is(res, FILE_REF_RESOURCE);
   };
 
   var FileRef_GetFileSystemType = function() {
@@ -47,8 +53,15 @@
 
   var FileRef_Delete = function(file_ref, callback_ptr) {
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
-    var ref = resources.resolve(file_ref);
+    var ref = resources.resolve(file_ref, FILE_REF_RESOURCE);
+    if (ref === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
     var file_system = resources.resolve(ref.file_system);
+    if (file_system  === undefined) {
+      // This is an internal error.
+      return ppapi.PP_Error.PP_ERROR_FAILED;
+    }
 
     var error_handler = function(error) {
       var code = error.code;

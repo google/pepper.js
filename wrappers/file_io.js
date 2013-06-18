@@ -9,6 +9,7 @@
   var PP_FILETYPE_DIRECTORY = 1;
   var PP_FILETYPE_OTHER = 2;
 
+  var FILE_IO_RESOURCE = "file_io";
 
   var DummyError = function(error) {
     console.log('Unhandled fileio error!', error);
@@ -16,10 +17,10 @@
   };
 
   var FileIO_Create = function(instance) {
-    if (!resources.is(instance, 'instance')) {
+    if (!resources.is(instance, INSTANCE_RESOURCE)) {
       return 0;
     }
-    return resources.register('fileio', {
+    return resources.register(FILE_IO_RESOURCE, {
         closed: false,
         entry: null,
         fs_type: 0,
@@ -27,12 +28,15 @@
     });
   };
 
-  var FileIO_IsFileIO = function() {
-    throw "FileIO_IsFileIO not implemented";
+  var FileIO_IsFileIO = function(res) {
+    return resources.is(res, FILE_IO_RESOURCE);
   };
 
   var FileIO_Open = function(file_io, file_ref, flags, callback_ptr) {
-    var io = resources.resolve(file_io);
+    var io = resources.resolve(file_io, FILE_IO_RESOURCE);
+    if (io === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
     var ref = resources.resolve(file_ref);
     var file_system = resources.resolve(ref.file_system);
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
@@ -77,7 +81,10 @@
   };
 
   var AccessFile = function(file_io, callback_ptr, body) {
-    var io = resources.resolve(file_io);
+    var io = resources.resolve(file_io, FILE_IO_RESOURCE);
+    if (io === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
     if (io.closed) {
       return callback(ppapi.PP_Error.PP_ERROR_ABORTED);
@@ -156,7 +163,10 @@
 
   var FileIO_Flush = function(file_io, callback_ptr) {
     // Basically a NOP in the current implementation
-    var io = resources.resolve(file_io);
+    var io = resources.resolve(file_io, FILE_IO_RESOURCE);
+    if (io === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
     callback(io.closed ? ppapi.PP_Error.PP_ERROR_ABORTED : ppapi.PP_Error.PP_OK);
   };

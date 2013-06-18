@@ -1,4 +1,7 @@
 (function() {
+  var URL_LOADER_RESOURCE = "url_loader";
+  var URL_REQUEST_INFO_RESOURCE = "url_request_info";
+
   var updatePendingRead = function(loader) {
     if (loader.pendingReadCallback) {
       var full_read_possible = loader.data.byteLength >= loader.index + loader.pendingReadSize
@@ -14,17 +17,22 @@
   }
 
   var URLLoader_Create = function(instance) {
-    var uid = resources.register("url_loader", {});
-    return uid;
+    return resources.register(URL_LOADER_RESOURCE, {});
   };
 
   var URLLoader_IsURLLoader = function(resource) {
-    return resources.is(resource, "url_loader");
+    return resources.is(resource, URL_LOADER_RESOURCE);
   };
 
   var URLLoader_Open = function(loader, request, callback) {
-    loader = resources.resolve(loader);
-    request = resources.resolve(request);
+    loader = resources.resolve(loader, URL_LOADER_RESOURCE);
+    if (loader === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
+    request = resources.resolve(request, URL_REQUEST_INFO_RESOURCE);
+    if (request === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
     callback = ppapi_glue.convertCompletionCallback(callback);
 
     var req = new XMLHttpRequest();
@@ -78,7 +86,10 @@
   };
 
   var URLLoader_GetDownloadProgress = function(loader, bytes_ptr, total_ptr) {
-    var l = resources.resolve(loader);
+    var l = resources.resolve(loader, URL_LOADER_RESOURCE);
+    if (l === undefined) {
+      return 0;
+    }
     setValue(bytes_ptr, l.progress_bytes, 'i64');
     setValue(total_ptr, l.progress_total, 'i64');
     return 1;
@@ -89,7 +100,10 @@
   };
 
   var URLLoader_ReadResponseBody = function(loader, buffer_ptr, read_size, callback) {
-    var loader = resources.resolve(loader);
+    var loader = resources.resolve(loader, URL_LOADER_RESOURCE);
+    if (loader === undefined) {
+      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+    }
     var c = ppapi_glue.convertCompletionCallback(callback);
 
     loader.pendingReadCallback = function(status, data) {
@@ -124,15 +138,20 @@
 
 
   var URLRequestInfo_Create = function(instance) {
-    return resources.register("url_request_info", {});
+    return resources.register(URL_REQUEST_INFO_RESOURCE, {});
   };
 
   var URLRequestInfo_IsURLRequestInfo = function(resource) {
-    return resources.is(resource, "url_request_info");
+    return resources.is(resource, URL_REQUEST_INFO_RESOURCE);
   };
 
   var URLRequestInfo_SetProperty = function(request, property, value) {
-    var r = resources.resolve(request);
+    var r = resources.resolve(request, URL_REQUEST_INFO_RESOURCE);
+    if (r === undefined) {
+      return 0;
+    }
+
+    // TODO(ncbray): check property types.
     if (property === 0) {
       r.url = ppapi_glue.stringForVar(value);
     } else if (property === 1) {
@@ -142,10 +161,10 @@
     } else {
       throw "URLRequestInfo_SetProperty not implemented for " + property;
     }
+    return 1;
   };
 
   var URLRequestInfo_AppendDataToBody = function(request, data, len) {
-    console.log(request, data, len);
     throw "URLRequestInfo_AppendDataToBody not implemented";
   };
 
