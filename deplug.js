@@ -73,6 +73,10 @@ ResourceManager.prototype.registerArrayBuffer = function(memory, len) {
   });
 }
 
+var uidInfo = function(uid, type) {
+  return "(" + uid + " as " + type + ")";
+}
+
 ResourceManager.prototype.resolve = function(uid, type) {
   if (typeof uid !== "number") {
     throw "resources.resolve uid must be an int";
@@ -81,16 +85,16 @@ ResourceManager.prototype.resolve = function(uid, type) {
     throw "resources.resolve type must be a string";
   }
   if (uid === 0) {
-    console.warn("Attempted to resolve an invalid resource ID (0/" + type + ")");
+    console.error("Attempted to resolve an invalid resource ID " + uidInfo(uid, type));
     return undefined;
   }
   var res = this.lut[uid];
   if (res === undefined) {
-    console.warn("Attempted to resolve a non-existant resource ID (" + uid + "/" + type + ")");
+    console.error("Attempted to resolve a non-existant resource ID " + uidInfo(uid, type));
     return undefined;
   }
   if (type !== undefined && res.type !== type) {
-    console.warn("Expected a resource of type " + type + ", but got one of type " + res.type);
+    console.error("Expected resource " + uidInfo(uid, type) + ", but it was " + uidInfo(uid, res.type));
     return undefined;
   }
   return res;

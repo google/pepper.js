@@ -1,5 +1,7 @@
 (function() {
 
+  var INPUT_EVENT_RESOURCE = "input_event";
+
   //Enums copied from ppb_input_event.h
   var PP_InputEvent_Type = {
     UNDEFINED: -1,
@@ -126,7 +128,10 @@
   };
 
   var RegisterHandlers = function(instance, event_classes, filtering) {
-    var resource = resources.resolve(instance);
+    var resource = resources.resolve(instance, INSTANCE_RESOURCE);
+    if (resource === undefined) {
+      return;
+    }
 
     var makeCallback = function(event_type) {
       return function(event) {
@@ -162,7 +167,7 @@
           }
         }
 
-        var obj_uid = resources.register("input_event", {
+        var obj_uid = resources.register(INPUT_EVENT_RESOURCE, {
           // can't use type as attribute name since deplug uses that internally
           ie_type: event_type,
           pos: GetEventPos(event),
@@ -202,6 +207,33 @@
     }
   };
 
+  var isMouseEvent = function(res) {
+    var type = res.ie_type;
+    return (
+        type === PPIE_Type.MOUSEDOWN ||
+        type === PPIE_Type.MOUSEUP ||
+        type === PPIE_Type.MOUSEMOVE ||
+        type === PPIE_Type.MOUSEENTER ||
+        type === PPIE_Type.MOUSELEAVE ||
+        type === PPIE_Type.CONTEXTMENU
+    );
+  };
+
+  var isWheelEvent = function(res) {
+    var type = res.ie_type;
+    return (type === PPIE_Type.WHEEL);
+  };
+
+  var isKeyboardEvent = function(res) {
+    var type = res.ie_type;
+    return (
+        type === PPIE_Type.KEYDOWN ||
+        type === PPIE_Type.KEYUP ||
+        type === PPIE_Type.RAWKEYDOWN ||
+        type === PPIE_Type.CHAR
+    );
+  };
+
   var InputEvent_RequestInputEvents = function(instance, event_classes) {
     RegisterHandlers(instance, event_classes, false);
   };
@@ -215,11 +247,11 @@
   };
 
   var InputEvent_IsInputEvent = function(resource) {
-    return resources.is(resource, "input_event");
+    return resources.is(resource, INPUT_EVENT_RESOURCE);
   };
 
   var InputEvent_GetType = function(event) {
-    var resource = resources.resolve(event);
+    var resource = resources.resolve(event, INPUT_EVENT_RESOURCE);
     if (resource !== undefined) {
       return resource.ie_type;
     } else {
@@ -228,7 +260,7 @@
   };
 
   var InputEvent_GetTimeStamp = function(event) {
-    var resource = resources.resolve(event);
+    var resource = resources.resolve(event, INPUT_EVENT_RESOURCE);
     if (resource !== undefined) {
       return resource.time;
     } else {
@@ -238,7 +270,7 @@
 
 
   var InputEvent_GetModifiers = function(event) {
-    var resource = resources.resolve(event);
+    var resource = resources.resolve(event, INPUT_EVENT_RESOURCE);
     if (resource !== undefined) {
       return resource.modifiers;
     } else {
@@ -261,23 +293,15 @@
   };
 
   var MouseInputEvent_IsMouseInputEvent = function(event) {
-    // ppb_input_event_thunk.cc line 126
-    if (!InputEvent_IsInputEvent(event)) {
-      return false;
+    var _event = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (_event === undefined) {
+      return 0;
     }
-    var type = resources.resolve(event).ie_type;
-    return (
-      type === PPIE_Type.MOUSEDOWN ||
-        type === PPIE_Type.MOUSEUP ||
-        type === PPIE_Type.MOUSEMOVE ||
-        type === PPIE_Type.MOUSEENTER ||
-        type === PPIE_Type.MOUSELEAVE ||
-        type === PPIE_Type.CONTEXTMENU
-    );
+    return +isMouseEvent(_event);
   };
 
   var MouseInputEvent_GetButton = function(event) {
-    var resource = resources.resolve(event);
+    var resource = resources.resolve(event, INPUT_EVENT_RESOURCE);
     if (resource !== undefined) {
       return resource.button;
     } else {
@@ -287,8 +311,9 @@
 
   var MouseInputEvent_GetPosition = function(ptr, event) {
     var point = {x: 0, y: 0};
-    if (MouseInputEvent_IsMouseInputEvent(event)) {
-      point = resources.resolve(event).pos;
+    var _event = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (_event !== undefined && isMouseEvent(_event)) {
+      point = _event.pos;
     }
     ppapi_glue.setPoint(point, ptr);
   };
@@ -299,7 +324,12 @@
   };
 
   var MouseInputEvent_Movement = function(ptr, event) {
-    ppapi_glue.setPoint(resources.resolve(event).movement, ptr);
+    var point = {x: 0, y: 0};
+    var _event = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (_event !== undefined && isMouseEvent(_event)) {
+      point = _event.movement;
+    }
+    ppapi_glue.setPoint(point, ptr);
   };
 
   registerInterface("PPB_MouseInputEvent;1.1", [
@@ -316,18 +346,18 @@
   };
 
   var WheelInputEvent_IsWheelInputEvent = function(event) {
-    // ppb_input_event_thunk.cc line 205
-    if (!InputEvent_IsInputEvent(event)) {
-      return false;
+    var _event = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (_event === undefined) {
+      return 0;
     }
-    var type = resources.resolve(event).ie_type;
-    return (type === PPIE_Type.WHEEL);
+    return +isWheelEvent(_event);
   };
 
   var WheelInputEvent_GetDelta = function(ptr, event) {
     var point = {x: 0, y: 0};
-    if (WheelInputEvent_IsWheelInputEvent(event)) {
-      point = resources.resolve(event).delta;
+    var _event = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (_event !== undefined && isWheelEvent(_event)) {
+      point = _event.delta;
     }
     ppapi_glue.setFloatPoint(point, ptr);
   };
@@ -339,21 +369,20 @@
   var WheelInputEvent_GetTicks = function(ptr, event) {
     // TODO(ncbray): get tick directly from event object?
     var point = {x: 0, y: 0};
-    if (WheelInputEvent_IsWheelInputEvent(event)) {
-      var delta = resources.resolve(event).delta;
-      point.x = deltaToTick(delta.x);
-      point.y = deltaToTick(delta.y);
+    var _event = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (_event !== undefined && isWheelEvent(_event)) {
+      point.x = deltaToTick(_event.delta.x);
+      point.y = deltaToTick(_event.delta.y);
     }
     ppapi_glue.setFloatPoint(point, ptr);
   };
 
   var WheelInputEvent_GetScrollByPage = function(event) {
-    var resource = resources.resolve(event);
-    if (resource !== undefined) {
-      return resource.scrollByPage;
-    } else {
-      return false;
+    var res = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (res === undefined) {
+      return 0;
     }
+    return +res.scrollByPage;
   };
 
   registerInterface("PPB_WheelInputEvent;1.0", [
@@ -369,26 +398,19 @@
   };
 
   var KeyboardInputEvent_IsKeyboardInputEvent = function(event) {
-    // ppb_input_event_thunk.cc line 262
-    if (!InputEvent_IsInputEvent(event)) {
-      return false;
+    var _event = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (_event === undefined) {
+      return 0;
     }
-    var type = resources.resolve(event).ie_type;
-    return (
-      type === PPIE_Type.KEYDOWN ||
-        type === PPIE_Type.KEYUP ||
-        type === PPIE_Type.RAWKEYDOWN ||
-        type === PPIE_Type.CHAR
-    );
+    return +isKeyboardEvent(_event);
   };
 
   var KeyboardInputEvent_GetKeyCode = function(event) {
-    var resource = resources.resolve(event);
-    if (resource !== undefined) {
-      return resource.keyCode;
-    } else {
+    var res = resources.resolve(event, INPUT_EVENT_RESOURCE);
+    if (res === undefined) {
       return 0;
     }
+    return res.keyCode;
   };
 
   var KeyboardInputEvent_GetCharacterText = function(ptr, event) {
