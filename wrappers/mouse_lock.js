@@ -17,13 +17,13 @@
 
     if('webkitRequestPointerLock' in canvas) {
       // TODO(grosse): Figure out how to handle the callbacks properly
-      canvas.addEventListener('webkitpointerlockchange', makeCallback(ppapi.PP_Error.PP_OK));
-      canvas.addEventListener('webkitpointerlockerror', makeCallback(ppapi.PP_Error.PP_ERROR_FAILED));
+      canvas.addEventListener('webkitpointerlockchange', makeCallback(ppapi.PP_OK));
+      canvas.addEventListener('webkitpointerlockerror', makeCallback(ppapi.PP_ERROR_FAILED));
       canvas.webkitRequestPointerLock();
     } else {
       // Note: This may not work as Firefox currently requires fullscreen before requesting pointer lock
-      canvas.addEventListener('mozpointerlockchange', makeCallback(ppapi.PP_Error.PP_OK));
-      canvas.addEventListener('mozpointerlockerror', makeCallback(ppapi.PP_Error.PP_ERROR_FAILED));
+      canvas.addEventListener('mozpointerlockchange', makeCallback(ppapi.PP_OK));
+      canvas.addEventListener('mozpointerlockerror', makeCallback(ppapi.PP_ERROR_FAILED));
       canvas.mozRequestPointerLock();
     }
   };

@@ -27,11 +27,11 @@
   var URLLoader_Open = function(loader, request, callback) {
     loader = resources.resolve(loader, URL_LOADER_RESOURCE);
     if (loader === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     request = resources.resolve(request, URL_REQUEST_INFO_RESOURCE);
     if (request === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     callback = ppapi_glue.convertCompletionCallback(callback);
 
@@ -46,7 +46,7 @@
       if (!did_callback) {
 	// Apps may attempt to synchonously GetDownloadProcess inside the callback,
 	// so wait until we have progress to report.
-	callback(ppapi.PP_Error.PP_OK);
+	callback(ppapi.PP_OK);
 	did_callback = true;
       }
     }
@@ -54,7 +54,7 @@
       if (this.readyState == 1) {
       } else if (this.readyState == 2) {
 	if (this.status != 200) {
-	  callback(ppapi.PP_Error.PP_FAILED);
+	  callback(ppapi.PP_FAILED);
 	}
       } else if (this.readyState == 3) {
 	// Array buffers do not do partial downloads.
@@ -75,7 +75,7 @@
     loader.progress_bytes = 0;
     loader.progress_total = -1;
 
-    return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
+    return ppapi.PP_OK_COMPLETIONPENDING;
   };
 
   var URLLoader_FollowRedirect = function() {
@@ -102,7 +102,7 @@
   var URLLoader_ReadResponseBody = function(loader, buffer_ptr, read_size, callback) {
     var loader = resources.resolve(loader, URL_LOADER_RESOURCE);
     if (loader === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     var c = ppapi_glue.convertCompletionCallback(callback);
 
@@ -112,7 +112,7 @@
     };
     loader.pendingReadSize = read_size;
     setTimeout(function() { updatePendingRead(loader); }, 0);
-    return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
+    return ppapi.PP_OK_COMPLETIONPENDING;
 
   };
 

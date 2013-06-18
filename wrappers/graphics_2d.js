@@ -71,9 +71,9 @@
   var Graphics2D_Flush = function(resource, callback) {
     var c = ppapi_glue.convertCompletionCallback(callback);
     Module.requestAnimationFrame(function() {
-      c(ppapi.PP_Error.PP_OK);
+      c(ppapi.PP_OK);
     });
-    return ppapi.PP_Error.PP_OK;
+    return ppapi.PP_OK;
   };
 
   registerInterface("PPB_Graphics2D;1.0", [

@@ -406,9 +406,7 @@ var util = (function() {
 
 
 var ppapi = (function() {
-  var ppapi = {};
-
-  ppapi.PP_Error = {
+  var ppapi = {
     /**
      * This value is returned by a function on successful synchronous completion
      * or is passed as a result to a PP_CompletionCallback_Func on successful

@@ -26,25 +26,25 @@
   var FileSystem_Open = function(file_system, size_low, size_high, callback_ptr) {
     var res = resources.resolve(file_system, FILE_SYSTEM_RESOURCE);
     if (res === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
 
     var type = fsTypeMap[res.fs_type];
     if (type === undefined) {
-      return ppapi.PP_Error.PP_ERROR_FAILED;
+      return ppapi.PP_ERROR_FAILED;
     }
 
     var requestFS = window.requestFileSystem || window.webkitRequestFileSystem;
     requestFS(type, util.ToI64(size_low, size_high), function(fs) {
       res.fs = fs;
-      callback(ppapi.PP_Error.PP_OK);
+      callback(ppapi.PP_OK);
     }, function(error) {
       console.log('Error!', error);
-      callback(ppapi.PP_Error.PP_ERROR_FAILED);
+      callback(ppapi.PP_ERROR_FAILED);
     });
 
-    return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
+    return ppapi.PP_OK_COMPLETIONPENDING;
   };
 
   var FileSystem_GetType = function() {
@@ -108,33 +108,33 @@
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
     var ref = resources.resolve(file_ref, FILE_REF_RESOURCE);
     if (ref === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     var file_system = resources.resolve(ref.file_system, FILE_SYSTEM_RESOURCE);
     if (file_system  === undefined) {
       // This is an internal error.
-      return ppapi.PP_Error.PP_ERROR_FAILED;
+      return ppapi.PP_ERROR_FAILED;
     }
 
     var error_handler = function(error) {
       var code = error.code;
       if (code === FileError.NOT_FOUND_ERR) {
-        callback(ppapi.PP_Error.PP_ERROR_FILENOTFOUND);
+        callback(ppapi.PP_ERROR_FILENOTFOUND);
       } else {
-        callback(ppapi.PP_Error.PP_ERROR_FAILED);
+        callback(ppapi.PP_ERROR_FAILED);
       }
     };
 
     file_system.fs.root.getFile(ref.path, {}, function(entry) {
       entry.remove(function() {
-        callback(ppapi.PP_Error.PP_OK);
+        callback(ppapi.PP_OK);
       }, function(error) {
         console.log('Unhandled fileref error!', error);
         throw 'Unhandled fileref error!' + error;
       });
     }, error_handler);
 
-    return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
+    return ppapi.PP_OK_COMPLETIONPENDING;
   };
 
   var FileRef_Rename = function() {
@@ -189,21 +189,21 @@
   var FileIO_Open = function(file_io, file_ref, flags, callback_ptr) {
     var io = resources.resolve(file_io, FILE_IO_RESOURCE);
     if (io === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     var ref = resources.resolve(file_ref, FILE_REF_RESOURCE);
     if (ref === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     var file_system = resources.resolve(ref.file_system, FILE_SYSTEM_RESOURCE);
     if (file_system  === undefined) {
       // This is an internal error.
-      return ppapi.PP_Error.PP_ERROR_FAILED;
+      return ppapi.PP_ERROR_FAILED;
     }
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
 
     if (io.closed || io.entry !== null) {
-      return ppapi.PP_Error.PP_ERROR_FAILED;
+      return ppapi.PP_ERROR_FAILED;
     }
 
     var js_flags = {
@@ -213,7 +213,7 @@
 
     file_system.fs.root.getFile(ref.path, js_flags, function(entry) {
       if (io.dead || file_system.dead) {
-        return callback(ppapi.PP_Error.PP_ERROR_ABORTED);
+        return callback(ppapi.PP_ERROR_ABORTED);
       }
 
       io.entry = entry;
@@ -222,37 +222,37 @@
       if (flags & PP_FLAGS_TRUNCATE) {
         entry.createWriter(function(writer) {
           writer.onwrite = function(event) {
-            callback(ppapi.PP_Error.PP_OK);
+            callback(ppapi.PP_OK);
           }
           writer.onerror = DummyError;
           writer.truncate(0);
         }, DummyError);
       } else {
-        callback(ppapi.PP_Error.PP_OK);
+        callback(ppapi.PP_OK);
       }
     }, function(error) {
       var code = error.code;
       if (code === FileError.NOT_FOUND_ERR) {
-        callback(ppapi.PP_Error.PP_ERROR_FILENOTFOUND)
+        callback(ppapi.PP_ERROR_FILENOTFOUND)
       } else {
-        callback(ppapi.PP_Error.PP_ERROR_FAILED)
+        callback(ppapi.PP_ERROR_FAILED)
       }
     });
-    return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
+    return ppapi.PP_OK_COMPLETIONPENDING;
   };
 
   var AccessFile = function(file_io, callback_ptr, body) {
     var io = resources.resolve(file_io, FILE_IO_RESOURCE);
     if (io === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
     if (io.closed) {
-      return callback(ppapi.PP_Error.PP_ERROR_ABORTED);
+      return callback(ppapi.PP_ERROR_ABORTED);
     }
 
     body(io, io.entry, callback);
-    return ppapi.PP_Error.PP_OK_COMPLETIONPENDING;
+    return ppapi.PP_OK_COMPLETIONPENDING;
   }
 
   var FileIO_Query = function(file_io, info_ptr, callback_ptr) {
@@ -260,7 +260,7 @@
         entry.getMetadata(function(metadata) {
 
           if (io.dead) {
-            return callback(ppapi.PP_Error.PP_ERROR_ABORTED);
+            return callback(ppapi.PP_ERROR_ABORTED);
           }
 
           var info = {
@@ -275,7 +275,7 @@
 
           ppapi_glue.setFileInfo(info, info_ptr);
 
-          callback(ppapi.PP_Error.PP_OK);
+          callback(ppapi.PP_OK);
         }, DummyError);
     });
   };
@@ -326,10 +326,10 @@
     // Basically a NOP in the current implementation
     var io = resources.resolve(file_io, FILE_IO_RESOURCE);
     if (io === undefined) {
-      return ppapi.PP_Error.PP_ERROR_BADRESOURCE;
+      return ppapi.PP_ERROR_BADRESOURCE;
     }
     var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
-    callback(io.closed ? ppapi.PP_Error.PP_ERROR_ABORTED : ppapi.PP_Error.PP_OK);
+    callback(io.closed ? ppapi.PP_ERROR_ABORTED : ppapi.PP_OK);
   };
 
   var FileIO_Close = function() {
