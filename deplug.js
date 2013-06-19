@@ -191,6 +191,10 @@ var CreateInstance = function(width, height, shadow_instance) {
   var canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
+  canvas.onselectstart = function(evt) {
+    evt.preventDefault();
+    return false;
+  };
   shadow_instance.appendChild(canvas);
 
   var sendViewEvent = function(instance_id, view_obj) {

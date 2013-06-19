@@ -697,10 +697,9 @@ bool Planet::HandleInputEvent(const pp::InputEvent& event) {
           StartBenchmark();
       break;
     }
-    case PP_INPUTEVENT_TYPE_MOUSEMOVE:
-    case PP_INPUTEVENT_TYPE_MOUSEDOWN: {
+    case PP_INPUTEVENT_TYPE_MOUSEMOVE: {
       pp::MouseInputEvent mouse = pp::MouseInputEvent(event);
-      if (mouse.GetButton() != PP_INPUTEVENT_MOUSEBUTTON_NONE) {
+      if (mouse.GetModifiers() & PP_INPUTEVENT_MODIFIER_LEFTBUTTONDOWN) {
         PP_Point delta = mouse.GetMovement();
         float spin_x = std::min(4.0f, std::max(-4.0f, (float) delta.x * 0.5f));
         float spin_y = std::min(4.0f, std::max(-4.0f, (float) delta.y * 0.5f));
