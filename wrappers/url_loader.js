@@ -54,7 +54,12 @@
       if (this.readyState == 1) {
       } else if (this.readyState == 2) {
 	if (this.status != 200) {
-	  callback(ppapi.PP_FAILED);
+          if (did_callback) {
+	    throw "Internal error: got progress event for a bad URL request.";
+	  }
+	  callback(ppapi.PP_ERROR_FAILED);
+	  // TODO(ncbray): prevent any further responses.
+          did_callback = true;
 	}
       } else if (this.readyState == 3) {
 	// Array buffers do not do partial downloads.
@@ -151,13 +156,24 @@
       return 0;
     }
 
-    // TODO(ncbray): check property types.
+    var js_obj = ppapi_glue.jsForVar(value);
+    var js_type = typeof js_obj;
+
     if (property === 0) {
-      r.url = ppapi_glue.stringForVar(value);
+      if (js_type !== "string") {
+        return 0;
+      }
+      r.url = js_obj;
     } else if (property === 1) {
-      r.method = ppapi_glue.stringForVar(value);
+      if (js_type !== "string") {
+        return 0;
+      }
+      r.method = js_obj;
     } else if (property === 5) {
-      r.record_download_progress = ppapi_glue.boolForVar(value);
+      if (js_type !== "boolean") {
+        return 0;
+      }
+      r.record_download_progress = js_obj;
     } else {
       throw "URLRequestInfo_SetProperty not implemented for " + property;
     }

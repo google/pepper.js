@@ -20,25 +20,6 @@ var ppapi_exports = {
     PP_VARTYPE_STRING: 5,
     PP_VARTYPE_ARRAY_BUFFER: 9,
 
-    stringForVar: function(p) {
-      var o = ppapi_glue.PP_Var;
-      var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
-      if (type != ppapi_glue.PP_VARTYPE_STRING)
-        throw "PP_Var is not a string.";
-      var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-      return resources.resolve(uid, STRING_RESOURCE).value;
-    },
-
-    boolForVar: function(p) {
-      var o = ppapi_glue.PP_Var;
-      var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
-      if (type != ppapi_glue.PP_VARTYPE_BOOL)
-        throw "PP_Var is not a Boolean.";
-      // PP_Bool is guarenteed to be 4 bytes.
-      var value = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
-      return value > 0;
-    },
-
     jsForVar: function(p) {
       var o = ppapi_glue.PP_Var;
       var type = {{{ makeGetValue('p + o.type', '0', 'i32') }}};
@@ -104,7 +85,7 @@ var ppapi_exports = {
       // TODO correct way to call?
       return function(result) {
         if (typeof result !== 'number') {
-          throw "Invalid argument to callback";
+          throw "Invalid argument to callback: " + result;
         }
 
         Runtime.dynCall('vii', func, [user_data, result]);
