@@ -72,16 +72,18 @@ var ppapi_exports = {
 	var uid = resources.registerString(obj, memory, arr.length-1);
         {{{ makeSetValue('p + o.type', '0', '5', 'i32') }}};
         {{{ makeSetValue('p + o.value', '0', 'uid', 'i32') }}};
-      } else if (typen === 'undefined') {
-        {{{ makeSetValue('p + o.type', '0', '0', 'i32') }}};
-      } else if (typen === 'boolean') {
-        var value = (obj) ? 1 : 0;
-        {{{ makeSetValue('p + o.type', '0', '2', 'i32') }}};
-        {{{ makeSetValue('p + o.value', '0', 'value', 'i32') }}};
       } else if (typen === 'number') {
         // Note this will always pass a double, even when the value can be represented as an int32
         {{{ makeSetValue('p + o.type', '0', '4', 'i32') }}};
         {{{ makeSetValue('p + o.value', '0', 'obj', 'double') }}};
+      } else if (typen === 'boolean') {
+        var value = (obj) ? 1 : 0;
+        {{{ makeSetValue('p + o.type', '0', '2', 'i32') }}};
+        {{{ makeSetValue('p + o.value', '0', 'value', 'i32') }}};
+      } else if (typen === 'undefined') {
+        {{{ makeSetValue('p + o.type', '0', '0', 'i32') }}};
+      } else if (obj === null) {
+        {{{ makeSetValue('p + o.type', '0', '1', 'i32') }}};
       } else if (obj instanceof ArrayBuffer) {
         var memory = _malloc(obj.byteLength);
         // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
