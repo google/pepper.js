@@ -15,8 +15,11 @@ var ppapi_exports = {
       ['i32', 'padding'],
       ['i64', 'value'],
     ]),
+    PP_VARTYPE_UNDEFINED: 0,
     PP_VARTYPE_NULL: 1,
     PP_VARTYPE_BOOL: 2,
+    PP_VARTYPE_INT32: 3,
+    PP_VARTYPE_DOUBLE: 4,
     PP_VARTYPE_STRING: 5,
     PP_VARTYPE_ARRAY_BUFFER: 9,
 
@@ -41,6 +44,11 @@ var ppapi_exports = {
       } else {
 	throw "Var type conversion not implemented: " + type;
       }
+    },
+
+    varType: function(p) {
+      var o = ppapi_glue.PP_Var;
+      return {{{ makeGetValue('p + o.type', '0', 'i32') }}};
     },
 
     varForJS: function(p, obj) {

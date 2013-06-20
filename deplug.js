@@ -111,7 +111,7 @@ ResourceManager.prototype.is = function(uid, type) {
 ResourceManager.prototype.addRef = function(uid) {
   var res = this.lut[uid];
   if (res === undefined) {
-    throw "Resource does not exist.";
+    throw "Resource does not exist: " + uid;
   }
   res.refcount += 1;
 }

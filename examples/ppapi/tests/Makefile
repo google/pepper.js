@@ -51,6 +51,7 @@ ppapi_test_SOURCES= \
   test_console.cc \
   test_core.cc \
   test_image_data.cc \
+  test_url_request.cc \
   test_utils.cc \
   test_var.cc \
   testing_instance.cc \

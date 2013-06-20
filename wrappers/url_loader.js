@@ -33,6 +33,7 @@
     if (request === undefined) {
       return ppapi.PP_ERROR_BADRESOURCE;
     }
+    // TODO(ncbray): what to do if no URL is specified?
     callback = ppapi_glue.convertCompletionCallback(callback);
 
     var req = new XMLHttpRequest();
@@ -143,7 +144,20 @@
 
 
   var URLRequestInfo_Create = function(instance) {
-    return resources.register(URL_REQUEST_INFO_RESOURCE, {});
+    if (resources.resolve(instance, INSTANCE_RESOURCE) === undefined) {
+      return 0;
+    }
+    return resources.register(URL_REQUEST_INFO_RESOURCE, {
+      method: "GET",
+      headers: "",
+      stream_to_file: false,
+      follow_redirects: true,
+      record_download_progress: false,
+      record_upload_progress: false,
+      allow_cross_origin_requests: false,
+      allow_credentials: false,
+      body: null
+    });
   };
 
   var URLRequestInfo_IsURLRequestInfo = function(resource) {
@@ -156,32 +170,97 @@
       return 0;
     }
 
+    // Need to use the ppapi var type to distinguish between ints and floats.
+    var var_type = ppapi_glue.varType(value);
     var js_obj = ppapi_glue.jsForVar(value);
-    var js_type = typeof js_obj;
 
     if (property === 0) {
-      if (js_type !== "string") {
+      if (var_type !== ppapi_glue.PP_VARTYPE_STRING) {
         return 0;
       }
       r.url = js_obj;
     } else if (property === 1) {
-      if (js_type !== "string") {
+      if (var_type !== ppapi_glue.PP_VARTYPE_STRING) {
         return 0;
       }
+      // PPAPI does not filter invalid methods at this level.
       r.method = js_obj;
+    } else if (property === 2) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_STRING) {
+        return 0;
+      }
+      r.headers = js_obj;
+    } else if (property === 3) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+        return 0;
+      }
+      r.stream_to_file = js_obj;
+    } else if (property === 4) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+        return 0;
+      }
+      r.follow_redirects = js_obj;
     } else if (property === 5) {
-      if (js_type !== "boolean") {
+      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
         return 0;
       }
       r.record_download_progress = js_obj;
+    } else if (property === 6) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+        return 0;
+      }
+      r.record_upload_progress = js_obj;
+    } else if (property === 7) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_STRING && var_type !== ppapi_glue.PP_VARTYPE_UNDEFINED) {
+        return 0;
+      }
+      r.custom_referrer_url = js_obj;
+    } else if (property === 8) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+        return 0;
+      }
+      r.allow_cross_origin_requests = js_obj;
+    } else if (property === 9) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+        return 0;
+      }
+      r.allow_credentials = js_obj;
+    } else if (property === 10) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_STRING && var_type !== ppapi_glue.PP_VARTYPE_UNDEFINED) {
+        return 0;
+      }
+      r.custom_content_transfer_encoding = js_obj;
+    } else if (property === 11) {
+      // TODO(ncbray): require integer, disallow double.
+      if (var_type !== ppapi_glue.PP_VARTYPE_INT32) {
+        return 0;
+      }
+      r.prefetch_buffer_upper_threshold = js_obj;
+    } else if (property === 12) {
+      // TODO(ncbray): require integer, disallow double.
+      if (var_type !== ppapi_glue.PP_VARTYPE_INT32) {
+        return 0;
+      }
+      r.prefetch_buffer_lower_threshold = js_obj;
+    } else if (property === 13) {
+      if (var_type !== ppapi_glue.PP_VARTYPE_STRING && var_type !== ppapi_glue.PP_VARTYPE_UNDEFINED) {
+        return 0;
+      }
+      r.custom_user_agent = js_obj;
     } else {
-      throw "URLRequestInfo_SetProperty not implemented for " + property;
+      console.error("URLRequestInfo_SetProperty got unknown property " + property);
+      return 0;
     }
     return 1;
   };
 
   var URLRequestInfo_AppendDataToBody = function(request, data, len) {
-    throw "URLRequestInfo_AppendDataToBody not implemented";
+    var r = resources.resolve(request, URL_REQUEST_INFO_RESOURCE);
+    if (r === undefined) {
+      return 0;
+    }
+    // TODO(ncbray): actually copy and send the data.  Note the data may not be UTF8.
+    return 1;
   };
 
   var URLRequestInfo_AppendFileToBody = function(request, file_ref, start_offset, number_of_bytes, expect_last_time_modified) {
@@ -195,4 +274,26 @@
     URLRequestInfo_AppendDataToBody,
     URLRequestInfo_AppendFileToBody
   ]);
+
+
+  var URLResponseInfo_IsURLResponseInfo = function(res) {
+    throw "URLResponseInfo_IsURLResponseInfo not implemented";
+  };
+
+  var URLResponseInfo_GetProperty = function() {
+    console.log("GetProperty", arguments);
+    throw "URLResponseInfo_GetProperty not implemented";
+  };
+
+  var URLResponseInfo_GetBodyAsFileRef = function(res) {
+    throw "URLResponseInfo_GetBodyAsFileRef not implemented";
+  };
+
+
+  registerInterface("PPB_URLResponseInfo;1.0", [
+    URLResponseInfo_IsURLResponseInfo,
+    URLResponseInfo_GetProperty,
+    URLResponseInfo_GetBodyAsFileRef
+  ]);
+
 })();

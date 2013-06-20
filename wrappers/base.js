@@ -92,18 +92,26 @@
     Messaging_PostMessage
   ]);
 
+  var isRefCountedVarType = function(type) {
+    return type >= 5;
+  };
+
   var Var_AddRef = function(v) {
-    // TODO check var type.
     var o = ppapi_glue.PP_Var;
-    var uid = getValue(v + o.value, 'i32');
-    resources.addRef(uid);
+    var type = getValue(v + o.type, 'i32');
+    if (isRefCountedVarType(type)) {
+      var uid = getValue(v + o.value, 'i32');
+      resources.addRef(uid);
+    }
   };
 
   var Var_Release = function(v) {
-    // TODO check var type.
     var o = ppapi_glue.PP_Var;
-    var uid = getValue(v + o.value, 'i32');
-    resources.release(uid);
+    var type = getValue(v + o.type, 'i32');
+    if (isRefCountedVarType(type)) {
+      var uid = getValue(v + o.value, 'i32');
+      resources.release(uid);
+    }
   };
 
   var Var_VarFromUtf8_1_0 = function(result, module, ptr, len) {
