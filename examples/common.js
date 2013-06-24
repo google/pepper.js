@@ -18,10 +18,79 @@ var common = (function () {
     }
   };
 
+  // Canonicalize the URL using the DOM.
+  var resolveURL = function(url) {
+    var a = document.createElement('a');
+    a.href = url;
+    return a.href;
+  }
+
+  // Search for a script element in the page.  The user may have loaded it
+  // themselves or it could have been dynamically loaded by the subsequent code.
+  var findScript = function(src) {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = 0; i < scripts.length; i++) {
+      if (scripts[i].src === src) {
+	return scripts[i];
+      }
+    }
+    return null;
+  }
+
+  // A look-up table for the scripts we're waiting for.
+  var waiting = {};
+
+  // Make sure the specified script is loaded before invoking a callback.
+  var loadScript = function(url, onload, onerror) {
+    var src = resolveURL(url);
+    if (findScript(src) === null) {
+      // Loading the script if it cannot be found.
+      var script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = src;
+
+      waiting[src] = [];
+      script.onload = function() {
+        for (var i in waiting[src]) {
+          waiting[src][i].onload();
+        }
+        delete waiting[str];
+      };
+      script.onerror = function() {
+        for (var i in waiting[src]) {
+          if (waiting[src][i].onerror) {
+            waiting[src][i].onerror();
+          }
+	}
+        delete waiting[str];
+      };
+      document.getElementsByTagName('head')[0].appendChild(script);
+    }
+
+    // If src is in waiting, we have started to load the script but it is not
+    // yet ready.
+    if (src in waiting) {
+      waiting[src].push({onload: onload, onerror: onerror});
+    } else {
+      // HACK assumes the script loaded successfully.
+      onload();
+    }
+  }
+
   function createEmscriptenModule(name, tool, path, width, height) {
-    var e = CreateInstance(width, height);
+    // Create a fake embed element.  The actual script may take a while to load.
+    var e = document.createElement("span");
+    e.setAttribute("name", "nacl_module");
+    e.setAttribute("id", "nacl_module");
     document.getElementById('listener').appendChild(e);
-    e.finishLoading();
+
+    loadScript(path + '/' + name + '.js', function() {
+      CreateInstance(width, height, e);
+      // Instead of listening to DOM mutation events (which has cross-platform
+      // compatibility issues), explicitly notify the instance that it has been
+      // inserted into the document.
+      e.finishLoading();
+    });
     return e;
   }
 
@@ -34,8 +103,9 @@ var common = (function () {
    * @param {string} path Directory name where .nmf file can be found.
    * @param {number} width The width to create the plugin.
    * @param {number} height The height to create the plugin.
+   * @param {Object} optional dictionary of args to send to DidCreateInstance
    */
-  function createNaClModule(name, tool, path, width, height) {
+  function createNaClModule(name, tool, path, width, height, args) {
     if (tool == 'emscripten') {
       return createEmscriptenModule(name, tool, path, width, height);
     }
@@ -44,7 +114,16 @@ var common = (function () {
     moduleEl.setAttribute('id', 'nacl_module');
     moduleEl.setAttribute('width', width);
     moduleEl.setAttribute('height',height);
+    moduleEl.setAttribute('path', path);
     moduleEl.setAttribute('src', path + '/' + name + '.nmf');
+
+    // Add any optional arguments
+    if (args) {
+      for (var key in args) {
+        moduleEl.setAttribute(key, args[key])
+      }
+    }
+
     // For NaCL modules use application/x-nacl.
     var mimetype = 'application/x-nacl';
     var isHost = tool == 'win' || tool == 'linux' || tool == 'mac';
@@ -55,6 +134,8 @@ var common = (function () {
         mimetype = 'application/x-ppapi-release';
       else
         mimetype = 'application/x-ppapi-debug';
+    } else if (tool == 'pnacl') {
+      mimetype = 'application/x-pnacl';
     }
     moduleEl.setAttribute('type', mimetype);
 
@@ -89,16 +170,29 @@ var common = (function () {
     var listenerDiv = document.getElementById('listener');
     listenerDiv.addEventListener('load', moduleDidLoad, true);
     listenerDiv.addEventListener('message', handleMessage, true);
-
+    listenerDiv.addEventListener('crash', handleCrash, true);
     if (typeof window.attachListeners !== 'undefined') {
       window.attachListeners();
+    }
+  }
+
+
+  /**
+   * Called when the Browser can not communicate with the Module
+   *
+   * This event listener is registered in attachDefaultListeners above.
+   */
+  function handleCrash(event) {
+    updateStatus('CRASHED')
+    if (typeof window.handleCrash !== 'undefined') {
+      window.handleCrash(common.naclModule.lastError);
     }
   }
 
   /**
    * Called when the NaCl module is loaded.
    *
-   * This event listener is registered in createNaClModule above.
+   * This event listener is registered in attachDefaultListeners above.
    */
   function moduleDidLoad() {
     common.naclModule = document.getElementById('nacl_module');
@@ -135,16 +229,25 @@ var common = (function () {
     return s.lastIndexOf(prefix, 0) === 0;
   }
 
+  /** Maximum length of logMessageArray. */
+  var kMaxLogMessageLength = 20;
+
+  /** An array of messages to display in the element with id "log". */
+  var logMessageArray = [];
+
   /**
-   * Add a message to an element with id "log", separated by a <br> element.
+   * Add a message to an element with id "log".
    *
    * This function is used by the default "log:" message handler.
    *
    * @param {string} message The message to log.
    */
   function logMessage(message) {
-    var logEl = document.getElementById('log');
-    logEl.innerHTML += message + '<br>';
+    logMessageArray.push(message);
+    if (logMessageArray.length > kMaxLogMessageLength)
+      logMessageArray.shift();
+
+    document.getElementById('log').textContent = logMessageArray.join('');
     console.log(message)
   }
 
@@ -171,6 +274,7 @@ var common = (function () {
           if (startsWith(message_event.data, type + ':')) {
             func = defaultMessageTypes[type];
             func(message_event.data.slice(type.length + 1));
+            return;
           }
         }
       }
@@ -246,6 +350,7 @@ var common = (function () {
     domContentLoaded: domContentLoaded,
     createNaClModule: createNaClModule,
     hideModule: hideModule,
+    logMessage: logMessage,
     updateStatus: updateStatus
   };
 
@@ -262,7 +367,34 @@ window.onload = function() {
   if (body.dataset && body.dataset.customLoad && typeof window.domContentLoaded !== 'undefined') {
     loadFunction = window.domContentLoaded;
   }
-  loadFunction(body.getAttribute("data-name"), body.getAttribute("data-tc"), body.getAttribute("data-path"),
-               body.getAttribute("data-width") || undefined, body.getAttribute("data-height") || undefined);
+
+  // From https://developer.mozilla.org/en-US/docs/DOM/window.location
+  var searchVars = {};
+  if (window.location.search.length > 1) {
+    var pairs = window.location.search.substr(1).split("&");
+    for (var key_ix = 0; key_ix < pairs.length; key_ix++) {
+      var keyValue = pairs[key_ix].split("=");
+      searchVars[unescape(keyValue[0])] =
+        keyValue.length > 1 ? unescape(keyValue[1]) : "";
+    }
+  }
+  if (loadFunction) {
+    var name = body.getAttribute("data-name");
+    var tc = body.getAttribute("data-tc");
+    var path = body.getAttribute("data-path");
+    var width = body.getAttribute("data-width") || undefined;
+    var height = body.getAttribute("data-height") || undefined;
+
+    var toolchains = (body.getAttribute("data-tools") || tc || "emscripten newlib").split(' ');
+    var configs = (body.getAttribute("data-configs") || "Debug Release").split(' ');
+
+    var tc = toolchains.indexOf(searchVars.tc) !== -1 ?
+        searchVars.tc : toolchains[0];
+    var config = configs.indexOf(searchVars.config) !== -1 ?
+      searchVars.config : configs[0];
+    path = path.replace('{tc}', tc).replace('{config}', config);
+
+    loadFunction(name, tc, path, width, height);
+  }
 };
 //});
