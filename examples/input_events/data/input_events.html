@@ -7,13 +7,15 @@ found in the LICENSE file.
 -->
 <head>
   <title>Input Events</title>
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
   <title>Input Events</title>
   <script type="text/javascript" src="../../common.js"></script>
   <script type="text/javascript" src="example.js"></script>
+  <script type="text/javascript" src="../emscripten/Debug/input_events.js"></script>
 </head>
-<body data-name="input_events" data-tc="newlib" data-path="../newlib/Debug">
+<body data-name="input_events" data-tools="emscripten newlib" data-configs="Debug Release" data-path="../{tc}/{config}">
   <h1>Input Events</h1>
   <h2>Status: <code id="statusField">NO-STATUS</code></h2>
   <button id="killButton">Kill worker thread and queue</button>
