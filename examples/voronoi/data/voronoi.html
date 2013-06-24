@@ -12,12 +12,10 @@ found in the LICENSE file.
   <title>Multi-threaded Voronoi Demo</title>
   <script type="text/javascript" src="../../common.js"></script>
   <script type="text/javascript" src="example.js"></script>
-  <!-- MODIFICATION: include the generated source-->
-  <script type="text/javascript" src="../emscripten/Release/voronoi.js"></script>
 </head>
 <body
   data-name="voronoi" data-width="512" data-height="512"
-  data-tc="emscripten" data-path="../emscripten/Release">
+  data-tools="emscripten newlib" data-configs="Debug Release" data-path="../{tc}/{config}">
   <h1>Voronoi</h1>
   <h2>Status: <code id="statusField">NO-STATUS</code></h2>
   <div>
