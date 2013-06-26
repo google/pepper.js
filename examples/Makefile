@@ -21,6 +21,7 @@ PROJECTS:= \
   earth \
   file_io \
   ppapi/tests \
+  tests/ppapi_messaging \
 
 HTTPD:=../tools/httpd.py
 

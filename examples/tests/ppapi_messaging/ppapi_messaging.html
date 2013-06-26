@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <!-- Copyright 2011 Google Inc.  All rights reserved. -->
+  <head>
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache" />
+    <META HTTP-EQUIV="Expires" CONTENT="-1" />
+    <script type="text/javascript" src="../nacltest.js"></script>
+    <script type="application/x-javascript">
+      //<![CDATA[
+      function setupTests(tester, plugin) {
+        function TestPostMessageAndOnMessage(status, messageToSend) {
+          var listener = status.wrap(function(message) {
+            plugin.removeEventListener("message", listener, false);
+            status.log('Received onmessage event: ' + message.data);
+            // Verify the message received against the message sent.
+            status.assertEqual(message.data, messageToSend);
+            status.assertEqual(typeof(message.data), typeof(messageToSend));
+            status.pass();
+          });
+
+          plugin.addEventListener("message", listener, false);
+          plugin.postMessage(messageToSend);
+        }
+
+        tester.addAsyncTest('PPB/PPP_Messaging:String', function(status) {
+            TestPostMessageAndOnMessage(status, 'Some String Value');
+            });
+        tester.addAsyncTest('PPB/PPP_Messaging:Double', function(status) {
+            TestPostMessageAndOnMessage(status, 3.14);  // dummy double value
+            });
+        tester.addAsyncTest('PPB/PPP_Messaging:Int', function(status) {
+            TestPostMessageAndOnMessage(status, 8);  // dummy integer value
+            });
+        tester.addAsyncTest('PPB/PPP_Messaging:Null', function(status) {
+            TestPostMessageAndOnMessage(status, null);
+            });
+        tester.addAsyncTest('PPB/PPP_Messaging:Undefined', function(status) {
+            TestPostMessageAndOnMessage(status, undefined);
+            });
+        // TODO(dspringer): Add tests for other types like object, array, etc.
+      }
+      //]]>
+    </script>
+    <title>PPAPI PPB_Messaging Test</title>
+  </head>
+  <body>
+    <h1>PPAPI PPB_Messaging Test</h1>
+
+    <div id="listener"></div>
+
+    <script type="text/javascript">
+      //<![CDATA[
+      var tester = new Tester();
+      var e = createTestModule("ppapi_messaging", 0, 0);
+      setupTests(tester, e);
+      tester.waitFor(e);
+      tester.run();
+      //]]>
+    </script>
+  </body>
+</html>

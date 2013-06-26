@@ -155,6 +155,7 @@ var common = (function () {
         moduleEl.dispatchEvent(evt);
       }, 100);  // 100 ms
     }
+    return moduleEl;
   }
 
   /**

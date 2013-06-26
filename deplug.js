@@ -249,10 +249,16 @@ var CreateInstance = function(width, height, shadow_instance) {
       clip_rect: {x: 0, y: 0, width: width, height: height}
     });
 
-    // Fake the load event.
-    var evt = document.createEvent('Event');
-    evt.initEvent('load', true, true);  // bubbles, cancelable
-    shadow_instance.dispatchEvent(evt);
+    var sendProgressEvent = function(name) {
+      var evt = document.createEvent('Event');
+      evt.initEvent(name, true, true);  // bubbles, cancelable
+      shadow_instance.dispatchEvent(evt);
+    }
+
+    // Fake the load sequence.
+    shadow_instance.readyState = 4;
+    sendProgressEvent('load');
+    sendProgressEvent('loadend');
   };
 
   var makeCallback = function(hasFocus){
