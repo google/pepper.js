@@ -54,7 +54,7 @@ var common = (function () {
         for (var i in waiting[src]) {
           waiting[src][i].onload();
         }
-        delete waiting[str];
+        delete waiting[src];
       };
       script.onerror = function() {
         for (var i in waiting[src]) {
@@ -62,7 +62,7 @@ var common = (function () {
             waiting[src][i].onerror();
           }
 	}
-        delete waiting[str];
+        delete waiting[src];
       };
       document.getElementsByTagName('head')[0].appendChild(script);
     }
