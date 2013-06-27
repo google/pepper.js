@@ -18,6 +18,19 @@ var common = (function () {
     }
   };
 
+  var getImageDataBuffer = function(imageData) {
+    var buffer = imageData.data.buffer;
+    // IE support
+    if(buffer === undefined) {
+      buffer = new ArrayBuffer(imageData.data.length);
+      view = new Uint8Array(buffer);
+      for (var i = 0; i < imageData.data.length; i++) {
+        view[i] = imageData.data[i];
+      }
+    }
+    return buffer;
+  }
+
   // Canonicalize the URL using the DOM.
   var resolveURL = function(url) {
     var a = document.createElement('a');
@@ -84,12 +97,17 @@ var common = (function () {
     e.setAttribute("id", "nacl_module");
     document.getElementById('listener').appendChild(e);
 
-    loadScript(path + '/' + name + '.js', function() {
+    var src = path + '/' + name + '.js';
+    loadScript(src, function() {
       CreateInstance(width, height, e);
       // Instead of listening to DOM mutation events (which has cross-platform
       // compatibility issues), explicitly notify the instance that it has been
       // inserted into the document.
       e.finishLoading();
+    }, function() {
+      // TODO send event.
+      e.readyState = 4;
+      e.lastError = "Could not load " + src;
     });
     return e;
   }
@@ -347,6 +365,7 @@ var common = (function () {
     naclModule: null,
 
     addListener: addListener,
+    getImageDataBuffer: getImageDataBuffer,
     attachDefaultListeners: attachDefaultListeners,
     domContentLoaded: domContentLoaded,
     createNaClModule: createNaClModule,

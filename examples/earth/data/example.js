@@ -83,7 +83,7 @@ function handleMessage(message_event) {
       // Send NaCl module the raw image data obtained from canvas.
       common.naclModule.postMessage('tex_width: ' + img.width);
       common.naclModule.postMessage('tex_height: ' + img.height);
-      common.naclModule.postMessage(imageData.data.buffer);
+      common.naclModule.postMessage(common.getImageDataBuffer(imageData));
     }
     img.src = name;
   }
