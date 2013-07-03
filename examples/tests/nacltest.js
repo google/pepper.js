@@ -82,12 +82,18 @@ function createEmscriptenModule(name, tool, path, width, height) {
   e.setAttribute("id", "nacl_module");
   document.getElementById('listener').appendChild(e);
 
-  loadScript(path + '/' + name + '.js', function() {
+  var src = path + '/' + name + '.js';
+  e.setAttribute("src", src);
+  loadScript(src, function() {
     CreateInstance(width, height, e);
     // Instead of listening to DOM mutation events (which has cross-platform
     // compatibility issues), explicitly notify the instance that it has been
     // inserted into the document.
     e.finishLoading();
+  }, function() {
+    // TODO send event.
+    e.readyState = 4;
+    e.lastError = "Could not load " + src;
   });
   return e;
 }
@@ -498,7 +504,7 @@ function fail(message, info, test_status) {
 }
 
 
-function assert(condition, message, test_status) {
+function assert_(condition, message, test_status) {
   if (!condition) {
     fail(message, toString(condition), test_status);
   }
@@ -842,7 +848,7 @@ function TestStatus(tester, name, async) {
   }
 
   this.assert = function(condition, message) {
-    assert(condition, message, this);
+    assert_(condition, message, this);
   }
 
   this.assertEqual = function(a, b, message) {

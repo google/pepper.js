@@ -22,6 +22,7 @@ PROJECTS:= \
   file_io \
   ppapi/tests \
   tests/ppapi_messaging \
+  tests/ppapi_geturl \
 
 HTTPD:=../tools/httpd.py
 

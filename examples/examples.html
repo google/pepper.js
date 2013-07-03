@@ -97,6 +97,13 @@
     <td><a href="tests/ppapi_messaging/ppapi_messaging.html?tc=newlib&config=Debug">Run</a></td>
     <td><a href="tests/ppapi_messaging/ppapi_messaging.html?tc=newlib&config=Release">Run</a></td>
   </tr>
+  <tr>
+    <td>PPAPI GetURL</td>
+    <td><a href="tests/ppapi_geturl/ppapi_geturl.html?tc=emscripten&config=Debug">Run</a></td>
+    <td><a href="tests/ppapi_geturl/ppapi_geturl.html?tc=emscripten&config=Release">Run</a></td>
+    <td><a href="tests/ppapi_geturl/ppapi_geturl.html?tc=newlib&config=Debug">Run</a></td>
+    <td><a href="tests/ppapi_geturl/ppapi_geturl.html?tc=newlib&config=Release">Run</a></td>
+  </tr>
 </table>
 <div style="width: 800px">
 <h3>Browser Support</h3>
@@ -137,7 +144,8 @@
   <li>The Graphics2D and Graphics3D interfaces will automatically swap buffers every frame, even if Flush or SwapBuffers is not called.  This behavior should not be noticible for most applications.  Explicit swapping could be emulated by creating an offscreen buffer, but this would cost time and memory.</li>
   <li>The Audio API only supports one sample rate - whatever the underlying Web Audio API uses, in many cases 48k.  Resampling could be performed as a polyfill, but this would be slow.</li>
   <li>URLLoader does not stream - the data appears all at once.</li>
-  <li>Input support is a little fiddly due to inconsitencies between platforms.</li>
+  <li>URLLoader intentionally deviates from the native implementation's behavior when it is at odds with XMLHttpRequest.  For example, Deplug does not identify CORS failures as PP_ERROR_NOACCESS, instead it returns PP_ERROR_FAILED.  Similar
+  <li>Input support is a little fiddly due to inconsistencies between browsers.</li>
   <ul>
     <li>Only one mouse button can be "down" for modifiers, and the left mouse button will be "down" if no buttons are pressed. (Will be polyfilled.)</li>
   </ul>

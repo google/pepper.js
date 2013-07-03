@@ -86,6 +86,17 @@ var ppapi_exports = {
       }
     },
 
+    varForJSInt: function(p, obj) {
+      var o = ppapi_glue.PP_Var;
+      var typen = (typeof obj);
+      if (typen === 'number') {
+        {{{ makeSetValue('p + o.type', '0', '3', 'i32') }}};
+        {{{ makeSetValue('p + o.value', '0', 'obj', 'i32') }}};
+      } else {
+        throw "Not an integer: " + typen;
+      }
+    },
+
     convertCompletionCallback: function(callback) {
       // Assumes 4-byte pointers.
       var func = {{{ makeGetValue('callback + 0', '0', 'i32') }}};

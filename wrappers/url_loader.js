@@ -1,6 +1,14 @@
 (function() {
   var URL_LOADER_RESOURCE = "url_loader";
   var URL_REQUEST_INFO_RESOURCE = "url_request_info";
+  var URL_RESPONSE_INFO_RESOURCE = "url_response_info";
+
+  // Canonicalize the URL using the DOM.
+  var resolveURL = function(url) {
+    var a = document.createElement('a');
+    a.href = url;
+    return a.href;
+  };
 
   var updatePendingRead = function(loader) {
     if (loader.pendingReadCallback) {
@@ -14,10 +22,16 @@
 	cb(readSize, new Uint8Array(loader.data, index, readSize));
       }
     }
-  }
+  };
 
   var URLLoader_Create = function(instance) {
-    return resources.register(URL_LOADER_RESOURCE, {});
+    return resources.register(URL_LOADER_RESOURCE, {
+      destroy: function() {
+        if (this.response_info !== undefined) {
+          resources.release(this.response_info.uid);
+        }
+      }
+    });
   };
 
   var URLLoader_IsURLLoader = function(resource) {
@@ -36,43 +50,6 @@
     // TODO(ncbray): what to do if no URL is specified?
     callback = ppapi_glue.convertCompletionCallback(callback);
 
-    var req = new XMLHttpRequest();
-
-    var did_callback = false;
-
-    // Assumed: onprogress will be called before onreadystatechange.
-    req.onprogress = function(evt) {
-      loader.progress_bytes = evt.loaded;
-      loader.progress_total = evt.total;
-      if (!did_callback) {
-	// Apps may attempt to synchonously GetDownloadProcess inside the callback,
-	// so wait until we have progress to report.
-	callback(ppapi.PP_OK);
-	did_callback = true;
-      }
-    }
-    req.onreadystatechange = function() {
-      if (this.readyState == 1) {
-      } else if (this.readyState == 2) {
-	if (this.status != 200) {
-          if (did_callback) {
-	    throw "Internal error: got progress event for a bad URL request.";
-	  }
-	  callback(ppapi.PP_ERROR_FAILED);
-	  // TODO(ncbray): prevent any further responses.
-          did_callback = true;
-	}
-      } else if (this.readyState == 3) {
-	// Array buffers do not do partial downloads.
-      } else {
-	loader.data = this.response;
-	loader.done = true;
-	updatePendingRead(loader);
-      }
-    };
-    req.open(request.method || "GET", request.url);
-    req.responseType = "arraybuffer";
-    req.send();
     loader.data = '';
     loader.index = 0;
     loader.done = false;
@@ -80,6 +57,62 @@
     loader.pendingReadSize = 0;
     loader.progress_bytes = 0;
     loader.progress_total = -1;
+
+    loader.response_info = {
+      url: resolveURL(request.url),
+      status: 0,
+      file_ref: 0,
+      destroy: function() {
+	if (this.file_ref !== 0) {
+	  resources.release(this.file_ref);
+	  this.file_ref = 0;
+	}
+      }
+    };
+    resources.register(URL_RESPONSE_INFO_RESOURCE, loader.response_info);
+
+    var req = new XMLHttpRequest();
+
+    req.onprogress = function(evt) {
+      if (loader.dead) {
+        return;
+      }
+      loader.progress_bytes = evt.loaded;
+      loader.progress_total = evt.total;
+    }
+    // Called as long as the request completes, even if it's a 404 or similar.
+    req.onload = function() {
+      if (loader.dead) {
+        return;
+      }
+      loader.response_info.status = this.status;
+
+      // Even a 404 is "OK".
+      // This could be done before onload, but because we can't stream data there isn't a huge reason to do it.
+      callback(ppapi.PP_OK);
+
+      loader.data = this.response;
+      loader.done = true;
+      updatePendingRead(loader);
+    };
+    // Called on network errors and CORS failiures.
+    // Note that we do not explicitly distinguish CORS failiures because this information is not exposed to JavaScript.
+    req.onerror = function(e) {
+      if (loader.dead) {
+        return;
+      }
+      callback(ppapi.PP_ERROR_FAILED);
+    };
+    req.onabort = function() {
+      if (loader.dead) {
+        return;
+      }
+      callback(ppapi.PP_ERROR_ABORTED);
+    };
+
+    req.open(request.method || "GET", request.url);
+    req.responseType = "arraybuffer";
+    req.send();
 
     return ppapi.PP_OK_COMPLETIONPENDING;
   };
@@ -101,8 +134,15 @@
     return 1;
   };
 
-  var URLLoader_GetResponseInfo = function() {
-    throw "URLLoader_GetResponseInfo not implemented";
+  var URLLoader_GetResponseInfo = function(loader) {
+    var l = resources.resolve(loader, URL_LOADER_RESOURCE);
+    if (l === undefined || !l.response_info) {
+      return 0;
+    }
+    var uid = l.response_info.uid;
+    // Returned resources have an implicit addRef.
+    resources.addRef(uid);
+    return uid;
   };
 
   var URLLoader_ReadResponseBody = function(loader, buffer_ptr, read_size, callback) {
@@ -122,8 +162,16 @@
 
   };
 
-  var URLLoader_FinishStreamingToFile = function() {
-    throw "URLLoader_FinishStreamingToFile not implemented";
+  var URLLoader_FinishStreamingToFile = function(loader, callback) {
+    var loader = resources.resolve(loader, URL_LOADER_RESOURCE);
+    if (loader === undefined) {
+      return ppapi.PP_ERROR_BADRESOURCE;
+    }
+    // TODO check STREAM_TO_FILE flag.
+    var c = ppapi_glue.convertCompletionCallback(callback);
+    // HACK to get the test running but failing.
+    setTimeout(function() { c(ppapi.PP_OK); }, 0);
+    return ppapi.PP_OK_COMPLETIONPENDING;
   };
   var URLLoader_Close = function() {
     throw "URLLoader_Close not implemented";
@@ -277,16 +325,35 @@
 
 
   var URLResponseInfo_IsURLResponseInfo = function(res) {
-    throw "URLResponseInfo_IsURLResponseInfo not implemented";
+    return resources.is(res, URL_RESPONSE_INFO_RESOURCE);
   };
 
-  var URLResponseInfo_GetProperty = function() {
-    console.log("GetProperty", arguments);
-    throw "URLResponseInfo_GetProperty not implemented";
+  var URLResponseInfo_GetProperty = function(var_ptr, res, property) {
+    var r = resources.resolve(res, URL_RESPONSE_INFO_RESOURCE);
+    if (r === undefined) {
+      return 0;
+    }
+    if (property == 0) {
+      ppapi_glue.varForJS(var_ptr, r.url);
+    } else if (property == 3) {
+      ppapi_glue.varForJSInt(var_ptr, r.status);
+    } else {
+      throw "URLResponseInfo_GetProperty not implemented: " + property;
+    }
+    return 1;
   };
 
   var URLResponseInfo_GetBodyAsFileRef = function(res) {
-    throw "URLResponseInfo_GetBodyAsFileRef not implemented";
+    var r = resources.resolve(res, URL_RESPONSE_INFO_RESOURCE);
+    if (r === undefined) {
+      return 0;
+    }
+    var uid = r.file_ref;
+    if (uid === 0) {
+      return 0;
+    }
+    resource.addRef(uid);
+    return uid;
   };
 
 
