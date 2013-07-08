@@ -45,9 +45,10 @@ export EMCC_CLOSURE_ARGS=--externs $(DEPLUG_SRC_ROOT)/externs.js --externs $(DEP
 # Emscripten appears to key off the optimization while linking to deterimine what backend should be used.
 # HACK PPAPI will export a bunch of anonymous function pointers, so we need to reserve slots for them.
 # Eventually we should make these non-anonymous.
-# NOTE set minify to 0 to make the Release mode more readable.
+# NOTE add --minify 0 to the command line to make the Release mode more readable.
+# It appears that emcc currently assumes --minify will always be used to disable minification, so --minify 1 does not work, rather it also disables minification.
 ifeq ($(CONFIG),Release)
-NACL_LDFLAGS+=-O2 -s RESERVED_FUNCTION_POINTERS=350 --closure 1 --minify 0
+NACL_LDFLAGS+=-O2 -s RESERVED_FUNCTION_POINTERS=350 --closure 1
 else
 NACL_LDFLAGS+=-O0
 endif
