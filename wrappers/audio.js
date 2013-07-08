@@ -43,8 +43,6 @@
     return 2048;
   };
 
-  var AUDIO_CONFIG_RESOURCE = "audio_config";
-
   var AudioConfig_IsAudioConfig = function(resource) {
     return resources.is(resource, AUDIO_CONFIG_RESOURCE);
   };
@@ -98,8 +96,6 @@
       audio.playing = false;
     }
   };
-
-  var AUDIO_RESOURCE = "audio";
 
   var Audio_Create = function(instance, config, audio_callback, user_data) {
     var config_js = resources.resolve(config, AUDIO_CONFIG_RESOURCE);

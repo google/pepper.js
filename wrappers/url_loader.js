@@ -1,7 +1,4 @@
 (function() {
-  var URL_LOADER_RESOURCE = "url_loader";
-  var URL_REQUEST_INFO_RESOURCE = "url_request_info";
-  var URL_RESPONSE_INFO_RESOURCE = "url_response_info";
 
   // Canonicalize the URL using the DOM.
   var resolveURL = function(url) {

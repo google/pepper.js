@@ -30,6 +30,28 @@ var postMessage = function(message) {
 var STRING_RESOURCE = "string";
 var ARRAY_BUFFER_RESOURCE = "array_buffer";
 
+var INPUT_EVENT_RESOURCE = "input_event";
+
+var FILE_SYSTEM_RESOURCE = "file_system";
+var FILE_REF_RESOURCE = "file_ref";
+var FILE_IO_RESOURCE = "file_io";
+
+var URL_LOADER_RESOURCE = "url_loader";
+var URL_REQUEST_INFO_RESOURCE = "url_request_info";
+var URL_RESPONSE_INFO_RESOURCE = "url_response_info";
+
+var AUDIO_CONFIG_RESOURCE = "audio_config";
+var AUDIO_RESOURCE = "audio";
+
+var GRAPHICS_2D_RESOURCE = "graphics_2d";
+var IMAGE_DATA_RESOURCE = "image_data";
+
+var PROGRAM_RESOURCE = "program"
+var SHADER_RESOURCE = "shader";
+var BUFFER_RESOURCE = "buffer";
+var TEXTURE_RESOURCE = "texture";
+var UNIFORM_LOCATION_RESOURCE = "uniform_location";
+
 var ResourceManager = function() {
   this.lut = {};
   this.uid = 1;

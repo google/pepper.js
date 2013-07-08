@@ -1,9 +1,4 @@
 (function() {
-  var PROGRAM_RESOURCE = "program"
-  var SHADER_RESOURCE = "shader";
-  var BUFFER_RESOURCE = "buffer";
-  var TEXTURE_RESOURCE = "texture";
-  var UNIFORM_LOCATION_RESOURCE = "uniform_location";
 
   // (GLenum) => void
   var OpenGLES2_ActiveTexture = function(context, texture) {

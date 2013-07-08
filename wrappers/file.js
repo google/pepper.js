@@ -1,9 +1,5 @@
 (function() {
 
-  var FILE_SYSTEM_RESOURCE = "file_system";
-  var FILE_REF_RESOURCE = "file_ref";
-  var FILE_IO_RESOURCE = "file_io";
-
   var PP_FILESYSTEMTYPE_INVALID = 0;
   var PP_FILESYSTEMTYPE_EXTERNAL = 1;
   var PP_FILESYSTEMTYPE_LOCALPERSISTENT = 2;

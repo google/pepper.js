@@ -1,7 +1,5 @@
 (function() {
 
-  var GRAPHICS_2D_RESOURCE = "graphics_2d";
-
   var Graphics2D_Create = function(instance, size_ptr, is_always_opaque) {
     var size = ppapi_glue.getSize(size_ptr);
     var i = resources.resolve(instance, INSTANCE_RESOURCE);
@@ -115,8 +113,6 @@
     }
   }
 
-
-  var IMAGE_DATA_RESOURCE = "image_data";
 
   var ImageData_GetNativeImageDataFormat = function() {
     // PP_IMAGEDATAFORMAT_RGBA_PREMUL

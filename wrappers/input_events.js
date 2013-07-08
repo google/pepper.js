@@ -1,7 +1,5 @@
 (function() {
 
-  var INPUT_EVENT_RESOURCE = "input_event";
-
   //Enums copied from ppb_input_event.h
   var PP_InputEvent_Type = {
     UNDEFINED: -1,
