@@ -169,8 +169,14 @@ ResourceManager.prototype.getNumResources = function() {
 
 var resources = new ResourceManager();
 var interfaces = {};
+var declaredInterfaces = [];
 
 var registerInterface = function(name, functions) {
+  // Defer creating the interface until Emscripten's runtime is available.
+  declaredInterfaces.push({name: name, functions: functions});
+};
+
+var createInterface = function(name, functions) {
   var trace = function(f, i) {
     return function() {
       console.log(">>>", name, i, arguments);
@@ -193,7 +199,17 @@ var registerInterface = function(name, functions) {
   interfaces[name] = ptr;
 };
 
-var Module = {};
+var Module = {
+  "noInitialRun": true,
+  "noExitRuntime": true,
+  "preInit": function() {
+    for (var i = 0; i < declaredInterfaces.length; i++) {
+      var inf = declaredInterfaces[i];
+      createInterface(inf.name, inf.functions);
+    }
+    declaredInterfaces = [];
+  }
+};
 
 var CreateInstance = function(width, height, shadow_instance) {
   if (shadow_instance === undefined) {

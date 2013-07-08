@@ -145,7 +145,7 @@ WRAPPERS:=$(foreach wrapper,$(WRAPPERS),$(DEPLUG_SRC_ROOT)/wrappers/$(wrapper))
 define LINKER_RULE
 all: $(OUTDIR)/$(1).js
 $(OUTDIR)/$(1).js : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_emscripten)) $(foreach dep,$(4),$(STAMPDIR)/$(dep).stamp) $(JS_LIBRARIES) $(JS_PRE) $(WRAPPERS)
-	$(call LOG,LINK,$$@,$(EM_LINK) -o $$@ $$(filter %.o,$$^) $(NACL_LDFLAGS) $(foreach path,$(6),-L$(path)/emscripten/$(CONFIG)) $(foreach lib,$(3),-l$(lib)) $(foreach file,$(JS_LIBRARIES),--js-library $(file)) $(foreach file,$(JS_PRE),--pre-js $(file)) $(foreach wrapper,$(WRAPPERS),--post-js $(wrapper)) $(5))
+	$(call LOG,LINK,$$@,$(EM_LINK) -o $$@ $$(filter %.o,$$^) $(NACL_LDFLAGS) $(foreach path,$(6),-L$(path)/emscripten/$(CONFIG)) $(foreach lib,$(3),-l$(lib)) $(foreach file,$(JS_LIBRARIES),--js-library $(file)) $(foreach file,$(JS_PRE),--pre-js $(file)) $(foreach wrapper,$(WRAPPERS),--pre-js $(wrapper)) $(5))
 endef
 
 #
