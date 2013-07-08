@@ -50,7 +50,7 @@ export EMCC_CLOSURE_ARGS=--externs $(DEPLUG_SRC_ROOT)/externs.js --externs $(DEP
 ifeq ($(CONFIG),Release)
 NACL_LDFLAGS+=-O2 -s RESERVED_FUNCTION_POINTERS=350 --closure 1
 else
-NACL_LDFLAGS+=-O0
+NACL_LDFLAGS+=-O0 --minify 0
 endif
 
 NACL_LDFLAGS+=-s TOTAL_MEMORY=33554432

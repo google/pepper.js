@@ -27,30 +27,35 @@ var postMessage = function(message) {
   _free(var_ptr);
 }
 
-var STRING_RESOURCE = "string";
-var ARRAY_BUFFER_RESOURCE = "array_buffer";
+// Encoding types as numbers instead of string saves ~2kB when minified because closure will inline these constants.
+var STRING_RESOURCE = 0;
+var ARRAY_BUFFER_RESOURCE = 1;
 
-var INPUT_EVENT_RESOURCE = "input_event";
+var INPUT_EVENT_RESOURCE = 2;
 
-var FILE_SYSTEM_RESOURCE = "file_system";
-var FILE_REF_RESOURCE = "file_ref";
-var FILE_IO_RESOURCE = "file_io";
+var FILE_SYSTEM_RESOURCE = 3;
+var FILE_REF_RESOURCE = 4;
+var FILE_IO_RESOURCE = 5;
 
-var URL_LOADER_RESOURCE = "url_loader";
-var URL_REQUEST_INFO_RESOURCE = "url_request_info";
-var URL_RESPONSE_INFO_RESOURCE = "url_response_info";
+var URL_LOADER_RESOURCE = 6;
+var URL_REQUEST_INFO_RESOURCE = 7;
+var URL_RESPONSE_INFO_RESOURCE = 8;
 
-var AUDIO_CONFIG_RESOURCE = "audio_config";
-var AUDIO_RESOURCE = "audio";
+var AUDIO_CONFIG_RESOURCE = 9;
+var AUDIO_RESOURCE = 10;
 
-var GRAPHICS_2D_RESOURCE = "graphics_2d";
-var IMAGE_DATA_RESOURCE = "image_data";
+var GRAPHICS_2D_RESOURCE = 11;
+var IMAGE_DATA_RESOURCE = 12;
 
-var PROGRAM_RESOURCE = "program"
-var SHADER_RESOURCE = "shader";
-var BUFFER_RESOURCE = "buffer";
-var TEXTURE_RESOURCE = "texture";
-var UNIFORM_LOCATION_RESOURCE = "uniform_location";
+var PROGRAM_RESOURCE = 13;
+var SHADER_RESOURCE = 14;
+var BUFFER_RESOURCE = 15;
+var TEXTURE_RESOURCE = 16;
+var UNIFORM_LOCATION_RESOURCE = 17;
+
+var INSTANCE_RESOURCE = 18;
+var VIEW_RESOURCE = 19;
+var GRAPHICS_3D_RESOURCE = 20;
 
 var ResourceManager = function() {
   this.lut = {};
@@ -58,10 +63,14 @@ var ResourceManager = function() {
   this.num_resources = 0;
 }
 
-ResourceManager.prototype.register = function(type, res) {
-  if (typeof type !== "string") {
-    throw "resources.register type must be a string";
+ResourceManager.prototype.checkType = function(type) {
+  if (typeof type !== "number") {
+    throw "resource type must be a number";
   }
+}
+
+ResourceManager.prototype.register = function(type, res) {
+  this.checkType(type);
   while (this.uid in this.lut || this.uid === 0) {
     this.uid = (this.uid + 1) & 0xffffffff;
   }
@@ -103,9 +112,7 @@ ResourceManager.prototype.resolve = function(uid, type, speculative) {
   if (typeof uid !== "number") {
     throw "resources.resolve uid must be an int";
   }
-  if (typeof type !== "string") {
-    throw "resources.resolve type must be a string";
-  }
+  this.checkType(type);
   if (uid === 0) {
     if (!speculative) {
       console.error("Attempted to resolve an invalid resource ID " + uidInfo(uid, type));
@@ -187,10 +194,6 @@ var registerInterface = function(name, functions) {
 };
 
 var Module = {};
-
-var INSTANCE_RESOURCE = "instance";
-var VIEW_RESOURCE = "view";
-var GRAPHICS_3D_RESOURCE = "graphics_3d";
 
 var CreateInstance = function(width, height, shadow_instance) {
   if (shadow_instance === undefined) {
