@@ -12,7 +12,6 @@ if (window.performance.now === undefined) {
 }
 
 var postMessage = function(message) {
-
   // Fill out the PP_Var structure
   var o = ppapi_glue.PP_Var
   var var_ptr = _malloc(o.__size__);
@@ -171,9 +170,9 @@ var resources = new ResourceManager();
 var interfaces = {};
 var declaredInterfaces = [];
 
-var registerInterface = function(name, functions) {
+var registerInterface = function(name, functions, supported) {
   // Defer creating the interface until Emscripten's runtime is available.
-  declaredInterfaces.push({name: name, functions: functions});
+  declaredInterfaces.push({name: name, functions: functions, supported: supported});
 };
 
 var createInterface = function(name, functions) {
@@ -205,7 +204,11 @@ var Module = {
   "preInit": function() {
     for (var i = 0; i < declaredInterfaces.length; i++) {
       var inf = declaredInterfaces[i];
-      createInterface(inf.name, inf.functions);
+      if (inf.supported === undefined || inf.supported()) {
+	createInterface(inf.name, inf.functions);
+      } else {
+	interfaces[inf.name] = 0;
+      }
     }
     declaredInterfaces = [];
   }

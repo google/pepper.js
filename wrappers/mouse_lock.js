@@ -36,7 +36,10 @@
   registerInterface("PPB_MouseLock;1.0", [
     MouseLock_LockMouse,
     MouseLock_UnlockMouse,
-  ]);
+  ], function() {
+    var b = document.body;
+    return b.webkitRequestPointerLock || b.mozRequestPointerLock;
+  });
 
   var FullScreen_IsFullscreen = function(instance) {
     var res = resources.resolve(instance, INSTANCE_RESOURCE);
@@ -101,6 +104,9 @@
     FullScreen_IsFullscreen,
     FullScreen_SetFullscreen,
     FullScreen_GetScreenSize
-  ]);
+  ], function() {
+    var b = document.body;
+    return b.requestFullscreen || b.mozRequestFullScreen || b.webkitRequestFullscreen;
+  });
 
 })();
