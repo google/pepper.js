@@ -112,6 +112,8 @@ var common = (function () {
     return e;
   }
 
+  var loadStart;
+
   /**
    * Create the Native Client <embed> element as a child of the DOM element
    * named "listener".
@@ -124,6 +126,7 @@ var common = (function () {
    * @param {Object} optional dictionary of args to send to DidCreateInstance
    */
   function createNaClModule(name, tool, path, width, height, args) {
+    loadStart = new Date();
     if (tool == 'emscripten') {
       return createEmscriptenModule(name, tool, path, width, height);
     }
@@ -216,6 +219,7 @@ var common = (function () {
   function moduleDidLoad() {
     common.naclModule = document.getElementById('nacl_module');
     updateStatus('SUCCESS');
+    console.log("Create instance: " + (new Date()-loadStart) + " ms");
 
     if (typeof window.moduleDidLoad !== 'undefined') {
       window.moduleDidLoad();
