@@ -1,5 +1,9 @@
 (function() {
 
+  var getContext = function(c) {
+    return c.getContext('webgl') || c.getContext("experimental-webgl");
+  };
+
   var Graphics3D_GetAttribMaxValue = function(instance, attribute, value) {
     throw "Graphics3D_GetAttribMaxValue not implemented";
   };
@@ -19,7 +23,7 @@
 
     return resources.register(GRAPHICS_3D_RESOURCE, {
       canvas: canvas,
-      ctx: canvas.getContext('webgl') || canvas.getContext("experimental-webgl"),
+      ctx: getContext(canvas),
       destroy: function() {
 	throw "Graphics3D destroy not implemented.";
       }
@@ -63,5 +67,7 @@
     Graphics3D_GetError,
     Graphics3D_ResizeBuffers,
     Graphics3D_SwapBuffers,
-  ]);
+  ], function() {
+      return !!getContext(document.createElement("canvas"));
+  });
 })();
