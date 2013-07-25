@@ -55,6 +55,8 @@ endif
 
 NACL_LDFLAGS+=-s TOTAL_MEMORY=33554432
 
+NACL_LDFLAGS+=-s EXPORTED_FUNCTIONS="['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']"
+
 # No threads.
 POSIX_FLAGS:=$(filter-out -pthread,$(POSIX_FLAGS))
 #

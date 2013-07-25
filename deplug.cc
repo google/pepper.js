@@ -9,12 +9,10 @@
 #include "ppapi/c/ppp_instance.h"
 #include "ppapi/c/ppp_messaging.h"
 
-#define CALLED_FROM_JS __attribute__((used))
-
 extern "C" {
   const void* GetBrowserInterface(const char* interface_name);
 
-  CALLED_FROM_JS void DoPostMessage(PP_Instance instance, const PP_Var* var) {
+  void DoPostMessage(PP_Instance instance, const PP_Var* var) {
     const PPP_Messaging* messaging_interface = (const PPP_Messaging*)PPP_GetInterface(PPP_MESSAGING_INTERFACE);
     if (!messaging_interface) {
       return;
@@ -23,7 +21,7 @@ extern "C" {
     // It appears that the callee own the var, so no need to release it?
   }
 
-  CALLED_FROM_JS void DoChangeView(PP_Instance instance, PP_Resource resource) {
+  void DoChangeView(PP_Instance instance, PP_Resource resource) {
     const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
     if (instance_interface == NULL) {
       printf("STUB: Failed to get instance interface.\n");
@@ -32,7 +30,7 @@ extern "C" {
     instance_interface->DidChangeView(instance, resource);
   }
 
-  CALLED_FROM_JS void DoChangeFocus(PP_Instance instance, PP_Bool hasFocus) {
+  void DoChangeFocus(PP_Instance instance, PP_Bool hasFocus) {
     const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
     if (instance_interface == NULL) {
       printf("STUB: Failed to get instance interface.\n");
@@ -49,7 +47,7 @@ extern "C" {
     PPP_ShutdownModule();
   }
 
-  CALLED_FROM_JS void NativeCreateInstance(PP_Instance instance, uint32_t argc, const char *argn[], const char *argv[]) {
+  void NativeCreateInstance(PP_Instance instance, uint32_t argc, const char *argn[], const char *argv[]) {
     int32_t status = PPP_InitializeModule(1, &GetBrowserInterface);
     if (status != PP_OK) {
       printf("STUB: Failed to initialize module.\n");
@@ -70,7 +68,7 @@ extern "C" {
     }
   }
 
-  CALLED_FROM_JS PP_Bool HandleInputEvent(PP_Instance instance, PP_Resource input_event) {
+  PP_Bool HandleInputEvent(PP_Instance instance, PP_Resource input_event) {
     const PPP_InputEvent* event_interface = (const PPP_InputEvent*)PPP_GetInterface(PPP_INPUT_EVENT_INTERFACE);
     if (event_interface == NULL) {
       printf("STUB: Failed to get input event interface.\n");

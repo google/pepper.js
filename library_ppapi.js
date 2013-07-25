@@ -1,13 +1,3 @@
-// C functions called by the JavaScript shims.
-EXPORTED_FUNCTIONS['_DoPostMessage'] = 1;
-EXPORTED_FUNCTIONS['_DoChangeView'] = 1;
-EXPORTED_FUNCTIONS['_DoChangeFocus'] = 1;
-EXPORTED_FUNCTIONS['_NativeCreateInstance'] = 1;
-EXPORTED_FUNCTIONS['_HandleInputEvent'] = 1;
-
-// Actually a JS function. Done to fix minimization problems.
-EXPORTED_FUNCTIONS['CreateInstance'] = 1;
-
 var ppapi_exports = {
   $ppapi_glue: {
     PP_Var: Runtime.generateStructInfo([
