@@ -27,12 +27,12 @@ VALID_TOOLCHAINS:=emscripten newlib
 # If NACL_SDK_ROOT is not set, then assume it can be found relative to
 # to this Makefile.
 #
-NACL_SDK_ROOT?=$(abspath $(CURDIR)/../../../../../nacl_sdk/pepper_27)
-DEPLUG_SRC_ROOT:=../../..
+NACL_SDK_ROOT?=$(abspath $(CURDIR)/../../../../../../nacl_sdk/pepper_27)
+DEPLUG_SRC_ROOT:=../../../..
 include $(DEPLUG_SRC_ROOT)/tools/common.mk
 
 # The tests expect header files starting with "ppapi/test"
-INC_PATHS+=$(DEPLUG_SRC_ROOT)/examples
+INC_PATHS+=$(DEPLUG_SRC_ROOT)/examples/tests
 
 #
 # Target Name

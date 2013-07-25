@@ -20,7 +20,7 @@ PROJECTS:= \
   voronoi \
   earth \
   file_io \
-  ppapi/tests \
+  tests/ppapi/tests \
   tests/ppapi_messaging \
   tests/ppapi_geturl \
 
