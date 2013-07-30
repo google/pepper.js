@@ -49,11 +49,6 @@ earth_SOURCES= \
   earth.cc \
   ../sdk_util/thread_pool.cc \
 
-# TODO(ncbray): find a better way to inject the shim
-ifeq (emscripten,$(TOOLCHAIN))
-earth_SOURCES := $(earth_SOURCES) ../../deplug.cc
-endif
-
 #
 # List of libraries to link against.  Unlike some tools, the GCC and LLVM
 # based tools require libraries to be specified in the correct order.  The
@@ -67,8 +62,8 @@ endif
 # and the set we do not.  This example does not havea any additional library
 # dependencies.
 #
-DEPS=ppapi_cpp
-LIBS=$(DEPS) ppapi pthread
+DEPS=ppapi ppapi_cpp
+LIBS=$(DEPS) pthread
 
 
 #

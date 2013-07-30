@@ -56,11 +56,6 @@ ppapi_test_SOURCES= \
   test_var.cc \
   testing_instance.cc \
 
-# TODO(ncbray): find a better way to inject the shim
-ifeq (emscripten,$(TOOLCHAIN))
-ppapi_test_SOURCES := $(ppapi_test_SOURCES) $(PPAPIJS_SRC_ROOT)/deplug.cc
-endif
-
 #
 # List of libraries to link against.  Unlike some tools, the GCC and LLVM
 # based tools require libraries to be specified in the correct order.  The
@@ -74,8 +69,8 @@ endif
 # and the set we do not.  This example does not havea any additional library
 # dependencies.
 #
-DEPS=ppapi_cpp
-LIBS=$(DEPS) ppapi pthread
+DEPS=ppapi ppapi_cpp
+LIBS=$(DEPS) pthread
 
 
 #

@@ -46,11 +46,6 @@ TARGET=stress
 stress_SOURCES= \
   stress.cc \
 
-# TODO(ncbray): find a better way to inject the shim
-ifeq (emscripten,$(TOOLCHAIN))
-stress_SOURCES := $(stress_SOURCES) ../../deplug.cc
-endif
-
 #
 # List of libraries to link against.  Unlike some tools, the GCC and LLVM
 # based tools require libraries to be specified in the correct order.  The
@@ -64,8 +59,8 @@ endif
 # and the set we do not.  This example does not havea any additional library
 # dependencies.
 #
-DEPS=
-LIBS=$(DEPS) ppapi pthread
+DEPS=ppapi
+LIBS=$(DEPS) pthread
 
 
 #

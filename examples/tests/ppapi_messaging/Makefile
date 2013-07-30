@@ -45,11 +45,6 @@ TARGET=ppapi_messaging
 ppapi_messaging_SOURCES= \
   ppapi_messaging.c \
 
-# TODO(ncbray): find a better way to inject the shim
-ifeq (emscripten,$(TOOLCHAIN))
-ppapi_messaging_SOURCES := $(ppapi_messaging_SOURCES) ../../../deplug.cc
-endif
-
 #
 # List of libraries to link against.  Unlike some tools, the GCC and LLVM
 # based tools require libraries to be specified in the correct order.  The
@@ -63,8 +58,8 @@ endif
 # and the set we do not.  This example does not havea any additional library
 # dependencies.
 #
-DEPS=
-LIBS=$(DEPS) ppapi pthread
+DEPS=ppapi
+LIBS=$(DEPS) pthread
 
 
 #

@@ -8,6 +8,7 @@
 #
 
 PROJECTS:= \
+  ppapi \
   ppapi_cpp \
   ppapi_gles2 \
   hello_world \

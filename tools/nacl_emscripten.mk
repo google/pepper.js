@@ -153,7 +153,7 @@ endef
 # $6 = VC Linker Switches
 #
 define LINK_RULE
-$(call LINKER_RULE,$(1),$(2),$(filter-out pthread ppapi,$(3)),$(4),$(5),$(LIB_PATHS))
+$(call LINKER_RULE,$(1),$(2),$(filter-out pthread,$(3)),$(4),$(5),$(LIB_PATHS))
 endef
 
 

@@ -43,11 +43,6 @@ hello_world_gles_SOURCES= \
   hello_world.cc \
   matrix.cc \
 
-# TODO(ncbray): find a better way to inject the shim
-ifeq (emscripten,$(TOOLCHAIN))
-hello_world_gles_SOURCES := $(hello_world_gles_SOURCES) ../../deplug.cc
-endif
-
 #
 # List of libraries to link against.  Unlike some tools, the GCC and LLVM
 # based tools require libraries to be specified in the correct order.  The
@@ -61,8 +56,8 @@ endif
 # and the set we do not.  This example does not havea any additional library
 # dependencies.
 #
-DEPS= ppapi_gles2
-LIBS=$(DEPS) ppapi pthread
+DEPS=ppapi ppapi_gles2
+LIBS=$(DEPS) pthread
 
 
 #
