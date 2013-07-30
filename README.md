@@ -1,5 +1,5 @@
 # ppapi.js #
-ppapi.js is a JavaScript library that enables the compilation of PPAPI plugins into JavaScript using [Emscripten](https://github.com/kripken/emscripten).  This enables the deployment native code on the web both as a Native Client executable and as JavaScript.
+ppapi.js is a JavaScript library that enables the compilation of Pepper plugins into JavaScript using [Emscripten](https://github.com/kripken/emscripten).  This allows the simultaneous deployment of native code on the web both as a [Native Client](http://gonacl.com) executable and as JavaScript. 
 
 ## Getting Started ##
 Warning: getting ppapi.js up and running currently requires a non-trivial amount work installing dependencies and configuring the system.  If you have Emscripten already working, however, it should be fairly simple.
@@ -9,6 +9,8 @@ Warning: getting ppapi.js up and running currently requires a non-trivial amount
 * ./ppapi.js/emscripten => [Emscripten](https://github.com/kripken/emscripten/wiki/Tutorial)
     * git clone https://github.com/kripken/emscripten.git
 * ./nacl_sdk => the [NaCl SDK](https://developers.google.com/native-client/sdk/download)
+
+This layout will be simplified, in the future.
 
 ### System Setup ###
 Install Emscripten's dependencies:
@@ -20,7 +22,7 @@ Install Emscripten's dependencies:
 
 Run ./ppapi.js/emscripten/emcc to let Emscripten set itself up.  You may need to manually edit ~/.emscripten (after you've run emcc once) to point it to the correct paths.  For example, you may want Emscripten to use a hermetic version of Clang instead of the one installed on the system.  For a specific example, Emscripten doesn't appear to be entirely happy with Xcode's command line tools, so downloading prebuilt binaries from LLVM's website may save some difficulty, even if you're already set up with Xcode.
 
-Development on Windows is currently not supported because Emscripten depends on Clang, and Clang does not officially support Windows.  In the future, the Windows will be supported via the PNaCl toolchain.  The PNaCl toolchain is essentially Clang, and it has already been ported to Windows.
+Development on Windows is currently not supported because Emscripten depends on Clang, and Clang does not officially support Windows.  In the future, the Windows will be supported via the Portable Native Client (PNaCl) toolchain.  The PNaCl toolchain is essentially Clang, and it has already been ported to Windows.
 
 Emscripten expects a "python2" binary to exist.  If it does not exist on your system, such as on OSX, you can create a symlink.
 `sudo ln -s /usr/bin/python /usr/bin/python2`
@@ -36,21 +38,98 @@ Emscripten expects a "python2" binary to exist.  If it does not exist on your sy
     cd .. (out of the examples directory)
     python ./tools/httpd.py
 
-Surf to [examples/examples.html](http://127.0.0.1:5103/examples/examples.html).
-Note that this web server can be accessed remotely.
+Surf to [examples/examples.html](http://127.0.0.1:5103/examples/examples.html).  Note that this web server can be accessed remotely.
 
 ## Developing with ppapi.js ##
+To create an application that can target both Native Client and Emscripten, it is necessary to work within the constraints of both platforms.  To do this, an application must be written to use the Pepper Plugin API and must _not_ use threads.
 
-### PPAPI Interfaces ###
+To be compatible with Native Client, it is necessary to use the [Pepper Plugin API](https://developers.google.com/native-client/pepperc/group___interfaces) to interact with the browser.  In the general case, Emscripten lets a developer define JavaScript functions that can be invoked synchronously from native code.  ppapi.js provides a set of JavaScript functions that implement Pepper and invoking any other JavaScript functions would break cross-toolchain compatibility.
 
-### Concurrency ###
+To be compatible with Emscripten, it is necessary to structure the program so that it does not create additional threads and does not block the main thread.  In other words, the program must be written as if it were an event-driven JavaScript program.  The Pepper Plugin API imposes the same non-blocking requirement on its main thread of execution, so this constraint is equivalent to requiring that a Pepper plugin only runs on the main thread and does not create any additional threads.
+
+Of course, both of these constraints can be worked around using the C preprocessor and conditional compilation.  For example, threading can be enabled on Native Client by guarding the relevant code with `#if defined(__native_client__) ... #endif`.  Emscripten-specific functionality can be conditioned on `defined(__EMSCRIPTEN__)`.  This approach is generally not recommended, but there are situations where the benefits outweigh the additional complexity - such as performance improvements from mutlithreading or calling directly to JavaScript rather than mediating through postMessage.
+
+In addition to these two constraints, there are a few subtle differences between native code compiled with Native Client and compiled with Emscripten.  For example, dereferencing a null pointer (or accessing unmapped memory of any sort) will cause a segfault in Native Client whereas it will succeed in Emscripten and return junk data.  Developers should keep these platform differences in mind - similar to how differences between 32-bit and 64-bit architectures needs to be considered in other situations.
 
 ### Required Compiler Flags ###
-Building an example with `V=1` will show the flags being passed to Emscripten.
+Building an example with `V=1 TOOLCHAIN=emscripten` will show the flags being passed to Emscripten.  If you want to set up your own build system, there’s a few flags you must pass when linking in order for your application to use ppapi.js.  
 
-### Deploying Native Client ###
+    -s RESERVED_FUNCTION_POINTERS=350
 
-### Deploying JavaScript ###
+ppapi.js creates function tables for each PPAPI interfaces at runtime.  Emscripten requires that space for each function pointer is reserved at link time.
+
+    -s TOTAL_MEMORY=33554432
+
+Emscripten defaults to a 16 MB address space, which may to be too small.  Tune the size for your particular application.
+
+    -lppapi
+
+TODO
+
+    -s EXPORTED_FUNCTIONS="['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']"
+
+These functions are called by ppapi.js, and they must be exported by your application.
+
+TODO --js-library and --pre-js
+
+TODO closure exports
+
+## PPAPI Interfaces in ppapi.js ##
+
+### Unsupported Interfaces ###
+There are currently a few Pepper Interfaces not supported by ppapi.js.  For example, `PPB_MessageLoop` is not supported because it only makes sense when additional threads are created.  There are also a number of interfaces that simply haven’t been implemented, yet:
+
+* `PPB_Gamepad`
+* `PPB_MouseCursor`
+* `PPB_TouchInputEvent`
+* `PPB_VarArray`
+* `PPB_VarDictionary`
+* Networking-related interfaces
+    * `PPB_HostResolver`
+    * `PPB_NetAddress`
+    * `PPB_NetworkProxy`
+    * `PPB_TCPSocket`
+    * `PPB_UDPSocket`
+    * `PPB_WebSocket`
+
+### Incomplete Support ###
+ppapi.js was developed using test-driven development.  Features are only added when tests are available (either automatic or manual).  This means that even if an interface is supported, there may be missing features or subtle incompatibilities where test coverage is not available.  Lack of test coverage is the main reason ppapi.js has not been declared v1.0.
+
+TODO figure out how to clearly explain how this situation impacts developers, or fix it.
+
+### Implementation Errata ###
+The Graphics2D and Graphics3D interfaces will automatically swap buffers every frame, even if Flush or SwapBuffers is not called. This behavior should not be noticible for most applications. Explicit swapping could be emulated by creating an offscreen buffer, but this would cost time and memory.
+
+Using BGRA image formats will result in a silent performance penalty. In general, web APIs tend to be strongly opinionated that premultiplied RGBA is the image format that should be used. Any other format must be manually converted into premultiplied RGBA.
+
+The Audio API only supports one sample rate - whatever the underlying Web Audio API uses, which is whatever the OS defaults to, which tends to be either 44.1k or 48k. 48k appears to be a little more common.  This means that an app expecting a particular sample rate may not be able to get it, and this can cause serious difficulties.  In the future, resampling could be performed as a polyfill, but this would be slow.
+
+URLLoader intentionally deviates from the native implementation's behavior when it is at odds with XMLHttpRequest. For example, ppapi.js does not identify CORS failures as `PP_ERROR_NOACCESS`, instead it returns `PP_ERROR_FAILED`.
+
+URLLoader does not stream - the data appears all at once. This is a consequence of doing an XHR with requestType "arraybuffer", it does not appear to give partial results.
+
+If multiple mouse buttons are held, ppapi.js will list all of them as event modifiers. PPAPI will only list one button - the one with the lowest enum value. There is a known but where ppapi.js will not update the modifier state if a button is pressed or released outside of ppapi.js's canvas.
+
+### Platform Errata ###
+`PPB_Graphics3D` does not work on Internet Explorer 10 or before because WebGL is not supported.  WebGL is supported on Safari, but it must be [manually enabled](https://discussions.apple.com/thread/3300585).
+
+`PPB_MouseLock` and `PPB_Fullscreen` are only supported in Chrome and Firefox.  The behavior of these interfaces varies somewhat between the two browsers, however.
+
+The file interfaces are currently supported only by Chrome. (Creation and last access time are not supported, even on Chrome.) A polyfill for Firefox and IE is included in ppapi.js, but it has a few known bugs - such as not being able to resize existing files. Another issue is that the Closure compiler will rename fields in persistent data structures, resulting in data incompatibility/loss between Debug and Release versions, and possibly even between different Release versions.
+
+Input events are a little fiddly due to inconsistencies between browsers. For example, the delta for scroll wheel events is scaled differently in different browsers. ppapi.js attempts to normalize this, but in general, cross-platform inconsistencies should be expected in the input event interface.
+
+Mobile browsers have not been tested.
+
+TODO interface support dashboard for programmatically showing interface support.
+
+## Deployment ##
+ppapi.js lets a single Pepper plugin be deployed as both a Native Client executable and as JavaScript.  Choosing a single technology and sticking with it would make life simpler, but there are advantages and disadvantages to each technology.  Deploying different technologies in different circumstances let an application play to the strengths of each.
+
+Native Client generally provides better performance than JavaScript, particularly when threading is leveraged.  On the downside, currently Native Client executables are only supported by Chrome.  JavaScript has much more pervasive browser support.  It should be noted that although JavaScript “runs everywhere,” performance can vary widely between browsers, sometimes to the point of making an application unusable.  Because of this, It is highly suggested that applications be designed to scale across differing amounts processing power, if possible.
+
+### Portable Native Client ###
+In addition to only running on Chrome, Native Client is further restricted to only run as a Chrome (web app)[http://developer.chrome.com/extensions/apps.html].  Native Client executables contain architecture-specific code, which makes them inappropriate for running on the open web.  There is, however, an architecture neutral version of Native Client called Portable Native Client.  Portable Native Client executables contain platform-neutral bitcode, making it better suited for the open web.  Starting in Chrome 30, PNaCl executables can be loaded in arbitrary web pages.  Initial load times are longer than because bitcode must be translated into architecture-specific code before it is executed.  For applications running on the open web, PNaCl is required, but when deploying as a Chrome App, it may be advantageous to use NaCl.
 
 ## Getting Help ##
 * [native-client-discuss](https://groups.google.com/forum/#!forum/native-client-discuss) for questions about ppapi.js and Native Client.
