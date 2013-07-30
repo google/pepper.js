@@ -12,12 +12,12 @@
 #
 # Default Paths
 #
-EM_PATH:=$(abspath $(DEPLUG_SRC_ROOT)/../emscripten)
+EM_PATH:=$(abspath $(PPAPIJS_SRC_ROOT)/../emscripten)
 #$(error $(EM_PATH))
 
-LIBDIR:=$(DEPLUG_SRC_ROOT)/lib/emscripten/$(CONFIG)
+LIBDIR:=$(PPAPIJS_SRC_ROOT)/lib/emscripten/$(CONFIG)
 
-LD_X86_32:=-L$(DEPLUG_SRC_ROOT)/lib/emscripten/$(CONFIG)
+LD_X86_32:=-L$(PPAPIJS_SRC_ROOT)/lib/emscripten/$(CONFIG)
 
 #
 # Macros for TOOLS
@@ -40,7 +40,7 @@ NACL_CXXFLAGS?=-Wno-long-long -Werror
 NACL_LDFLAGS?=-Wl,-as-needed
 
 # HACK closure currently does not have audio exports defined.
-export EMCC_CLOSURE_ARGS=--externs $(DEPLUG_SRC_ROOT)/externs.js --externs $(DEPLUG_SRC_ROOT)/third_party/w3c_audio.js
+export EMCC_CLOSURE_ARGS=--externs $(PPAPIJS_SRC_ROOT)/externs.js --externs $(PPAPIJS_SRC_ROOT)/third_party/w3c_audio.js
 
 # Emscripten appears to key off the optimization while linking to deterimine what backend should be used.
 # HACK PPAPI will export a bunch of anonymous function pointers, so we need to reserve slots for them.
@@ -113,8 +113,8 @@ $(LIBDIR)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_emscripten))
 
 endef
 
-JS_LIBRARIES=$(DEPLUG_SRC_ROOT)/library_ppapi.js
-JS_PRE=$(DEPLUG_SRC_ROOT)/deplug.js $(DEPLUG_SRC_ROOT)/third_party/idb.filesystem.js
+JS_LIBRARIES=$(PPAPIJS_SRC_ROOT)/library_ppapi.js
+JS_PRE=$(PPAPIJS_SRC_ROOT)/ppapi_preamble.js $(PPAPIJS_SRC_ROOT)/third_party/idb.filesystem.js
 
 # TODO(ncbray): only include needed wrappers, testing.js in particular.
 WRAPPERS= \
@@ -132,7 +132,7 @@ WRAPPERS= \
     file.js \
 
 # Resolve the paths.
-WRAPPERS:=$(foreach wrapper,$(WRAPPERS),$(DEPLUG_SRC_ROOT)/wrappers/$(wrapper))
+WRAPPERS:=$(foreach wrapper,$(WRAPPERS),$(PPAPIJS_SRC_ROOT)/wrappers/$(wrapper))
 
 #
 # Specific Link Macro

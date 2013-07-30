@@ -13,9 +13,9 @@
 # Default Paths
 #
 
-LD_X86_32:=-L$(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_32/$(CONFIG)
-LD_X86_64:=-L$(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_64/$(CONFIG)
-LD_ARM:=-L$(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_arm/$(CONFIG)
+LD_X86_32:=-L$(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_32/$(CONFIG)
+LD_X86_64:=-L$(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_64/$(CONFIG)
+LD_ARM:=-L$(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_arm/$(CONFIG)
 
 
 #
@@ -129,29 +129,29 @@ endef
 # $4 = VC Link Flags (unused)
 #
 define LIB_RULE
-$(STAMPDIR)/$(1).stamp : $(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_32/$(CONFIG)/lib$(1).a
-$(STAMPDIR)/$(1).stamp : $(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_64/$(CONFIG)/lib$(1).a
+$(STAMPDIR)/$(1).stamp : $(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_32/$(CONFIG)/lib$(1).a
+$(STAMPDIR)/$(1).stamp : $(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_64/$(CONFIG)/lib$(1).a
 ifneq ('glibc','$(TOOLCHAIN)')
-$(STAMPDIR)/$(1).stamp : $(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_arm/$(CONFIG)/lib$(1).a
+$(STAMPDIR)/$(1).stamp : $(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_arm/$(CONFIG)/lib$(1).a
 endif
 
 $(STAMPDIR)/$(1).stamp :
 	@echo "TOUCHED $$@" > $(STAMPDIR)/$(1).stamp
 
-all: $(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_32/$(CONFIG)/lib$(1).a
-$(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_32/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_x86_32))
+all: $(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_32/$(CONFIG)/lib$(1).a
+$(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_32/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_x86_32))
 	$(MKDIR) -p $$(dir $$@)
 	$(call LOG,LIB,$$@,$(X86_32_LIB) -r $$@ $$^)
 
-all: $(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_64/$(CONFIG)/lib$(1).a
-$(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_64/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_x86_64))
+all: $(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_64/$(CONFIG)/lib$(1).a
+$(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_x86_64/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_x86_64))
 	$(MKDIR) -p $$(dir $$@)
 	$(call LOG,LIB,$$@,$(X86_64_LIB) -r $$@ $$^)
 
 ifneq ('glibc','$(TOOLCHAIN)')
-all: $(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_arm/$(CONFIG)/lib$(1).a
+all: $(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_arm/$(CONFIG)/lib$(1).a
 endif
-$(DEPLUG_SRC_ROOT)/lib/$(TOOLCHAIN)_arm/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_arm))
+$(PPAPIJS_SRC_ROOT)/lib/$(TOOLCHAIN)_arm/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_arm))
 	$(MKDIR) -p $$(dir $$@)
 	$(call LOG,LIB,$$@,$(ARM_LIB) -r $$@ $$^)
 endef

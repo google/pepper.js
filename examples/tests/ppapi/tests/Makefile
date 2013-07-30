@@ -28,11 +28,11 @@ VALID_TOOLCHAINS:=emscripten newlib
 # to this Makefile.
 #
 NACL_SDK_ROOT?=$(abspath $(CURDIR)/../../../../../../nacl_sdk/pepper_27)
-DEPLUG_SRC_ROOT:=../../../..
-include $(DEPLUG_SRC_ROOT)/tools/common.mk
+PPAPIJS_SRC_ROOT:=../../../..
+include $(PPAPIJS_SRC_ROOT)/tools/common.mk
 
 # The tests expect header files starting with "ppapi/test"
-INC_PATHS+=$(DEPLUG_SRC_ROOT)/examples/tests
+INC_PATHS+=$(PPAPIJS_SRC_ROOT)/examples/tests
 
 #
 # Target Name
@@ -58,7 +58,7 @@ ppapi_test_SOURCES= \
 
 # TODO(ncbray): find a better way to inject the shim
 ifeq (emscripten,$(TOOLCHAIN))
-ppapi_test_SOURCES := $(ppapi_test_SOURCES) $(DEPLUG_SRC_ROOT)/deplug.cc
+ppapi_test_SOURCES := $(ppapi_test_SOURCES) $(PPAPIJS_SRC_ROOT)/deplug.cc
 endif
 
 #

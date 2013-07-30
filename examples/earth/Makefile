@@ -28,11 +28,11 @@ VALID_TOOLCHAINS:=emscripten newlib
 # to this Makefile.
 #
 NACL_SDK_ROOT?=$(abspath $(CURDIR)/../../../../nacl_sdk/pepper_27)
-DEPLUG_SRC_ROOT:=../..
-include $(DEPLUG_SRC_ROOT)/tools/common.mk
+PPAPIJS_SRC_ROOT:=../..
+include $(PPAPIJS_SRC_ROOT)/tools/common.mk
 
 # For sdk_util
-INC_PATHS+=$(DEPLUG_SRC_ROOT)/examples
+INC_PATHS+=$(PPAPIJS_SRC_ROOT)/examples
 
 #
 # Target Name

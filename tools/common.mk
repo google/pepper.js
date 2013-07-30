@@ -208,7 +208,7 @@ ifndef $(IGNORE_DEPS)
 
 rebuild_$(1) :| $(STAMPDIR)/dir.stamp
 ifeq (,$(2))
-	+$(MAKE) -C $(DEPLUG_SRC_ROOT)/examples/$(1) STAMPDIR=$(abspath $(STAMPDIR)) $(abspath $(STAMPDIR)/$(1).stamp) $(3)
+	+$(MAKE) -C $(PPAPIJS_SRC_ROOT)/examples/$(1) STAMPDIR=$(abspath $(STAMPDIR)) $(abspath $(STAMPDIR)/$(1).stamp) $(3)
 else
 	+$(MAKE) -C $(2) STAMPDIR=$(abspath $(STAMPDIR)) $(abspath $(STAMPDIR)/$(1).stamp) $(3)
 endif
@@ -254,7 +254,7 @@ else
 INC_PATHS?=$(NACL_SDK_ROOT)/include/$(OSNAME) $(NACL_SDK_ROOT)/include $(EXTRA_INC_PATHS)
 endif
 
-LIB_PATHS?=$(DEPLUG_SRC_ROOT)/lib $(EXTRA_LIB_PATHS)
+LIB_PATHS?=$(PPAPIJS_SRC_ROOT)/lib $(EXTRA_LIB_PATHS)
 
 #
 # Define a LOG macro that allow a command to be run in quiet mode where
@@ -314,11 +314,11 @@ endef
 # macros and targets.
 #
 ifneq (,$(findstring $(TOOLCHAIN),glibc newlib))
-include $(DEPLUG_SRC_ROOT)/tools/nacl_gcc.mk
+include $(PPAPIJS_SRC_ROOT)/tools/nacl_gcc.mk
 endif
 
 ifneq (,$(findstring $(TOOLCHAIN),emscripten))
-include $(DEPLUG_SRC_ROOT)/tools/nacl_emscripten.mk
+include $(PPAPIJS_SRC_ROOT)/tools/nacl_emscripten.mk
 endif
 
 #

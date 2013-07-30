@@ -166,7 +166,7 @@
         }
 
         var obj_uid = resources.register(INPUT_EVENT_RESOURCE, {
-          // can't use type as attribute name since deplug uses that internally
+          // can't use type as attribute name because it is used internally
           ie_type: event_type,
           pos: GetEventPos(event),
           button: button,
