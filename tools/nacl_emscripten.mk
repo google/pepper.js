@@ -31,10 +31,6 @@ EM_LIB?=$(EM_PATH)/emar
 EM_CFLAGS?=-DNACL_ARCH=x86_32
 EM_CXXFLAGS?=-DNACL_ARCH=x86_32
 
-# Emscripten currently has a warning about -nostdinc++, prevent this from causing an error.
-NACL_CFLAGS:=$(filter-out -Werror,$(NACL_CFLAGS))
-NACL_CXXFLAGS:=$(filter-out -Werror,$(NACL_CXXFLAGS))
-
 NACL_CFLAGS?=-Wno-long-long -Werror
 NACL_CXXFLAGS?=-Wno-long-long -Werror
 NACL_LDFLAGS?=-Wl,-as-needed
