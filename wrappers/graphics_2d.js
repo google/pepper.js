@@ -160,14 +160,15 @@
     // 1) The image format is RGBA
     // 2) The canvas API implements image_data.data as a typed array.
     // 3) Uint8ClampedArray is defined (this is likely redundant with condition 2)
-    var fast_path_supported = format === 1 && "set" in image_data.data && window.Uint8ClampedArray !== undefined;
+    // Note that Closure appears to minimize window.Uint8ClampedArray.
+    var fast_path_supported = format === 1 && "set" in image_data.data && window["Uint8ClampedArray"] !== undefined;
     if (fast_path_supported) {
       try {
-	// Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
-	view = new Uint8ClampedArray(buffer, memory, bytes);
+        // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
+        view = new Uint8ClampedArray(buffer, memory, bytes);
       } catch(err) {
-	_free(memory);
-	return 0;
+        _free(memory);
+        return 0;
       }
     }
 

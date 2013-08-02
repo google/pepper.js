@@ -72,7 +72,7 @@ inline float ExtractB(uint32_t c) {
 }
 
 inline uint32_t MakeRGBA(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
-  return (((a) << 24) | ((r) << 16) | ((g) << 8) | (b));
+  return (((a) << 24) | ((b) << 16) | ((g) << 8) | (r));
 }
 
 // simple container for earth texture
@@ -795,7 +795,7 @@ void Planet::CreateContext(const pp::Size& size) {
   if (!BindGraphics(*graphics_2d_context_))
     printf("Couldn't bind the device context\n");
   image_data_ = new pp::ImageData(this,
-                                  PP_IMAGEDATAFORMAT_BGRA_PREMUL,
+                                  PP_IMAGEDATAFORMAT_RGBA_PREMUL,
                                   size,
                                   false);
   width_ = image_data_->size().width();
