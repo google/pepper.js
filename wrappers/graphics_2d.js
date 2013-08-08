@@ -15,9 +15,10 @@
       canvas: canvas,
       ctx: canvas.getContext('2d'),
       always_opaque: true,
+      scale: 1,
       destroy: function() {
         //TODO(grosse): recreate canvas when necessary
-	// throw "Canvas destroy not implemented.";
+        // throw "Canvas destroy not implemented.";
       }
     });
   };
@@ -74,6 +75,30 @@
     return ppapi.PP_OK;
   };
 
+  var Graphics2D_SetScale = function(resource, scale) {
+    var g2d = resources.resolve(resource, GRAPHICS_2D_RESOURCE);
+    if (g2d === undefined) {
+      return 0;
+    }
+    if (scale <= 0) {
+      return 0;
+    }
+    g2d.scale = scale;
+    // TODO(ncbray): actually scale.  This is complicated by the canvas being
+    // both the graphics2d context and the display buffer, and by the fact that
+    // fullscreen stomps on the CSS of the canvas.
+    return 1;
+  };
+
+  var Graphics2D_GetScale = function(resource) {
+    var g2d = resources.resolve(resource, GRAPHICS_2D_RESOURCE);
+    if (g2d === undefined) {
+      return 0;
+    }
+    return g2d.scale;
+  };
+
+
   registerInterface("PPB_Graphics2D;1.0", [
     Graphics2D_Create,
     Graphics2D_IsGraphics2D,
@@ -81,8 +106,21 @@
     Graphics2D_PaintImageData,
     Graphics2D_Scroll,
     Graphics2D_ReplaceContents,
-    Graphics2D_Flush
+    Graphics2D_Flush,
   ]);
+
+  registerInterface("PPB_Graphics2D;1.1", [
+    Graphics2D_Create,
+    Graphics2D_IsGraphics2D,
+    Graphics2D_Describe,
+    Graphics2D_PaintImageData,
+    Graphics2D_Scroll,
+    Graphics2D_ReplaceContents,
+    Graphics2D_Flush,
+    Graphics2D_SetScale,
+    Graphics2D_GetScale,
+  ]);
+
 
   // Copy the data from Emscripten's memory space into the ImageData object.
   var syncImageData = function(res) {
@@ -94,21 +132,21 @@
       var bytes = res.size.width * res.size.height * 4;
 
       if (res.format === 0) {
-	// BGRA
-	for (var i = 0; i < bytes; i += 4) {
-	  image_data.data[i]     = HEAPU8[base + i + 2];
-	  image_data.data[i + 1] = HEAPU8[base + i + 1];
-	  image_data.data[i + 2] = HEAPU8[base + i];
-	  image_data.data[i + 3] = HEAPU8[base + i + 3];
-	}
+        // BGRA
+        for (var i = 0; i < bytes; i += 4) {
+          image_data.data[i]     = HEAPU8[base + i + 2];
+          image_data.data[i + 1] = HEAPU8[base + i + 1];
+          image_data.data[i + 2] = HEAPU8[base + i];
+          image_data.data[i + 3] = HEAPU8[base + i + 3];
+        }
       } else {
-	// RGBA
-	for (var i = 0; i < bytes; i += 4) {
-	  image_data.data[i]     = HEAPU8[base + i];
-	  image_data.data[i + 1] = HEAPU8[base + i + 1];
-	  image_data.data[i + 2] = HEAPU8[base + i + 2];
-	  image_data.data[i + 3] = HEAPU8[base + i + 3];
-	}
+        // RGBA
+        for (var i = 0; i < bytes; i += 4) {
+          image_data.data[i]     = HEAPU8[base + i];
+          image_data.data[i + 1] = HEAPU8[base + i + 1];
+          image_data.data[i + 2] = HEAPU8[base + i + 2];
+          image_data.data[i + 3] = HEAPU8[base + i + 3];
+        }
       }
     }
   }

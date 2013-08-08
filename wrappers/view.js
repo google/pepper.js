@@ -47,6 +47,24 @@
     return 1;
   };
 
+  var View_GetDeviceScale = function(resource) {
+    var view = resources.resolve(resource, VIEW_RESOURCE);
+    if (view === undefined) {
+      return 0;
+    }
+    return window.devicePixelRatio || 1;
+  };
+
+  var View_GetCSSScale = function(resource) {
+    var view = resources.resolve(resource, VIEW_RESOURCE);
+    if (view === undefined) {
+      return 0;
+    }
+    // This doesn't actually take CSS scaling into account, but it's unclear how
+    // to get this information in JavaScript.
+    return 1;
+  };
+
   registerInterface("PPB_View;1.0", [
     View_IsView,
     View_GetRect,
@@ -54,5 +72,16 @@
     View_IsVisible,
     View_IsPageVisible,
     View_GetClipRect,
+  ]);
+
+  registerInterface("PPB_View;1.1", [
+    View_IsView,
+    View_GetRect,
+    View_IsFullscreen,
+    View_IsVisible,
+    View_IsPageVisible,
+    View_GetClipRect,
+    View_GetDeviceScale,
+    View_GetCSSScale,
   ]);
 })();

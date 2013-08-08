@@ -183,7 +183,15 @@ var createInterface = function(name, functions) {
       console.log("<<<", name, i, result);
       return result;
     }
-  }
+  };
+
+  var getFuncPtr = function(f) {
+    // Memoize - a single function may appear in multiple versions of an interface.
+    if (f.func_ptr === undefined) {
+      f.func_ptr = Runtime.addFunction(f, 1);
+    }
+    return f.func_ptr;
+  };
 
   // allocate(...) is bugged for non-i8 allocations, so do it manually
   // TODO(ncbray): static alloc?
@@ -193,7 +201,7 @@ var createInterface = function(name, functions) {
     if (false) {
       f = trace(f, i);
     }
-    setValue(ptr + i * 4, Runtime.addFunction(f, 1), 'i32');
+    setValue(ptr + i * 4, getFuncPtr(f), 'i32');
   }
   interfaces[name] = ptr;
 };
@@ -205,9 +213,9 @@ var Module = {
     for (var i = 0; i < declaredInterfaces.length; i++) {
       var inf = declaredInterfaces[i];
       if (inf.supported === undefined || inf.supported()) {
-	createInterface(inf.name, inf.functions);
+        createInterface(inf.name, inf.functions);
       } else {
-	interfaces[inf.name] = 0;
+        interfaces[inf.name] = 0;
       }
     }
     declaredInterfaces = [];

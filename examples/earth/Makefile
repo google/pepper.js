@@ -31,8 +31,8 @@ NACL_SDK_ROOT?=$(abspath $(CURDIR)/../../../../nacl_sdk/pepper_27)
 PPAPIJS_SRC_ROOT:=../..
 include $(PPAPIJS_SRC_ROOT)/tools/common.mk
 
-# For sdk_util
-INC_PATHS+=$(PPAPIJS_SRC_ROOT)/examples
+# For hermetic sdk_util
+INC_PATHS:=$(PPAPIJS_SRC_ROOT)/examples $(INC_PATHS)
 
 #
 # Target Name

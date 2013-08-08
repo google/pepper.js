@@ -6,7 +6,6 @@
 # GNU Make based build file.  For details on GNU Make see:
 #   http://www.gnu.org/software/make/manual/make.html
 #
-#
 
 #
 # Toolchain
@@ -40,9 +39,10 @@ endif
 # are compiled without optimizations to make debugging easier.  By default
 # this will build a Debug configuration.
 #
-CONFIG?=Debug
+CONFIG ?= Debug
 
 
+#
 # Note for Windows:
 #   The GCC and LLVM toolchains (include the version of Make.exe that comes
 # with the SDK) expect and are capable of dealing with the '/' seperator.
@@ -65,8 +65,8 @@ endif
 #
 # If NACL_SDK_ROOT is not already set, then set it relative to this makefile.
 #
-THIS_MAKEFILE:=$(CURDIR)/$(lastword $(MAKEFILE_LIST))
-NACL_SDK_ROOT?=$(realpath $(dir $(THIS_MAKEFILE))/..)
+THIS_MAKEFILE := $(CURDIR)/$(lastword $(MAKEFILE_LIST))
+NACL_SDK_ROOT ?= $(realpath $(dir $(THIS_MAKEFILE))/..)
 
 
 #
@@ -84,7 +84,7 @@ endif
 # to a different location this is almost certainly a local configuration
 # error.
 #
-LOCAL_ROOT:=$(realpath $(dir $(THIS_MAKEFILE))/..)
+LOCAL_ROOT := $(realpath $(dir $(THIS_MAKEFILE))/..)
 ifneq (,$(wildcard $(LOCAL_ROOT)/tools/oshelpers.py))
   ifneq ($(realpath $(NACL_SDK_ROOT)), $(realpath $(LOCAL_ROOT)))
     $(error common.mk included from an SDK that does not match the current NACL_SDK_ROOT)
@@ -95,18 +95,18 @@ endif
 #
 # Alias for standard POSIX file system commands
 #
-OSHELPERS=python $(NACL_SDK_ROOT)/tools/oshelpers.py
-WHICH:=$(OSHELPERS) which
+OSHELPERS = python $(NACL_SDK_ROOT)/tools/oshelpers.py
+WHICH := $(OSHELPERS) which
 ifdef V
-RM:=$(OSHELPERS) rm
-CP:=$(OSHELPERS) cp
-MKDIR:=$(OSHELPERS) mkdir
-MV:=$(OSHELPERS) mv
+RM := $(OSHELPERS) rm
+CP := $(OSHELPERS) cp
+MKDIR := $(OSHELPERS) mkdir
+MV := $(OSHELPERS) mv
 else
-RM:=@$(OSHELPERS) rm
-CP:=@$(OSHELPERS) cp
-MKDIR:=@$(OSHELPERS) mkdir
-MV:=@$(OSHELPERS) mv
+RM := @$(OSHELPERS) rm
+CP := @$(OSHELPERS) cp
+MKDIR := @$(OSHELPERS) mkdir
+MV := @$(OSHELPERS) mv
 endif
 
 
@@ -203,8 +203,8 @@ clean:
 # $3 = Extra Settings
 #
 define DEPEND_RULE
-ifndef $(IGNORE_DEPS)
-.PHONY : rebuild_$(1)
+ifndef IGNORE_DEPS
+.PHONY: rebuild_$(1)
 
 rebuild_$(1) :| $(STAMPDIR)/dir.stamp
 ifeq (,$(2))
@@ -214,21 +214,21 @@ else
 endif
 
 all: rebuild_$(1)
-$(STAMPDIR)/$(1).stamp : rebuild_$(1)
+$(STAMPDIR)/$(1).stamp: rebuild_$(1)
 
 else
 
-.PHONY : $(STAMPDIR)/$(1).stamp
-$(STAMPDIR)/$(1).stamp :
+.PHONY: $(STAMPDIR)/$(1).stamp
+$(STAMPDIR)/$(1).stamp:
 	@echo Ignore $(1)
 endif
 endef
 
 
 ifeq ($(TOOLCHAIN),win)
-HOST_EXT=.dll
+HOST_EXT = .dll
 else
-HOST_EXT=.so
+HOST_EXT = .so
 endif
 
 
@@ -236,14 +236,18 @@ endif
 # Common Compile Options
 #
 ifeq ($(CONFIG),Release)
-POSIX_FLAGS?=-g -O2 -pthread -MMD
+POSIX_FLAGS ?= -g -O2 -pthread -MMD
 else
-POSIX_FLAGS?=-g -O0 -pthread -MMD
+POSIX_FLAGS ?= -g -O0 -pthread -MMD -DNACL_SDK_DEBUG
 endif
 
-NACL_CFLAGS?=-Wno-long-long -Werror
-NACL_CXXFLAGS?=-Wno-long-long -Werror
-NACL_LDFLAGS?=-Wl,-as-needed
+ifdef SEL_LDR
+POSIX_FLAGS += -DSEL_LDR=1
+endif
+
+NACL_CFLAGS ?= -Wno-long-long -Werror
+NACL_CXXFLAGS ?= -Wno-long-long -Werror
+NACL_LDFLAGS ?= -Wl,-as-needed
 
 #
 # Default Paths
@@ -251,10 +255,11 @@ NACL_LDFLAGS?=-Wl,-as-needed
 ifeq (,$(findstring $(TOOLCHAIN),linux mac win))
 INC_PATHS?=$(NACL_SDK_ROOT)/include $(EXTRA_INC_PATHS)
 else
-INC_PATHS?=$(NACL_SDK_ROOT)/include/$(OSNAME) $(NACL_SDK_ROOT)/include $(EXTRA_INC_PATHS)
+INC_PATHS ?= $(NACL_SDK_ROOT)/include/$(OSNAME) $(NACL_SDK_ROOT)/include $(EXTRA_INC_PATHS)
 endif
 
-LIB_PATHS?=$(PPAPIJS_SRC_ROOT)/lib $(EXTRA_LIB_PATHS)
+LIBDIR=$(PPAPIJS_SRC_ROOT)/lib
+LIB_PATHS ?= $(LIBDIR) $(EXTRA_LIB_PATHS)
 
 #
 # Define a LOG macro that allow a command to be run in quiet mode where
@@ -313,6 +318,14 @@ endef
 # macros and targets defined in nacl.mk, otherwise use the host sepecific
 # macros and targets.
 #
+ifneq (,$(findstring $(TOOLCHAIN),linux mac))
+include $(NACL_SDK_ROOT)/tools/host_gcc.mk
+endif
+
+ifneq (,$(findstring $(TOOLCHAIN),win))
+include $(NACL_SDK_ROOT)/tools/host_vc.mk
+endif
+
 ifneq (,$(findstring $(TOOLCHAIN),glibc newlib))
 include $(PPAPIJS_SRC_ROOT)/tools/nacl_gcc.mk
 endif
@@ -325,9 +338,9 @@ endif
 # File to redirect to to in order to hide output.
 #
 ifeq ($(OSNAME),win)
-DEV_NULL=nul
+DEV_NULL = nul
 else
-DEV_NULL=/dev/null
+DEV_NULL = /dev/null
 endif
 
 #
