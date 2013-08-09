@@ -14,7 +14,7 @@
 # project only builds in one or the other then this should be overridden
 # accordingly.
 #
-VALID_TOOLCHAINS?=newlib glibc emscripten
+VALID_TOOLCHAINS?=newlib glibc pnacl emscripten
 TOOLCHAIN?=$(word 1,$(VALID_TOOLCHAINS))
 
 
@@ -330,9 +330,14 @@ ifneq (,$(findstring $(TOOLCHAIN),glibc newlib))
 include $(PPAPIJS_SRC_ROOT)/tools/nacl_gcc.mk
 endif
 
+ifneq (,$(findstring $(TOOLCHAIN),pnacl))
+include $(NACL_SDK_ROOT)/tools/nacl_llvm.mk
+endif
+
 ifneq (,$(findstring $(TOOLCHAIN),emscripten))
 include $(PPAPIJS_SRC_ROOT)/tools/nacl_emscripten.mk
 endif
+
 
 #
 # File to redirect to to in order to hide output.

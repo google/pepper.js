@@ -409,7 +409,7 @@ window.onload = function() {
     var width = body.getAttribute("data-width") || undefined;
     var height = body.getAttribute("data-height") || undefined;
 
-    var toolchains = (body.getAttribute("data-tools") || tc || "emscripten newlib").split(' ');
+    var toolchains = (body.getAttribute("data-tools") || tc || "emscripten newlib pnacl").split(' ');
     var configs = (body.getAttribute("data-configs") || "Debug Release").split(' ');
 
     var tc = toolchains.indexOf(searchVars.tc) !== -1 ?

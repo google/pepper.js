@@ -16,7 +16,7 @@
 # to override this, specify TOOLCHAIN=newlib|glibc or CONFIG=Debug|Release on
 # the make command-line or in this file prior to including common.mk.  The
 # toolchain we use by default will be the first valid one listed
-VALID_TOOLCHAINS:=emscripten newlib
+VALID_TOOLCHAINS:=emscripten newlib pnacl
 
 
 

@@ -16,7 +16,7 @@
 # to override this, specify TOOLCHAIN=newlib|glibc or CONFIG=Debug|Release on
 # the make command-line or in this file prior to including common.mk.  The
 # toolchain we use by default will be the first valid one listed
-VALID_TOOLCHAINS:=emscripten newlib
+VALID_TOOLCHAINS:=emscripten newlib pnacl
 
 
 
@@ -28,6 +28,7 @@ VALID_TOOLCHAINS:=emscripten newlib
 # to this Makefile.
 #
 NACL_SDK_ROOT?=$(abspath $(CURDIR)/../../../../nacl_sdk/pepper_27)
+
 PPAPIJS_SRC_ROOT:=../..
 include ../../tools/common.mk
 
@@ -63,7 +64,7 @@ endif
 # and the set we do not.  This example does not havea any additional library
 # dependencies.
 #
-DEPS=	
+DEPS=
 LIBS=$(DEPS) ppapi pthread
 
 

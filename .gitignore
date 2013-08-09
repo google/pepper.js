@@ -5,6 +5,7 @@
 # SDK build locations
 newlib/
 glibc/
+pnacl/
 emscripten/
 
 # python
