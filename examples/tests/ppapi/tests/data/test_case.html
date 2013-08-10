@@ -35,11 +35,18 @@ function AppendFrame(testcase, i) {
 
   var frame = document.createElement("IFRAME");
   var mode = ExtractSearchParameter("mode");
+  var tc = ExtractSearchParameter("tc");
+  var config = ExtractSearchParameter("config");
   var websocket_host = ExtractSearchParameter("websocket_host");
   var websocket_port = ExtractSearchParameter("websocket_port");
   var ssl_server_port = ExtractSearchParameter("ssl_server_port");
   var src = "?testcase=" + testcase;
-  console.log(mode)
+  if (tc) {
+    src += "&tc=" + tc;
+  }
+  if (config) {
+    src += "&config=" + config;
+  }
   if (mode.slice(0, 4) === "nacl")
     src += "&mode=" + mode;
   if (websocket_host != "")
@@ -241,34 +248,41 @@ function createEmscriptenEmbed(script_url) {
 onload = function() {
   var testcase = ExtractSearchParameter("testcase");
   var mode = ExtractSearchParameter("mode");
+  var tc = ExtractSearchParameter("tc");
+  var config = ExtractSearchParameter("config");
   document.title = 'Test ' + testcase;
   var obj;
-  if (mode == "nacl_emscripten_debug") {
+  if (mode == "nacl_emscripten_debug" || tc == "emscripten" && config == "Debug") {
     obj = createEmscriptenEmbed("../emscripten/Debug/ppapi_test.js");
-    obj.setAttribute("mode", mode);
-  } else if (mode == "nacl_emscripten_release") {
+    obj.setAttribute("mode", "nacl_emscripten_debug");
+  } else if (mode == "nacl_emscripten_release" || tc == "emscripten" && config == "Release") {
     obj = createEmscriptenEmbed("../emscripten/Release/ppapi_test.js");
-    obj.setAttribute("mode", mode);
-  } else if (mode == "nacl_newlib_debug") {
+    obj.setAttribute("mode", "nacl_emscripten_release");
+  } else if (mode == "nacl_newlib_debug" || tc == "newlib" && config == "Debug") {
     obj = document.createElement("EMBED");
     obj.setAttribute("src", "../newlib/Debug/ppapi_test.nmf");
     obj.setAttribute("type", "application/x-nacl");
-    obj.setAttribute("mode", mode);
-  } else if (mode == "nacl_newlib_release") {
+    obj.setAttribute("mode", "nacl_newlib_debug");
+  } else if (mode == "nacl_newlib_release" || tc == "newlib" && config == "Release") {
     obj = document.createElement("EMBED");
     obj.setAttribute("src", "../newlib/Release/ppapi_test.nmf");
     obj.setAttribute("type", "application/x-nacl");
-    obj.setAttribute("mode", mode);
+    obj.setAttribute("mode", "nacl_newlib_release");
   } else if (mode == "nacl_glibc") {
     obj = document.createElement("EMBED");
     obj.setAttribute("src", "ppapi_nacl_tests_glibc.nmf");
     obj.setAttribute("type", "application/x-nacl");
     obj.setAttribute("mode", mode);
-  } else if (mode == "nacl_pnacl") {
+  } else if (mode == "nacl_pnacl_debug" || tc == "pnacl" && config == "Debug") {
     obj = document.createElement("EMBED");
-    obj.setAttribute("src", "ppapi_nacl_tests_pnacl.nmf");
-    obj.setAttribute("type", "application/x-nacl");
-    obj.setAttribute("mode", mode);
+    obj.setAttribute("src", "../pnacl/Debug/ppapi_test.nmf");
+    obj.setAttribute("type", "application/x-pnacl");
+    obj.setAttribute("mode", "nacl_pnacl_debug");
+  } else if (mode == "nacl_pnacl_debug" || tc == "pnacl" && config == "Release") {
+    obj = document.createElement("EMBED");
+    obj.setAttribute("src", "../pnacl/Release/ppapi_test.nmf");
+    obj.setAttribute("type", "application/x-pnacl");
+    obj.setAttribute("mode", "nacl_pnacl_release");
   } else {
     var mimeType = "application/x-ppapi-tests";
     if (mimeType in navigator.mimeTypes) {
@@ -324,7 +338,7 @@ onload = function() {
     obj.dispatchEvent = function() {
       // TODO(dmichael): NaCl triggers this; take out the special case for NaCl
       //                 when crbug.com/109775 is fixed.
-      if (mode.indexOf("nacl") !== 0)
+      if (mode.indexOf("nacl") !== 0 && !tc)
         InternalError("Bad dispatchEvent called!");
 
       // Pass it on anyways, we need the event to detect load progress and
