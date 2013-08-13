@@ -20,12 +20,16 @@
     }
 
     // TODO(ncbray): support attribs.
+    //canvas.width = width;
+    //canvas.height = height;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
 
     return resources.register(GRAPHICS_3D_RESOURCE, {
       canvas: canvas,
       ctx: getContext(canvas),
       destroy: function() {
-	throw "Graphics3D destroy not implemented.";
+        throw "Graphics3D destroy not implemented.";
       }
     });
   };

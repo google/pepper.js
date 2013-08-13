@@ -10,10 +10,16 @@
     canvas.width = size.width;
     canvas.height = size.height;
 
+    var ctx = canvas.getContext('2d');
+    // NaCl does not smooth a scaled canvas.
+    ctx.imageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+
     return resources.register(GRAPHICS_2D_RESOURCE, {
       size: size,
       canvas: canvas,
-      ctx: canvas.getContext('2d'),
+      ctx: ctx,
       always_opaque: true,
       scale: 1,
       destroy: function() {
@@ -84,9 +90,8 @@
       return 0;
     }
     g2d.scale = scale;
-    // TODO(ncbray): actually scale.  This is complicated by the canvas being
-    // both the graphics2d context and the display buffer, and by the fact that
-    // fullscreen stomps on the CSS of the canvas.
+    g2d.canvas.style.width = (g2d.canvas.width * scale) + "px";
+    g2d.canvas.style.height = (g2d.canvas.height * scale) + "px";
     return 1;
   };
 

@@ -101,12 +101,16 @@ PiGenerator::~PiGenerator() {
 
 void PiGenerator::DidChangeView(const pp::View& view) {
   pp::Rect position = view.GetRect();
-  if (pixel_buffer_ && position.size() == pixel_buffer_->size())
+  pp::Size desired;
+  desired.set_width(position.size().width() * view.GetDeviceScale());
+  desired.set_height(position.size().height() * view.GetDeviceScale());
+  if (pixel_buffer_ && desired == pixel_buffer_->size())
     return;  // Size didn't change, no need to update anything.
 
   // Create a new device context with the new size.
   DestroyContext();
-  CreateContext(position.size());
+  CreateContext(desired);
+  graphics_2d_context_->SetScale(1.0/view.GetDeviceScale());
   // Delete the old pixel buffer and create a new one.
   ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
   delete pixel_buffer_;

@@ -5,7 +5,8 @@
     if (res === undefined) {
       return;
     }
-    var canvas = res.canvas;
+    // TODO why does targeting the enclosing element cause difficulty?
+    var target = res.canvas;
     var cb_func = ppapi_glue.convertCompletionCallback(callback);
 
     var makeCallback = function(return_code) {
@@ -15,16 +16,16 @@
       };
     };
 
-    if('webkitRequestPointerLock' in canvas) {
+    if('webkitRequestPointerLock' in target) {
       // TODO(grosse): Figure out how to handle the callbacks properly
-      canvas.addEventListener('webkitpointerlockchange', makeCallback(ppapi.PP_OK));
-      canvas.addEventListener('webkitpointerlockerror', makeCallback(ppapi.PP_ERROR_FAILED));
-      canvas.webkitRequestPointerLock();
+      target.addEventListener('webkitpointerlockchange', makeCallback(ppapi.PP_OK));
+      target.addEventListener('webkitpointerlockerror', makeCallback(ppapi.PP_ERROR_FAILED));
+      target.webkitRequestPointerLock();
     } else {
       // Note: This may not work as Firefox currently requires fullscreen before requesting pointer lock
-      canvas.addEventListener('mozpointerlockchange', makeCallback(ppapi.PP_OK));
-      canvas.addEventListener('mozpointerlockerror', makeCallback(ppapi.PP_ERROR_FAILED));
-      canvas.mozRequestPointerLock();
+      target.addEventListener('mozpointerlockchange', makeCallback(ppapi.PP_OK));
+      target.addEventListener('mozpointerlockerror', makeCallback(ppapi.PP_ERROR_FAILED));
+      target.mozRequestPointerLock();
     }
   };
 
@@ -47,7 +48,7 @@
       return 0;
     }
     var element = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
-    return element === res.canvas ? 1 : 0;
+    return element === res.element ? 1 : 0;
   };
 
   var FullScreen_SetFullscreen = function(instance, fullscreen) {
@@ -55,7 +56,7 @@
     if (res == undefined) {
       return 0;
     }
-    var element = res.canvas;
+    var element = res.element;
 
     if (fullscreen) {
       if (element.requestFullscreen) {
@@ -64,23 +65,6 @@
         element.mozRequestFullScreen();
       } else if (element.webkitRequestFullscreen) {
         element.webkitRequestFullscreen();
-
-        // Chrome doesn't currently add the required CSS for fullscreen, so we have to add it manually
-        var fsstyles = {
-            'position':'fixed',
-            'top':0, 'right':0, 'bottom':0, 'left':0,
-            'margin':0,
-            'box-sizing':'border-box',
-            'width':'100%',
-            'height':'100%',
-            'object-fit':'contain'
-        };
-
-        for (var key in fsstyles) {
-          if (fsstyles.hasOwnProperty(key)) {
-            element.style[key] = fsstyles[key];
-          }
-        }
       }
     } else {
       if (document.cancelFullscreen) {

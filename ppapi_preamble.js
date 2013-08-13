@@ -245,42 +245,63 @@ var CreateInstance = function(width, height, shadow_instance) {
 
   shadow_instance.setAttribute("width", width);
   shadow_instance.setAttribute("height", height);
+  shadow_instance.className = "ppapiJsEmbed";
 
   shadow_instance.style.display = "inline-block";
   shadow_instance.style.width = width + "px";
   shadow_instance.style.height = height + "px";
-  shadow_instance.style.padding = "0px";
+  shadow_instance.style.overflow = "hidden";
 
   // Called from external code.
   shadow_instance["postMessage"] = postMessage;
 
+  // Not compatible with CSP.
+  var style = document.createElement("style");
+  style.type = "text/css";
+  style.innerHTML = ".ppapiJsEmbed {border: 0px; margin: 0px; padding: 0px;}";
+  // Bug-ish.  Each variation needs to be specified seperately.
+  var fullscreenCSS = "{position: fixed; top: 0; left: 0; bottom: 0; right: 0; width: 100% !important; height: 100% !important; box-sizing: border-box; object-fit: contain; background-color: black;}";
+  style.innerHTML += " .ppapiJsEmbed:-webkit-full-screen " + fullscreenCSS;
+  style.innerHTML += " .ppapiJsEmbed:-moz-full-screen " + fullscreenCSS;
+  style.innerHTML += " .ppapiJsEmbed:full-screen " + fullscreenCSS;
+
+  document.getElementsByTagName("head")[0].appendChild(style);
+
   var canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
+  canvas.style.border = "0px";
+  canvas.style.padding = "0px";
+  canvas.style.margin = "0px";
   canvas.onselectstart = function(evt) {
     evt.preventDefault();
     return false;
   };
   shadow_instance.appendChild(canvas);
 
-  var sendViewEvent = function(instance_id, view_obj) {
-    var view = resources.register(VIEW_RESOURCE, view_obj);
-    _DoChangeView(instance_id, view);
-    resources.release(view);
-  };
-
   var last_update = "";
   var updateView = function() {
-    var bounds = canvas.getBoundingClientRect();
+    // NOTE: this will give the wrong value if the canvas has any margin, border, or padding.
+    var bounds = shadow_instance.getBoundingClientRect();
     var rect = {x: bounds.left, y: bounds.top,
                 width: bounds.right - bounds.left,
                 height: bounds.bottom - bounds.top};
-    var clipX = clamp(window.pageXOffset - rect.x, 0, rect.width);
-    var clipY = clamp(window.pageYOffset - rect.y, 0, rect.height);
-    var clipWidth = clamp(window.pageXOffset + window.innerWidth - rect.x - clipX, 0, rect.width - clipX);
-    var clipHeight = clamp(window.pageYOffset + window.innerHeight - rect.y - clipY, 0, rect.height - clipY);
+
+    // Clip the bounds to the viewport.
+    var clipX = clamp(bounds.left, 0, window.innerWidth);
+    var clipY = clamp(bounds.top, 0, window.innerHeight);
+    var clipWidth = clamp(bounds.right, 0, window.innerWidth) - clipX;
+    var clipHeight = clamp(bounds.bottom, 0, window.innerHeight) - clipY;
+
+    // Translate into the coordinate space of the canvas.
+    clipX -= bounds.left;
+    clipY -= bounds.top;
+
+    // Handle a zero-sized clip region.
     var visible = clipWidth > 0 && clipHeight > 0;
     if (!visible) {
+      // clipX and clipY may be outside the canvas if width or height are zero.
+      // The PPAPI spec requires we return (0, 0, 0, 0)
       clipX = 0;
       clipY = 0;
       clipWidth = 0;
@@ -288,7 +309,7 @@ var CreateInstance = function(width, height, shadow_instance) {
     }
     var event = {
       rect: rect,
-      fullscreen: getFullscreenElement() === canvas,
+      fullscreen: getFullscreenElement() === shadow_instance,
       visible: visible,
       page_visible: 1,
       clip_rect: {x: clipX, y: clipY, width: clipWidth, height: clipHeight}
@@ -296,7 +317,9 @@ var CreateInstance = function(width, height, shadow_instance) {
     var s = JSON.stringify(event);
     if (s !== last_update) {
       last_update = s;
-      sendViewEvent(instance, event);
+      var view = resources.register(VIEW_RESOURCE, event);
+      _DoChangeView(instance, view);
+      resources.release(view);
     }
   };
 
@@ -362,32 +385,26 @@ var CreateInstance = function(width, height, shadow_instance) {
   canvas.addEventListener('focus', makeCallback(true));
   canvas.addEventListener('blur', makeCallback(false));
 
+  window.addEventListener('DOMContentLoaded', updateView);
+  window.addEventListener('load', updateView);
+  window.addEventListener('scroll', updateView);
+  window.addEventListener('resize', updateView);
+
+  // TODO(ncbray): element resize.
 
   // TODO(grosse): Make this work when creating multiple instances or modules.
   // It should only be called once when the page loads.
   // Currently it's called everytime an instance is created.
   var fullscreenChange = function() {
-    var doSend = function(entering_fullscreen, canvas) {
-      var instance_id = canvas.parentElement.instance;
+    var doSend = function(entering_fullscreen, target) {
+      var instance_id = target.instance;
       var inst = resources.resolve(instance_id, INSTANCE_RESOURCE);
       if (inst === undefined) {
         return;
       }
-      var origsize = inst.size;
-
-      updateView();
-
-      // Chrome doesn't currently add the required CSS for fullscreen, so we have to add it manually
-      // which means removing it when leaving fullscreen
-      if (!entering_fullscreen && canvas.webkitRequestFullscreen && !canvas.requestFullscreen) {
-        var style = canvas.style;
-        for (var key in style) {
-          if (style.hasOwnProperty(key)) {
-            style[key] = null;
-          }
-        }
-      }
     };
+
+    setTimeout(updateView, 1);
 
     // Keep track of current fullscreen element
     var lastTarget = null;
@@ -412,11 +429,12 @@ var CreateInstance = function(width, height, shadow_instance) {
     };
   }();
 
-  if (canvas.requestFullscreen) {
+  var target = shadow_instance;
+  if (target.requestFullscreen) {
     document.addEventListener('fullscreenchange', fullscreenChange);
-  } else if (canvas.mozRequestFullScreen) {
+  } else if (target.mozRequestFullScreen) {
     document.addEventListener('mozfullscreenchange', fullscreenChange);
-  } else if (canvas.webkitRequestFullscreen) {
+  } else if (target.webkitRequestFullscreen) {
     document.addEventListener('webkitfullscreenchange', fullscreenChange);
   }
 
