@@ -23,6 +23,7 @@ PROJECTS:= \
   tests/ppapi/tests \
   tests/ppapi_messaging \
   tests/ppapi_geturl \
+  stress \
 
 HTTPD:=../tools/httpd.py
 

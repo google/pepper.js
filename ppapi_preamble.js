@@ -11,6 +11,20 @@ if (window.performance.now === undefined) {
   }
 }
 
+var getFullscreenElement = function() {
+  return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || null;
+}
+
+var clamp = function(value, min, max) {
+  if (value < min) {
+    return min;
+  } else if (value > max) {
+    return max;
+  } else {
+    return value;
+  }
+}
+
 var postMessage = function(message) {
   // Fill out the PP_Var structure
   var o = ppapi_glue.PP_Var
@@ -88,7 +102,7 @@ ResourceManager.prototype.registerString = function(value, memory, len) {
       memory: memory,
       len: len,
       destroy: function() {
-	_free(this.memory);
+        _free(this.memory);
       }
   });
 }
@@ -98,7 +112,7 @@ ResourceManager.prototype.registerArrayBuffer = function(memory, len) {
       memory: memory,
       len: len,
       destroy: function() {
-	_free(this.memory);
+        _free(this.memory);
       }
   });
 }
@@ -255,18 +269,49 @@ var CreateInstance = function(width, height, shadow_instance) {
     resources.release(view);
   };
 
+  var last_update = "";
+  var updateView = function() {
+    var bounds = canvas.getBoundingClientRect();
+    var rect = {x: bounds.left, y: bounds.top,
+                width: bounds.right - bounds.left,
+                height: bounds.bottom - bounds.top};
+    var clipX = clamp(window.pageXOffset - rect.x, 0, rect.width);
+    var clipY = clamp(window.pageYOffset - rect.y, 0, rect.height);
+    var clipWidth = clamp(window.pageXOffset + window.innerWidth - rect.x - clipX, 0, rect.width - clipX);
+    var clipHeight = clamp(window.pageYOffset + window.innerHeight - rect.y - clipY, 0, rect.height - clipY);
+    var visible = clipWidth > 0 && clipHeight > 0;
+    if (!visible) {
+      clipX = 0;
+      clipY = 0;
+      clipWidth = 0;
+      clipHeight = 0;
+    }
+    var event = {
+      rect: rect,
+      fullscreen: getFullscreenElement() === canvas,
+      visible: visible,
+      page_visible: 1,
+      clip_rect: {x: clipX, y: clipY, width: clipWidth, height: clipHeight}
+    };
+    var s = JSON.stringify(event);
+    if (s !== last_update) {
+      last_update = s;
+      sendViewEvent(instance, event);
+    }
+  };
+
+  var instance = resources.register(INSTANCE_RESOURCE, {
+    element: shadow_instance,
+    canvas: canvas,
+    // Save original size so it can be restored later
+    size: {
+          width: canvas.width,
+          height: canvas.height
+      }
+  });
+
   // Called from external code.
   shadow_instance["finishLoading"] = function() {
-    var instance = resources.register(INSTANCE_RESOURCE, {
-      element: shadow_instance,
-      canvas: canvas,
-      // Save original size so it can be restored later
-      size: {
-            width: canvas.width,
-            height: canvas.height
-        }
-    });
-
     // Allows shadow_instance.postMessage to work.
     // This is only a UID so there is no circular reference.
     shadow_instance.instance = instance;
@@ -292,14 +337,7 @@ var CreateInstance = function(width, height, shadow_instance) {
     _free(argn);
     _free(argv);
 
-    // Create and send a bogus view resource.
-    sendViewEvent(instance, {
-      rect: {x: 0, y: 0, width: width, height: height},
-      fullscreen: 0,
-      visible: 1,
-      page_visible: 1,
-      clip_rect: {x: 0, y: 0, width: width, height: height}
-    });
+    updateView();
 
     var sendProgressEvent = function(name) {
       var evt = document.createEvent('Event');
@@ -333,20 +371,11 @@ var CreateInstance = function(width, height, shadow_instance) {
       var instance_id = canvas.parentElement.instance;
       var inst = resources.resolve(instance_id, INSTANCE_RESOURCE);
       if (inst === undefined) {
-	return;
+        return;
       }
       var origsize = inst.size;
 
-      var width = entering_fullscreen ? window.screen.width : origsize.width;
-      var height = entering_fullscreen ? window.screen.height : origsize.height;
-
-      sendViewEvent(instance_id, {
-        rect: {x: 0, y: 0, width: width, height: height},
-        fullscreen: entering_fullscreen ? 1 : 0,
-        visible: 1,
-        page_visible: 1,
-        clip_rect: {x: 0, y: 0, width: width, height: height}
-      });
+      updateView();
 
       // Chrome doesn't currently add the required CSS for fullscreen, so we have to add it manually
       // which means removing it when leaving fullscreen
@@ -365,7 +394,7 @@ var CreateInstance = function(width, height, shadow_instance) {
     return function(event) {
       // When an event occurs because fullscreen is lost, the element will be null but we have no direct way of determining
       // which element lost fullscreen. So we keep track of the previous element ot enter fullscreen.
-      var target = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || null;
+      var target = getFullscreenElement();
       var entering_fullscreen = (target !== null);
 
       if (target !== lastTarget) {

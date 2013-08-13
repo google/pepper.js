@@ -12,12 +12,8 @@
 #
 # Default Paths
 #
-EM_PATH:=$(abspath $(PPAPIJS_SRC_ROOT)/../emscripten)
+EM_PATH:=$(abspath $(PPAPIJS_SRC_ROOT)/../../emscripten)
 #$(error $(EM_PATH))
-
-LIBDIR:=$(PPAPIJS_SRC_ROOT)/lib/emscripten/$(CONFIG)
-
-LD_X86_32:=-L$(PPAPIJS_SRC_ROOT)/lib/emscripten/$(CONFIG)
 
 #
 # Macros for TOOLS
@@ -97,13 +93,13 @@ endef
 # $4 = VC Link Flags (unused)
 #
 define LIB_RULE
-$(STAMPDIR)/$(1).stamp : $(LIBDIR)/lib$(1).a
+$(STAMPDIR)/$(1).stamp : $(LIBDIR)/emscripten/$(CONFIG)/lib$(1).a
 
 $(STAMPDIR)/$(1).stamp :
 	@echo "TOUCHED $$@" > $(STAMPDIR)/$(1).stamp
 
-all: $(LIBDIR)/lib$(1).a
-$(LIBDIR)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_emscripten))
+all: $(LIBDIR)/emscripten/$(CONFIG)/lib$(1).a
+$(LIBDIR)/emscripten/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,$(src),_emscripten))
 	$(MKDIR) -p $$(dir $$@)
 	$(call LOG,LIB,$$@,$(EM_LIB) r $$@ $$^)
 
