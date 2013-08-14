@@ -259,6 +259,7 @@ var CreateInstance = function(width, height, shadow_instance) {
   var style = document.createElement("style");
   style.type = "text/css";
   style.innerHTML = ".ppapiJsEmbed {border: 0px; margin: 0px; padding: 0px;}";
+  style.innerHTML += " .ppapiJsCanvas {image-rendering: optimizeSpeed; image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: optimize-contrast; -ms-interpolation-mode: nearest-neighbor;}";
   // Bug-ish.  Each variation needs to be specified seperately.
   var fullscreenCSS = "{position: fixed; top: 0; left: 0; bottom: 0; right: 0; width: 100% !important; height: 100% !important; box-sizing: border-box; object-fit: contain; background-color: black;}";
   style.innerHTML += " .ppapiJsEmbed:-webkit-full-screen " + fullscreenCSS;
@@ -268,6 +269,7 @@ var CreateInstance = function(width, height, shadow_instance) {
   document.getElementsByTagName("head")[0].appendChild(style);
 
   var canvas = document.createElement('canvas');
+  canvas.className = "ppapiJsCanvas";
   canvas.width = width;
   canvas.height = height;
   canvas.style.border = "0px";
