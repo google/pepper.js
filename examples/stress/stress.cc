@@ -15,7 +15,10 @@
 #include "ppapi/c/pp_module.h"
 #include "ppapi/c/pp_var.h"
 #include "ppapi/c/ppb.h"
+#include "ppapi/c/ppb_core.h"
 #include "ppapi/c/ppb_console.h"
+#include "ppapi/c/ppb_graphics_2d.h"
+#include "ppapi/c/ppb_image_data.h"
 #include "ppapi/c/ppb_instance.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_var.h"
@@ -36,10 +39,24 @@
 #define TCNAME "host"
 #endif
 
+static PPB_Core* ppb_core_interface = NULL;
 static PPB_Console* ppb_console_interface = NULL;
+static PPB_Instance* ppb_instance_interface = NULL;
 static PPB_Messaging* ppb_messaging_interface = NULL;
 static PPB_Var* ppb_var_interface = NULL;
 static PPB_View* ppb_view_interface = NULL;
+static PPB_Graphics2D* ppb_graphics_2d_interface = NULL;
+static PPB_ImageData* ppb_image_data_interface = NULL;
+
+PP_Resource g2d = 0;
+PP_Resource img = 0;
+unsigned int* img_data = NULL;
+int width = 0;
+int height = 0;
+
+PP_Instance inst = 0;
+
+extern void Draw();
 
 
 /**
@@ -100,6 +117,8 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
                                   uint32_t argc,
                                   const char* argn[],
                                   const char* argv[]) {
+
+  inst = instance;
 
   const char* post_msg = "Hello World (" TCNAME ")!";
   const char* console_msg = "Hello World (JavaScript Console)!";
@@ -162,7 +181,53 @@ static void Instance_DidChangeView(PP_Instance instance,
            device_scale, css_scale);
   LogMessage(instance, buffer);
 
-  // TODO does the view need to be released?
+
+  PP_Size size;
+  size = rect.size;
+
+  width = size.width;
+  height = size.height;
+
+  if (g2d != 0) {
+    ppb_core_interface->ReleaseResource(g2d);
+  }
+  g2d = ppb_graphics_2d_interface->Create(instance, &size, PP_TRUE);
+  ppb_instance_interface->BindGraphics(instance, g2d);
+
+  if (img != 0) {
+    ppb_core_interface->ReleaseResource(img);
+  }
+  img = ppb_image_data_interface->Create(instance, PP_IMAGEDATAFORMAT_RGBA_PREMUL, &size, PP_TRUE);
+
+  Draw();
+}
+
+void Flushed(void* user_data, int32_t result) {
+  Draw();
+}
+
+void Draw() {
+  //LogMessage(inst, "draw");
+
+  PP_Point pos;
+  pos.x = 40;
+  pos.y = 40;
+
+  unsigned int* img_data = (unsigned int*)ppb_image_data_interface->Map(img);
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
+      if(((i>>3)+(j>>3))& 1) {
+        img_data[j * width + i] = 0xff0000ff;
+      } else {
+        img_data[j * width + i] = 0xff00ff00;
+      }
+    }
+  }
+  ppb_image_data_interface->Unmap(img);
+  ppb_graphics_2d_interface->PaintImageData(g2d, img, &pos, NULL);
+
+  PP_CompletionCallback callback = PP_MakeCompletionCallback(Flushed, NULL);
+  ppb_graphics_2d_interface->Flush(g2d, callback);
 }
 
 /**
@@ -213,12 +278,21 @@ static PP_Bool Instance_HandleDocumentLoad(PP_Instance instance,
  */
 PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
                                        PPB_GetInterface get_browser) {
+  ppb_core_interface =
+      (PPB_Core*)(get_browser(PPB_CORE_INTERFACE));
   ppb_console_interface =
       (PPB_Console*)(get_browser(PPB_CONSOLE_INTERFACE));
+  ppb_instance_interface =
+      (PPB_Instance*)(get_browser(PPB_INSTANCE_INTERFACE));
+
   ppb_messaging_interface =
       (PPB_Messaging*)(get_browser(PPB_MESSAGING_INTERFACE));
   ppb_var_interface = (PPB_Var*)(get_browser(PPB_VAR_INTERFACE));
   ppb_view_interface = (PPB_View*)(get_browser(PPB_VIEW_INTERFACE));
+
+  ppb_graphics_2d_interface = (PPB_Graphics2D*)(get_browser(PPB_GRAPHICS_2D_INTERFACE));
+  ppb_image_data_interface = (PPB_ImageData*)(get_browser(PPB_IMAGEDATA_INTERFACE));
+
   return PP_OK;
 }
 

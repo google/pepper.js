@@ -10,6 +10,14 @@
     canvas.width = size.width;
     canvas.height = size.height;
 
+    var bg;
+    if (is_always_opaque) {
+      bg = "black";
+    } else {
+      bg = "transparent";
+    }
+    canvas.style.backgroundColor = bg;
+
     var ctx = canvas.getContext('2d');
     // NaCl does not smooth a scaled canvas.
     ctx.imageSmoothingEnabled = false;

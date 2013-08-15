@@ -7,7 +7,7 @@ var messageArray = new Array();
 
 // Once we load, hide the plugin
 function moduleDidLoad() {
-  common.hideModule();
+  //common.hideModule();
 }
 
 // Called by the common.js module.
