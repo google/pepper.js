@@ -185,21 +185,25 @@ static void Instance_DidChangeView(PP_Instance instance,
   PP_Size size;
   size = rect.size;
 
-  width = size.width;
-  height = size.height;
+  if (size.width != width || size.height != height) {
+    width = size.width;
+    height = size.height;
 
-  if (g2d != 0) {
-    ppb_core_interface->ReleaseResource(g2d);
+    if (g2d != 0) {
+      ppb_core_interface->ReleaseResource(g2d);
+    }
+    g2d = ppb_graphics_2d_interface->Create(instance, &size, PP_TRUE);
+    ppb_instance_interface->BindGraphics(instance, g2d);
+
+    if (img != 0) {
+      ppb_core_interface->ReleaseResource(img);
+    }
+    img = ppb_image_data_interface->Create(instance, PP_IMAGEDATAFORMAT_RGBA_PREMUL, &size, PP_TRUE);
+
+    img_data = (unsigned int*)ppb_image_data_interface->Map(img);
+
+    Draw();
   }
-  g2d = ppb_graphics_2d_interface->Create(instance, &size, PP_TRUE);
-  ppb_instance_interface->BindGraphics(instance, g2d);
-
-  if (img != 0) {
-    ppb_core_interface->ReleaseResource(img);
-  }
-  img = ppb_image_data_interface->Create(instance, PP_IMAGEDATAFORMAT_RGBA_PREMUL, &size, PP_TRUE);
-
-  Draw();
 }
 
 void Flushed(void* user_data, int32_t result) {
@@ -207,13 +211,6 @@ void Flushed(void* user_data, int32_t result) {
 }
 
 void Draw() {
-  //LogMessage(inst, "draw");
-
-  PP_Point pos;
-  pos.x = 40;
-  pos.y = 40;
-
-  unsigned int* img_data = (unsigned int*)ppb_image_data_interface->Map(img);
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
       if(((i>>3)+(j>>3))& 1) {
@@ -223,8 +220,17 @@ void Draw() {
       }
     }
   }
-  ppb_image_data_interface->Unmap(img);
-  ppb_graphics_2d_interface->PaintImageData(g2d, img, &pos, NULL);
+
+  PP_Point pos;
+  pos.x = 20;
+  pos.y = 20;
+  PP_Rect src;
+  src.point.x = 4+16;
+  src.point.y = 4+16;
+  src.size.width = 64;
+  src.size.height = 64;
+
+  ppb_graphics_2d_interface->PaintImageData(g2d, img, &pos, &src);
 
   PP_CompletionCallback callback = PP_MakeCompletionCallback(Flushed, NULL);
   ppb_graphics_2d_interface->Flush(g2d, callback);

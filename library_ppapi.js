@@ -45,10 +45,10 @@ var ppapi_exports = {
       var o = ppapi_glue.PP_Var;
       var typen = (typeof obj);
       if (typen === 'string') {
-	var arr = intArrayFromString(obj);
-	var memory = allocate(arr, 'i8', ALLOC_NORMAL);
-	// Length is adjusted for null terminator.
-	var uid = resources.registerString(obj, memory, arr.length-1);
+        var arr = intArrayFromString(obj);
+        var memory = allocate(arr, 'i8', ALLOC_NORMAL);
+        // Length is adjusted for null terminator.
+        var uid = resources.registerString(obj, memory, arr.length-1);
         {{{ makeSetValue('p + o.type', '0', '5', 'i32') }}};
         {{{ makeSetValue('p + o.value', '0', 'uid', 'i32') }}};
       } else if (typen === 'number') {
@@ -100,6 +100,18 @@ var ppapi_exports = {
         Runtime.dynCall('vii', func, [user_data, result]);
       };
     },
+    getRect: function(ptr) {
+      return {
+        point: {
+          x: {{{ makeGetValue('ptr + 0', '0', 'i32') }}},
+          y: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
+        },
+        size: {
+          width: {{{ makeGetValue('ptr + 8', '0', 'i32') }}},
+          height: {{{ makeGetValue('ptr + 12', '0', 'i32') }}}
+        }
+      };
+    },
     setRect: function(rect, ptr) {
       {{{ makeSetValue('ptr', '0', 'rect.x', 'i32') }}};
       {{{ makeSetValue('ptr + 4', '0', 'rect.y', 'i32') }}};
@@ -108,8 +120,8 @@ var ppapi_exports = {
     },
     getSize: function(ptr) {
       return {
-	width: {{{ makeGetValue('ptr', '0', 'i32') }}},
-	height: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
+        width: {{{ makeGetValue('ptr', '0', 'i32') }}},
+        height: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
       };
     },
 

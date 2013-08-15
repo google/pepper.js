@@ -46,9 +46,6 @@
   };
 
   var Graphics2D_PaintImageData = function(resource, image_data, top_left_ptr, src_rect_ptr) {
-    if (src_rect_ptr !== 0){
-      throw "Graphics2D_PaintImageData doesn't support nonnull src_rect argument yet";
-    }
     var g2d = resources.resolve(resource, GRAPHICS_2D_RESOURCE);
     // Eat any errors that occur, same as the implementation in Chrome.
     if (g2d === undefined) {
@@ -60,7 +57,12 @@
     }
     syncImageData(res);
     var top_left = ppapi_glue.getPoint(top_left_ptr);
-    g2d.ctx.putImageData(res.image_data, top_left.x, top_left.y);
+    if (src_rect_ptr == 0) {
+      g2d.ctx.putImageData(res.image_data, top_left.x, top_left.y);
+    } else {
+      var src_rect = ppapi_glue.getRect(src_rect_ptr);
+      g2d.ctx.putImageData(res.image_data, top_left.x, top_left.y, src_rect.point.x, src_rect.point.y, src_rect.size.width, src_rect.size.height);
+    }
   };
 
   var Graphics2D_Scroll = function(resource, clip_rect_ptr, amount_ptr) {
