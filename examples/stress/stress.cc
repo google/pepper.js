@@ -53,6 +53,8 @@ PP_Resource img = 0;
 unsigned int* img_data = NULL;
 int width = 0;
 int height = 0;
+PP_TimeTicks last;
+float phase = 0;
 
 PP_Instance inst = 0;
 
@@ -202,6 +204,7 @@ static void Instance_DidChangeView(PP_Instance instance,
 
     img_data = (unsigned int*)ppb_image_data_interface->Map(img);
 
+    last = ppb_core_interface->GetTimeTicks();
     Draw();
   }
 }
@@ -211,15 +214,53 @@ void Flushed(void* user_data, int32_t result) {
 }
 
 void Draw() {
+  PP_TimeTicks current = ppb_core_interface->GetTimeTicks();
+  float dt = (float)(current - last);
+  last = current;
+
+  phase += dt * 2.0;
+  while (phase > 3.0) {
+    phase -= 3.0;
+  }
+
+  int color0;
+  int color1;
+
+  if (phase < 1.0) {
+    color0 = 0xff0000ff;
+    color1 = 0xff00ff00;
+  } else if (phase < 2.0) {
+    color0 = 0xff00ff00;
+    color1 = 0xffff0000;
+  } else {
+    color0 = 0xffff0000;
+    color1 = 0xff0000ff;
+  }
+
+  //char buffer[1024];
+  //snprintf(buffer, sizeof buffer, "phase=%f dt=%f current=%f color0=%d color1=%d", phase, dt, current, color0, color1);
+  //LogMessage(inst, buffer);
+
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
       if(((i>>3)+(j>>3))& 1) {
-        img_data[j * width + i] = 0xff0000ff;
+        img_data[j * width + i] = color0;
       } else {
-        img_data[j * width + i] = 0xff00ff00;
+        img_data[j * width + i] = color1;
       }
     }
   }
+
+  PP_Point delta;
+  delta.x = 3;
+  delta.y = 2;
+  PP_Rect clip;
+  clip.point.x = 10;
+  clip.point.y = 10;
+  clip.size.width = width - 20;
+  clip.size.height = height - 20;
+  ppb_graphics_2d_interface->Scroll(g2d, &clip, &delta);
+
 
   PP_Point pos;
   pos.x = 20;

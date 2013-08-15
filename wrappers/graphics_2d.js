@@ -55,6 +55,8 @@
     if (res === undefined) {
       return;
     }
+    // Note: PPAPI in Chrome does not draw the data if it is partially outside the bounds of the context.  This implementation does.
+    // TODO(ncbray): only sync the portion being drawn?
     syncImageData(res);
     var top_left = ppapi_glue.getPoint(top_left_ptr);
     if (src_rect_ptr == 0) {
@@ -66,7 +68,15 @@
   };
 
   var Graphics2D_Scroll = function(resource, clip_rect_ptr, amount_ptr) {
-    throw "Graphics2D_Scroll not implemented";
+    var g2d = resources.resolve(resource, GRAPHICS_2D_RESOURCE);
+    // Eat any errors that occur, same as the implementation in Chrome.
+    if (g2d === undefined) {
+      return;
+    }
+    var clip_rect =  ppapi_glue.getRect(clip_rect_ptr);
+    var amount = ppapi_glue.getPoint(amount_ptr);
+    var data = g2d.ctx.getImageData(clip_rect.point.x, clip_rect.point.y, clip_rect.size.width, clip_rect.size.height);
+      g2d.ctx.putImageData(data, clip_rect.point.x + amount.x, clip_rect.point.y + amount.y);
   };
 
   var Graphics2D_ReplaceContents = function(resource, image_data) {
