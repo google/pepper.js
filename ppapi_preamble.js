@@ -1,4 +1,5 @@
-"use strict";
+// TODO(ncbray): re-enable once Emscripten stops including code with octal values.
+//"use strict";
 
 // Polyfill for Safari.
 if (window.performance === undefined) {
