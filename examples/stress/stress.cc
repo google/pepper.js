@@ -197,6 +197,15 @@ static void Instance_DidChangeView(PP_Instance instance,
     g2d = ppb_graphics_2d_interface->Create(instance, &size, PP_TRUE);
     ppb_instance_interface->BindGraphics(instance, g2d);
 
+    PP_Size sz;
+    PP_Bool opaque = PP_FALSE;
+
+    ppb_graphics_2d_interface->Describe(g2d, &sz, &opaque);
+
+    char buffer[1024];
+    snprintf(buffer, sizeof buffer, "Describe: width=%d height=%d opaque=%d", sz.width, sz.height, opaque);
+    LogMessage(inst, buffer);
+
     if (img != 0) {
       ppb_core_interface->ReleaseResource(img);
     }

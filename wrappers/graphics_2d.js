@@ -41,8 +41,18 @@
     return resources.is(resource, GRAPHICS_2D_RESOURCE);
   };
 
-  var Graphics2D_Describe = function(resource, size_ptr, is_always_opqaue_ptr) {
-    throw "Graphics2D_Describe not implemented";
+  var Graphics2D_Describe = function(resource, size_ptr, is_always_opaque_ptr) {
+    var g2d = resources.resolve(resource, GRAPHICS_2D_RESOURCE);
+    if (g2d === undefined) {
+      setValue(size_ptr, 0, 'i32');
+      setValue(size_ptr + 4, 0, 'i32');
+      setValue(is_always_opaque_ptr, 0, 'i32');
+      return 0;
+    }
+    setValue(size_ptr, g2d.size.width, 'i32');
+    setValue(size_ptr + 4, g2d.size.height, 'i32');
+    setValue(is_always_opaque_ptr, g2d.always_opaque, 'i32');
+    return 1;
   };
 
   var Graphics2D_PaintImageData = function(resource, image_data, top_left_ptr, src_rect_ptr) {
