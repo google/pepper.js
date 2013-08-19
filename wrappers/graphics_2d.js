@@ -27,12 +27,20 @@
     return resources.register(GRAPHICS_2D_RESOURCE, {
       size: size,
       canvas: canvas,
+      bound: false,
       ctx: ctx,
-      always_opaque: true,
+      always_opaque: is_always_opaque,
       scale: 1,
+      flushCallback: null,
+      notifyBound: function(instance) {
+        this.bound = true;
+      },
+      notifyUnbound: function(instance) {
+        // TODO convert pending callbacks.
+        this.bound = false;
+      },
       destroy: function() {
-        //TODO(grosse): recreate canvas when necessary
-        // throw "Canvas destroy not implemented.";
+        this.flushCallback = null;
       }
     });
   };
@@ -104,11 +112,32 @@
   };
 
   var Graphics2D_Flush = function(resource, callback) {
-    var c = ppapi_glue.convertCompletionCallback(callback);
+    var g2d = resources.resolve(resource, GRAPHICS_2D_RESOURCE);
+    if (g2d === undefined) {
+      return ppapi.PP_ERROR_BADRESOURCE;
+    }
+    if (g2d.flushCallback) {
+      return ppapi.PP_ERROR_INPROGRESS;
+    }
+    var flushCallback = {
+      callback: ppapi_glue.convertCompletionCallback(callback),
+      trigger: function() {
+        if (g2d.flushCallback === this) {
+          g2d.flushCallback = null;
+          this.callback(ppapi.PP_OK);
+        }
+      },
+      cancel: function() {
+        if (g2d.flushCallback === this) {
+          g2d.flushCallback = null;
+        }
+      }
+    };
+    g2d.flushCallback = flushCallback;
     Module.requestAnimationFrame(function() {
-      c(ppapi.PP_OK);
+      flushCallback.trigger();
     });
-    return ppapi.PP_OK;
+    return ppapi.PP_OK_COMPLETIONPENDING;
   };
 
   var Graphics2D_SetScale = function(resource, scale) {

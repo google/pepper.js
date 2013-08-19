@@ -60,6 +60,8 @@ PP_Instance inst = 0;
 
 extern void Draw();
 
+void NopCallback(void* user_data, int32_t result) {
+}
 
 /**
  * Creates new string PP_Var from C string. The resulting object will be a
@@ -187,7 +189,8 @@ static void Instance_DidChangeView(PP_Instance instance,
   PP_Size size;
   size = rect.size;
 
-  if (size.width != width || size.height != height) {
+  // Deliberately recreate the context whenever the Window is scrolled to stress test context management.
+  if (size.width != width || size.height != height || 1) {
     width = size.width;
     height = size.height;
 
@@ -215,6 +218,12 @@ static void Instance_DidChangeView(PP_Instance instance,
 
     last = ppb_core_interface->GetTimeTicks();
     Draw();
+
+    // Test the return code of a double flush.
+    PP_CompletionCallback callback = PP_MakeCompletionCallback(NopCallback, NULL);
+    int32_t result = ppb_graphics_2d_interface->Flush(g2d, callback);
+    snprintf(buffer, sizeof buffer, "flush=%d", result);
+    LogMessage(inst, buffer);
   }
 }
 

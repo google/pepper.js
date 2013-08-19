@@ -62,11 +62,24 @@
 
 
   var Instance_BindGraphics = function(instance, device) {
+    var inst = resources.resolve(instance, INSTANCE_RESOURCE);
+    if (inst === undefined) {
+      return 0;
+    }
+    if (device === 0) {
+        inst.unbind();
+        return 1;
+    }
+    var dev = resources.resolve(device, GRAPHICS_3D_RESOURCE, true) || resources.resolve(device, GRAPHICS_2D_RESOURCE, true);
+    if (dev === undefined) {
+        return 0;
+    }
+    inst.bind(dev);
     return 1;
   };
 
   var Instance_IsFullFrame = function(instance) {
-    // TODO
+    // Only true for MIME handlers - which are not supported.
     return 0;
   };
 

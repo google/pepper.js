@@ -27,9 +27,13 @@
 
     return resources.register(GRAPHICS_3D_RESOURCE, {
       canvas: canvas,
+      bound: false,
       ctx: getContext(canvas),
-      destroy: function() {
-        throw "Graphics3D destroy not implemented.";
+      notifyBound: function(instance) {
+        this.bound = true;
+      },
+      notifyUnbound: function(instance) {
+        this.bound = false;
       }
     });
   };

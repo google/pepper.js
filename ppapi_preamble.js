@@ -328,12 +328,24 @@ var CreateInstance = function(width, height, shadow_instance) {
 
   var instance = resources.register(INSTANCE_RESOURCE, {
     element: shadow_instance,
+    device: null,
     canvas: canvas,
-    // Save original size so it can be restored later
-    size: {
-          width: canvas.width,
-          height: canvas.height
+    bind: function(device) {
+      this.unbind();
+      this.device = device;
+      resources.addRef(this.device.uid);
+      this.device.notifyBound(this);
+    },
+    unbind: function() {
+      if (this.device) {
+        this.device.notifyUnbound(this);
+        resources.release(this.device.uid);
+        this.device = null;
       }
+    },
+    destroy: function() {
+      this.unbind();
+    }
   });
 
   // Called from external code.
