@@ -269,19 +269,6 @@ var CreateInstance = function(width, height, shadow_instance) {
 
   document.getElementsByTagName("head")[0].appendChild(style);
 
-  var canvas = document.createElement('canvas');
-  canvas.className = "ppapiJsCanvas";
-  canvas.width = width;
-  canvas.height = height;
-  canvas.style.border = "0px";
-  canvas.style.padding = "0px";
-  canvas.style.margin = "0px";
-  canvas.onselectstart = function(evt) {
-    evt.preventDefault();
-    return false;
-  };
-  shadow_instance.appendChild(canvas);
-
   var last_update = "";
   var updateView = function() {
     // NOTE: this will give the wrong value if the canvas has any margin, border, or padding.
@@ -326,10 +313,36 @@ var CreateInstance = function(width, height, shadow_instance) {
     }
   };
 
+  var makeFocusCallback = function(hasFocus){
+    return function(event) {
+      _DoChangeFocus(shadow_instance.instance, hasFocus);
+      return true;
+    };
+  };
+
   var instance = resources.register(INSTANCE_RESOURCE, {
     element: shadow_instance,
     device: null,
-    canvas: canvas,
+    createCanvas: function(width, height) {
+      var canvas = document.createElement('canvas');
+      canvas.className = "ppapiJsCanvas";
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.border = "0px";
+      canvas.style.padding = "0px";
+      canvas.style.margin = "0px";
+
+      // TODO lift event handling to the enclosing span?
+      canvas.onselectstart = function(evt) {
+        evt.preventDefault();
+        return false;
+      };
+      canvas.setAttribute('tabindex', '0'); // make it focusable
+      canvas.addEventListener('focus', makeFocusCallback(true));
+      canvas.addEventListener('blur', makeFocusCallback(false));
+
+      return canvas;
+    },
     bind: function(device) {
       this.unbind();
       this.device = device;
@@ -348,12 +361,17 @@ var CreateInstance = function(width, height, shadow_instance) {
     }
   });
 
+  // Allows shadow_instance.postMessage to work.
+  // This is only a UID so there is no circular reference.
+  shadow_instance.instance = instance;
+
+  // TODO give each context a canvas.
+  var inst = resources.resolve(instance, INSTANCE_RESOURCE);
+  inst.canvas = inst.createCanvas(width, height);
+  shadow_instance.appendChild(inst.canvas);
+
   // Called from external code.
   shadow_instance["finishLoading"] = function() {
-    // Allows shadow_instance.postMessage to work.
-    // This is only a UID so there is no circular reference.
-    shadow_instance.instance = instance;
-
     // Turn the element's attributes into PPAPI's arguments.
     // TODO(ncbray): filter out style attribute?
     var argc = shadow_instance.attributes.length;
@@ -388,17 +406,6 @@ var CreateInstance = function(width, height, shadow_instance) {
     sendProgressEvent('load');
     sendProgressEvent('loadend');
   };
-
-  var makeCallback = function(hasFocus){
-    return function(event) {
-      _DoChangeFocus(shadow_instance.instance, hasFocus);
-      return true;
-    };
-  };
-
-  canvas.setAttribute('tabindex', '0'); // make it focusable
-  canvas.addEventListener('focus', makeCallback(true));
-  canvas.addEventListener('blur', makeCallback(false));
 
   window.addEventListener('DOMContentLoaded', updateView);
   window.addEventListener('load', updateView);
