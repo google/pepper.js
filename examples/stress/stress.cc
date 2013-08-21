@@ -77,22 +77,32 @@ static struct PP_Var CStrToVar(const char* str) {
   return PP_MakeUndefined();
 }
 
+static void Release(struct PP_Var& v) {
+  if (ppb_var_interface != NULL) {
+    ppb_var_interface->Release(v);
+  }
+}
 
 /**
  * Post a message back to our JavaScript
  */
 static void SendMessage(PP_Instance instance, const char *str) {
-  if (ppb_messaging_interface)
-    ppb_messaging_interface->PostMessage(instance, CStrToVar(str));
+  if (ppb_messaging_interface) {
+    struct PP_Var s = CStrToVar(str);
+    ppb_messaging_interface->PostMessage(instance, s);
+    Release(s);
+  }
 }
 
 /**
  * Send a message to the JavaScript Console
  */
 static void LogMessage(PP_Instance instance, const char *str) {
-  if (ppb_console_interface)
-    ppb_console_interface->Log(instance, PP_LOGLEVEL_ERROR,
-                          CStrToVar(str));
+  if (ppb_console_interface) {
+    struct PP_Var s = CStrToVar(str);
+    ppb_console_interface->Log(instance, PP_LOGLEVEL_ERROR, s);
+    Release(s);
+  }
 }
 
 /**

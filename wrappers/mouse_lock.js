@@ -6,7 +6,7 @@
       return;
     }
     // TODO why does targeting the enclosing element cause difficulty?
-    var target = res.canvas;
+    var target = res.element;
     var cb_func = ppapi_glue.convertCompletionCallback(callback);
 
     var makeCallback = function(return_code) {

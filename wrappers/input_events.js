@@ -191,14 +191,14 @@
       };
     };
 
-    var canvas = resource.canvas;
+    var elt = resource.element;
     for(var key in eventclassdata) {
       if (eventclassdata.hasOwnProperty(key) && (event_classes & PPIE_Class[key])) {
         var data = eventclassdata[key];
 
         for(var key2 in data) {
           if (data.hasOwnProperty(key2)) {
-            canvas.addEventListener(key2, makeCallback(data[key2]), false);
+            elt.addEventListener(key2, makeCallback(data[key2]), false);
           }
         }
       }

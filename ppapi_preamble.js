@@ -181,6 +181,15 @@ ResourceManager.prototype.getNumResources = function() {
   return this.num_resources;
 }
 
+ResourceManager.prototype.getResourceTypeHistogram = function() {
+  var types = {};
+  for (var uid in this.lut) {
+    var t = this.lut[uid].type;
+      types[t] = (types[t] || 0) + 1;
+  }
+  return types;
+}
+
 var resources = new ResourceManager();
 var interfaces = {};
 var declaredInterfaces = [];
@@ -259,8 +268,8 @@ var CreateInstance = function(width, height, shadow_instance) {
   // Not compatible with CSP.
   var style = document.createElement("style");
   style.type = "text/css";
-  style.innerHTML = ".ppapiJsEmbed {border: 0px; margin: 0px; padding: 0px;}";
-  style.innerHTML += " .ppapiJsCanvas {image-rendering: optimizeSpeed; image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: optimize-contrast; -ms-interpolation-mode: nearest-neighbor;}";
+  style.innerHTML = ".ppapiJsEmbed {border: 0px; margin: 0px; padding: 0px; outline: none;}";
+  style.innerHTML += " .ppapiJsCanvas {outline: none; image-rendering: optimizeSpeed; image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: optimize-contrast; -ms-interpolation-mode: nearest-neighbor;}";
   // Bug-ish.  Each variation needs to be specified seperately.
   var fullscreenCSS = "{position: fixed; top: 0; left: 0; bottom: 0; right: 0; width: 100% !important; height: 100% !important; box-sizing: border-box; object-fit: contain; background-color: black;}";
   style.innerHTML += " .ppapiJsEmbed:-webkit-full-screen " + fullscreenCSS;
@@ -323,7 +332,7 @@ var CreateInstance = function(width, height, shadow_instance) {
   var instance = resources.register(INSTANCE_RESOURCE, {
     element: shadow_instance,
     device: null,
-    createCanvas: function(width, height) {
+    createCanvas: function(width, height, opaque) {
       var canvas = document.createElement('canvas');
       canvas.className = "ppapiJsCanvas";
       canvas.width = width;
@@ -331,16 +340,7 @@ var CreateInstance = function(width, height, shadow_instance) {
       canvas.style.border = "0px";
       canvas.style.padding = "0px";
       canvas.style.margin = "0px";
-
-      // TODO lift event handling to the enclosing span?
-      canvas.onselectstart = function(evt) {
-        evt.preventDefault();
-        return false;
-      };
-      canvas.setAttribute('tabindex', '0'); // make it focusable
-      canvas.addEventListener('focus', makeFocusCallback(true));
-      canvas.addEventListener('blur', makeFocusCallback(false));
-
+      canvas.style.backgroundColor = opaque ? "black" : "transparent";
       return canvas;
     },
     bind: function(device) {
@@ -365,10 +365,13 @@ var CreateInstance = function(width, height, shadow_instance) {
   // This is only a UID so there is no circular reference.
   shadow_instance.instance = instance;
 
-  // TODO give each context a canvas.
-  var inst = resources.resolve(instance, INSTANCE_RESOURCE);
-  inst.canvas = inst.createCanvas(width, height);
-  shadow_instance.appendChild(inst.canvas);
+  shadow_instance.onselectstart = function(evt) {
+      evt.preventDefault();
+      return false;
+  };
+  shadow_instance.setAttribute('tabindex', '0'); // make it focusable
+  shadow_instance.addEventListener('focus', makeFocusCallback(true));
+  shadow_instance.addEventListener('blur', makeFocusCallback(false));
 
   // Called from external code.
   shadow_instance["finishLoading"] = function() {

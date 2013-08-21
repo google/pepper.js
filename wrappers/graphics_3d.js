@@ -13,15 +13,13 @@
     if (i === undefined) {
       return 0;
     }
-    var canvas = i.canvas;
-
     if (share_context !== 0) {
       throw "Graphics3D shared contexts not supported.";
     }
 
     // TODO(ncbray): support attribs.
-    //canvas.width = width;
-    //canvas.height = height;
+    // TODO(ncbray): is the canvas opaque?
+    var canvas = i.createCanvas(i.element.getAttribute("width"), i.element.getAttribute("height"), false);
     canvas.style.width = "100%";
     canvas.style.height = "100%";
 
@@ -31,8 +29,10 @@
       ctx: getContext(canvas),
       notifyBound: function(instance) {
         this.bound = true;
+        instance.element.appendChild(this.canvas);
       },
       notifyUnbound: function(instance) {
+        instance.element.removeChild(this.canvas);
         this.bound = false;
       }
     });
