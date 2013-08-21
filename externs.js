@@ -18,3 +18,11 @@ missing_externs.webkitFullscreenElement;
 
 missing_externs.FileError;
 missing_externs.resolveLocalFileSystemURL;
+
+missing_externs.webkitGetImageDataHD;
+missing_externs.webkitPutImageDataHD;
+missing_externs.webkitBackingStorePixelRatio;
+missing_externs.mozBackingStorePixelRatio;
+missing_externs.msBackingStorePixelRatio;
+missing_externs.oBackingStorePixelRatio;
+missing_externs.backingStorePixelRatio;

@@ -19,19 +19,39 @@
       lazyInit: function() {
         if (this.canvas === null) {
           // TODO(ncbray): move off instance object.
-          this.canvas = i.createCanvas(this.size.width, this.size.height, this.always_opaque);
+          this.canvas = i.createCanvas(0, 0, this.always_opaque);
           this.setScale(this.scale);
           this.ctx_ = this.canvas.getContext('2d');
           this.ctx_.imageSmoothingEnabled = false;
           this.ctx_.webkitImageSmoothingEnabled = false;
           this.ctx_.mozImageSmoothingEnabled = false;
+          // Undo the "helpful" effects of backingStorePixelRatio.
+          this.backingStoreRatio =
+              this.ctx_.webkitBackingStorePixelRatio ||
+              this.ctx_.mozBackingStorePixelRatio ||
+              this.ctx_.msBackingStorePixelRatio ||
+              this.ctx_.oBackingStorePixelRatio ||
+              this.ctx_.backingStorePixelRatio ||
+              1;
+          this.canvas.width = this.size.width / this.backingStoreRatio;
+          this.canvas.height = this.size.height / this.backingStoreRatio;
         }
       },
-      ctx: function() {
+      putImageData: function() {
         if (this.ctx_ === null) {
           this.lazyInit();
         }
-        return this.ctx_;
+        // Because Safari.
+        var f = this.ctx_.webkitPutImageDataHD || this.ctx_.putImageData;
+        f.apply(this.ctx_, arguments);
+      },
+      getImageData: function() {
+        if (this.ctx_ === null) {
+          this.lazyInit();
+        }
+        // Because Safari.
+        var f = this.ctx_.webkitGetImageDataHD || this.ctx_.getImageData;
+        return f.apply(this.ctx_, arguments);
       },
       setScale: function(scale) {
         this.scale = scale;
@@ -89,10 +109,10 @@
     syncImageData(res);
     var top_left = ppapi_glue.getPoint(top_left_ptr);
     if (src_rect_ptr == 0) {
-      g2d.ctx().putImageData(res.image_data, top_left.x, top_left.y);
+      g2d.putImageData(res.image_data, top_left.x, top_left.y);
     } else {
       var src_rect = ppapi_glue.getRect(src_rect_ptr);
-      g2d.ctx().putImageData(res.image_data, top_left.x, top_left.y, src_rect.point.x, src_rect.point.y, src_rect.size.width, src_rect.size.height);
+      g2d.putImageData(res.image_data, top_left.x, top_left.y, src_rect.point.x, src_rect.point.y, src_rect.size.width, src_rect.size.height);
     }
   };
 
@@ -104,8 +124,8 @@
     }
     var clip_rect =  ppapi_glue.getRect(clip_rect_ptr);
     var amount = ppapi_glue.getPoint(amount_ptr);
-    var data = g2d.ctx().getImageData(clip_rect.point.x, clip_rect.point.y, clip_rect.size.width, clip_rect.size.height);
-      g2d.ctx().putImageData(data, clip_rect.point.x + amount.x, clip_rect.point.y + amount.y);
+    var data = g2d.getImageData(clip_rect.point.x, clip_rect.point.y, clip_rect.size.width, clip_rect.size.height);
+      g2d.putImageData(data, clip_rect.point.x + amount.x, clip_rect.point.y + amount.y);
   };
 
   var Graphics2D_ReplaceContents = function(resource, image_data) {
@@ -119,7 +139,7 @@
       return;
     }
     syncImageData(res);
-    g2d.ctx().putImageData(res.image_data, 0, 0);
+    g2d.putImageData(res.image_data, 0, 0);
   };
 
   var Graphics2D_Flush = function(resource, callback) {
