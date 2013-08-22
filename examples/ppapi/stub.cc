@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "ppapi/c/pp_errors.h"
@@ -10,6 +11,10 @@
 #include "ppapi/c/ppp_messaging.h"
 
 extern "C" {
+  // Work around a bug in Emscripten that prevent malloc from being included unless it is referenced from native code.
+  // TODO(ncbray): fix the bug and remove this hack.
+  __attribute__((used)) static void* hack = (void *)&malloc;
+
   const void* GetBrowserInterface(const char* interface_name);
 
   void DoPostMessage(PP_Instance instance, const PP_Var* var) {
