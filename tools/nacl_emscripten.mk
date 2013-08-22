@@ -12,7 +12,7 @@
 #
 # Default Paths
 #
-EM_PATH:=$(abspath $(PPAPIJS_SRC_ROOT)/../../emscripten)
+EM_PATH:=$(abspath $(PPAPIJS_SRC_ROOT)/emscripten)
 #$(error $(EM_PATH))
 
 #

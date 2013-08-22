@@ -1,12 +1,14 @@
 # Build directory
 /lib/
-/out/
 
 # SDK build locations
 newlib/
 glibc/
 pnacl/
 emscripten/
+
+# The submodule
+!/emscripten/
 
 # python
 *.pyc
