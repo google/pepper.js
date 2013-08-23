@@ -2,27 +2,22 @@
 ppapi.js is a JavaScript library that enables the compilation of Pepper plugins into JavaScript using [Emscripten](https://github.com/kripken/emscripten).  This allows the simultaneous deployment of native code on the web both as a [Native Client](http://gonacl.com) executable and as JavaScript. 
 
 ## Getting Started ##
-Warning: getting ppapi.js up and running currently requires a non-trivial amount work installing dependencies and configuring the system.  If you have Emscripten already working, however, it should be fairly simple.
+Clone the repo.
 
-### File Layout ###
-* ./ppapi.js/src => this git repo
-* ./ppapi.js/emscripten => [Emscripten](https://github.com/kripken/emscripten/wiki/Tutorial)
-    * git clone https://github.com/kripken/emscripten.git
-* ./nacl_sdk => the [NaCl SDK](https://developers.google.com/native-client/sdk/download)
+Install the [NaCl SDK](https://developers.google.com/native-client/sdk/download).  Set the `NACL_SDK_ROOT` environment variable to point to the desired pepper_* directory inside of the NaCl SDK.  pepper_30 and up are supported.  The main dependency on pepper_30 is its toolchain, however, and not its header files and libraries.  It is possible to use an older version of Pepper by setting the `LLVM` environment variable to point to a toolchain other than the one contained in `NACL_SDK_ROOT`.
 
-This layout will be simplified, in the future.
+Inside the repo:
 
-### System Setup ###
-Install Emscripten's dependencies:
+    git submodule init
 
-* [Clang](http://llvm.org/releases/download.html)
+This will clone Emscripten.  Install Emscripten's dependencies on your system:
+
 * [node.js](http://nodejs.org/download/)
-* [Python](http://www.python.org/download/)
+* [Python 2.7](http://www.python.org/download/)
 * Java
+* Optional: [Clang](http://llvm.org/releases/download.html)
 
-Run ./ppapi.js/emscripten/emcc to let Emscripten set itself up.  You may need to manually edit ~/.emscripten (after you've run emcc once) to point it to the correct paths.  For example, you may want Emscripten to use a hermetic version of Clang instead of the one installed on the system.  For a specific example, Emscripten doesn't appear to be entirely happy with Xcode's command line tools, so downloading prebuilt binaries from LLVM's website may save some difficulty, even if you're already set up with Xcode.
-
-Development on Windows is currently not supported because Emscripten depends on Clang, and Clang does not officially support Windows.  In the future, the Windows will be supported via the Portable Native Client (PNaCl) toolchain.  The PNaCl toolchain is essentially Clang, and it has already been ported to Windows.
+Run <repo root>/emscripten/emcc to let Emscripten set itself up.  You may need to manually edit ~/.emscripten (after you've run emcc once) to point it to the correct paths.  For example, you may want Emscripten to use a hermetic version of Clang instead of the one installed on the system.  For a specific example, Emscripten doesn't appear to be entirely happy with Xcode's command line tools, so downloading prebuilt binaries from LLVM's website may save some difficulty, even if you're already set up with Xcode.
 
 Emscripten expects a "python2" binary to exist.  If it does not exist on your system, such as on OSX, you can create a symlink.
 `sudo ln -s /usr/bin/python /usr/bin/python2`
@@ -33,12 +28,15 @@ Emscripten expects a "python2" binary to exist.  If it does not exist on your sy
     make V=1 TOOLCHAIN=emscripten CONFIG=Release
     make V=1 TOOLCHAIN=newlib CONFIG=Debug
     make V=1 TOOLCHAIN=newlib CONFIG=Release
+    make V=1 TOOLCHAIN=pnacl CONFIG=Debug
+    make V=1 TOOLCHAIN=pnacl CONFIG=Release
+
 
 ### Running the Examples ###
     cd .. (out of the examples directory)
     python ./tools/httpd.py
 
-Surf to [examples/examples.html](http://127.0.0.1:5103/examples/examples.html).  Note that this web server can be accessed remotely.
+Surf to [examples/examples.html](http://127.0.0.1:5103/examples/examples.html).  Note that this web server can be accessed remotely, for better and for worse.
 
 ## Developing with ppapi.js ##
 To create an application that can target both Native Client and Emscripten, it is necessary to work within the constraints of both platforms.  To do this, an application must be written to use the Pepper Plugin API and must _not_ use threads.
@@ -51,10 +49,13 @@ Of course, both of these constraints can be worked around using the C preprocess
 
 In addition to these two constraints, there are a few subtle differences between native code compiled with Native Client and compiled with Emscripten.  For example, dereferencing a null pointer (or accessing unmapped memory of any sort) will cause a segfault in Native Client whereas it will succeed in Emscripten and return junk data.  Developers should keep these platform differences in mind - similar to how differences between 32-bit and 64-bit architectures needs to be considered in other situations.
 
+### Using the PNaCl Toolchain ###
+It is possible to make Emscripten use the PNaCl toolchain (from pepper_30 onwards) instead of the standard version of Clang.  Simply set the `LLVM` environment variable to point to the `bin` directory containing the PNaCl toolchain: `pnacl-clang`, `pnacl-dis`, etc.  ppapi.js does this by default for two reasons.  First, it eliminates an install-time dependency.  Second, there is no standard binary distribution of Clang on Windows, but there is a Windows version of the PNaCl toolchain.  There appear to be a few 
+
 ### Required Compiler Flags ###
 Building an example with `V=1 TOOLCHAIN=emscripten` will show the flags being passed to Emscripten.  If you want to set up your own build system, there’s a few flags you must pass when linking in order for your application to use ppapi.js.  
 
-    -s RESERVED_FUNCTION_POINTERS=350
+    -s RESERVED_FUNCTION_POINTERS=325
 
 ppapi.js creates function tables for each PPAPI interfaces at runtime.  Emscripten requires that space for each function pointer is reserved at link time.
 
@@ -64,9 +65,9 @@ Emscripten defaults to a 16 MB address space, which may to be too small.  Tune t
 
     -lppapi
 
-TODO
+The “ppapi” library contains boilerplate needed to bind the PPAPI plugin to JS.
 
-    -s EXPORTED_FUNCTIONS="['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']"
+    -s EXPORTED_FUNCTIONS="['_malloc', '_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']"
 
 These functions are called by ppapi.js, and they must be exported by your application.
 
@@ -98,7 +99,7 @@ ppapi.js was developed using test-driven development.  Features are only added w
 TODO figure out how to clearly explain how this situation impacts developers, or fix it.
 
 ### Implementation Errata ###
-The Graphics2D and Graphics3D interfaces will automatically swap buffers every frame, even if Flush or SwapBuffers is not called. This behavior should not be noticible for most applications. Explicit swapping could be emulated by creating an offscreen buffer, but this would cost time and memory.
+The Graphics2D and Graphics3D interfaces will automatically swap buffers every frame, even if Flush or SwapBuffers is not called. This behavior should not be noticeable for most applications. Explicit swapping could be emulated by creating an offscreen buffer, but this would cost time and memory.
 
 Using BGRA image formats will result in a silent performance penalty. In general, web APIs tend to be strongly opinionated that premultiplied RGBA is the image format that should be used. Any other format must be manually converted into premultiplied RGBA.
 
@@ -113,9 +114,11 @@ If multiple mouse buttons are held, ppapi.js will list all of them as event modi
 ### Platform Errata ###
 `PPB_Graphics3D` does not work on Internet Explorer 10 or before because WebGL is not supported.  WebGL is supported on Safari, but it must be [manually enabled](https://discussions.apple.com/thread/3300585).
 
-`PPB_MouseLock` and `PPB_Fullscreen` are only supported in Chrome and Firefox.  The behavior of these interfaces varies somewhat between the two browsers, however.
+`PPB_MouseLock` and `PPB_Fullscreen` are only supported in Chrome and Firefox.  The behavior of these interfaces varies somewhat between the two browsers, however.  Safari supports fullscreen, but does not support mouse lock.
 
 The file interfaces are currently supported only by Chrome. (Creation and last access time are not supported, even on Chrome.) A polyfill for Firefox and IE is included in ppapi.js, but it has a few known bugs - such as not being able to resize existing files. Another issue is that the Closure compiler will rename fields in persistent data structures, resulting in data incompatibility/loss between Debug and Release versions, and possibly even between different Release versions.
+
+Chrome will smoothly scale the image composited into the page when using ppapi.js, all other browsers will do nearest-neighbor scaling.  Nexes and pexes will also do nearest-neighbor scaling.  This means low res or pixel style graphics will be slightly blurred on Chrome with ppapi.js, unless the back buffer is the same size as the view port and the scaling factor for high DPI displays is accounted for.
 
 Input events are a little fiddly due to inconsistencies between browsers. For example, the delta for scroll wheel events is scaled differently in different browsers. ppapi.js attempts to normalize this, but in general, cross-platform inconsistencies should be expected in the input event interface.
 
