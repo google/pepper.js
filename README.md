@@ -12,7 +12,7 @@ Inside the repo:
 
 This will clone Emscripten.  Install Emscripten's dependencies on your system:
 
-* [node.js](http://nodejs.org/download/)
+* [node.js 0.8 or above](http://nodejs.org/download/)
 * [Python 2.7](http://www.python.org/download/)
 * Java
 * Optional: [Clang](http://llvm.org/releases/download.html)
@@ -21,6 +21,10 @@ Run <repo root>/emscripten/emcc to let Emscripten set itself up.  You may need t
 
 Emscripten expects a "python2" binary to exist.  If it does not exist on your system, such as on OSX, you can create a symlink.
 `sudo ln -s /usr/bin/python /usr/bin/python2`
+
+If you get the following error, your version of node.js is too old:
+
+    TypeError: Object #<Object> has no method 'appendFileSync'
 
 ### Building the Examples ###
     cd examples
@@ -31,6 +35,11 @@ Emscripten expects a "python2" binary to exist.  If it does not exist on your sy
     make V=1 TOOLCHAIN=pnacl CONFIG=Debug
     make V=1 TOOLCHAIN=pnacl CONFIG=Release
 
+There is a known issue where Emscripten will print the following warning when using the PNaCl toolchain:
+
+    Warning: using an unexpected LLVM triple: armv7-none-linux-gnueabi, !== ,le32-unknown-nacl (are you using emcc for everything and not clang?)
+
+It can be ignored and will be fixed in future releases.
 
 ### Running the Examples ###
     cd .. (out of the examples directory)

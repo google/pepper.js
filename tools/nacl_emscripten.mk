@@ -27,8 +27,8 @@ EM_LINK?=$(EM_PATH)/em++
 EM_LIB?=$(EM_PATH)/emar
 
 # Architecture-specific flags
-EM_CFLAGS?=-DNACL_ARCH=x86_32
-EM_CXXFLAGS?=-DNACL_ARCH=x86_32
+EM_CFLAGS?=-DNACL_ARCH=x86_32 -Wno-warn-absolute-paths
+EM_CXXFLAGS?=-DNACL_ARCH=x86_32 -Wno-warn-absolute-paths
 
 NACL_CFLAGS?=-Wno-long-long -Werror
 NACL_CXXFLAGS?=-Wno-long-long -Werror
@@ -37,6 +37,7 @@ NACL_LDFLAGS?=-Wl,-as-needed
 # HACK closure currently does not have audio exports defined.
 export EMCC_CLOSURE_ARGS=--externs $(PPAPIJS_SRC_ROOT)/externs.js --externs $(PPAPIJS_SRC_ROOT)/third_party/w3c_audio.js
 
+NACL_LDFLAGS+=-Wno-warn-absolute-paths
 # Emscripten appears to key off the optimization while linking to deterimine what backend should be used.
 # HACK PPAPI will export a bunch of anonymous function pointers, so we need to reserve slots for them.
 # Eventually we should make these non-anonymous.
