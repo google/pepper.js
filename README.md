@@ -4,7 +4,7 @@ ppapi.js is a JavaScript library that enables the compilation of Pepper plugins 
 ## Getting Started ##
 Clone the repo.
 
-Install the [NaCl SDK](https://developers.google.com/native-client/sdk/download).  Set the `NACL_SDK_ROOT` environment variable to point to the desired pepper_* directory inside of the NaCl SDK.  pepper_30 and up are supported.  The main dependency on pepper_30 is its toolchain, however, and not its header files and libraries.  It is possible to use an older version of Pepper by setting the `LLVM` environment variable to point to a toolchain other than the one contained in `NACL_SDK_ROOT`.
+Install the [NaCl SDK](https://developers.google.com/native-client/sdk/download).  Set the `NACL_SDK_ROOT` environment variable to point to the desired pepper_* directory inside of the NaCl SDK.  pepper_30 and up are supported.  (The main dependency on pepper_30 is its toolchain, however, and not its header files and libraries.  It is possible to use an older version of Pepper by setting the `LLVM` environment variable to point to a toolchain other than the one contained in `NACL_SDK_ROOT`.)
 
 Inside the repo:
 
@@ -50,7 +50,7 @@ Of course, both of these constraints can be worked around using the C preprocess
 In addition to these two constraints, there are a few subtle differences between native code compiled with Native Client and compiled with Emscripten.  For example, dereferencing a null pointer (or accessing unmapped memory of any sort) will cause a segfault in Native Client whereas it will succeed in Emscripten and return junk data.  Developers should keep these platform differences in mind - similar to how differences between 32-bit and 64-bit architectures needs to be considered in other situations.
 
 ### Using the PNaCl Toolchain ###
-It is possible to make Emscripten use the PNaCl toolchain (from pepper_30 onwards) instead of the standard version of Clang.  Simply set the `LLVM` environment variable to point to the `bin` directory containing the PNaCl toolchain: `pnacl-clang`, `pnacl-dis`, etc.  ppapi.js does this by default for two reasons.  First, it eliminates an install-time dependency.  Second, there is no standard binary distribution of Clang on Windows, but there is a Windows version of the PNaCl toolchain.  There appear to be a few 
+It is possible to make Emscripten use the PNaCl toolchain (from pepper_30 onwards) instead of the standard version of Clang.  Simply set the `LLVM` environment variable to point to the `bin` directory containing the PNaCl toolchain: `pnacl-clang`, `pnacl-dis`, etc.  ppapi.js’s examples do this by default for two reasons.  First, it eliminates an install-time dependency.  Second, there is no standard binary distribution of Clang on Windows, but there is a Windows version of the PNaCl toolchain.  There appear to be a few compatibility issues, such as exception support, but they are being worked on.
 
 ### Required Compiler Flags ###
 Building an example with `V=1 TOOLCHAIN=emscripten` will show the flags being passed to Emscripten.  If you want to set up your own build system, there’s a few flags you must pass when linking in order for your application to use ppapi.js.  

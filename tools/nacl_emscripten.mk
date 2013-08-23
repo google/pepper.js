@@ -15,6 +15,9 @@
 EM_PATH:=$(abspath $(PPAPIJS_SRC_ROOT)/emscripten)
 #$(error $(EM_PATH))
 
+# Use the PNaCl toolchain instead of a vanilla version of LLVM.
+export LLVM?=$(TC_PATH)/$(OSNAME)_x86_pnacl/newlib/bin
+
 #
 # Macros for TOOLS
 #
