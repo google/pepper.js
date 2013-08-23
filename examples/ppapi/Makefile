@@ -18,13 +18,6 @@ VALID_TOOLCHAINS:=emscripten newlib
 
 # Really, this library shouldn't be built for newlib, but it makes the build simpler.
 
-#
-# Get pepper directory for toolchain and includes.
-#
-# If NACL_SDK_ROOT is not set, then assume it can be found relative to
-# to this Makefile.
-#
-NACL_SDK_ROOT?=$(abspath $(CURDIR)/../../../../nacl_sdk/pepper_27)
 PPAPIJS_SRC_ROOT:=../..
 EXTRA_INC_PATHS=
 include $(PPAPIJS_SRC_ROOT)/tools/common.mk

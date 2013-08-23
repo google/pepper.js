@@ -62,12 +62,9 @@ ifeq ($(OSNAME),win)
 endif
 
 
-#
-# If NACL_SDK_ROOT is not already set, then set it relative to this makefile.
-#
-THIS_MAKEFILE := $(CURDIR)/$(lastword $(MAKEFILE_LIST))
-NACL_SDK_ROOT ?= $(realpath $(dir $(THIS_MAKEFILE))/..)
-
+ifndef NACL_SDK_ROOT
+$(error "The NACL_SDK_ROOT environment variable must be set.  pepper_30 and newer are supported.")
+endif
 
 #
 # Check that NACL_SDK_ROOT is set to a valid location.
