@@ -4,11 +4,11 @@ ppapi.js is a JavaScript library that enables the compilation of Pepper plugins 
 ## Getting Started ##
 Clone the repo.
 
-Install the [NaCl SDK](https://developers.google.com/native-client/sdk/download).  Set the `NACL_SDK_ROOT` environment variable to point to the desired pepper_* directory inside of the NaCl SDK.  pepper_30 and up are supported.  (The main dependency on pepper_30 is its toolchain, however, and not its header files and libraries.  It is possible to use an older version of Pepper by setting the `LLVM` environment variable to point to a toolchain other than the one contained in `NACL_SDK_ROOT`.)
+Install the [NaCl SDK](https://developers.google.com/native-client/sdk/download).  Set the `NACL_SDK_ROOT` environment variable to be an absolute path that points to the desired pepper_* directory inside of the NaCl SDK.  pepper_30 and up are supported.  (The main dependency on pepper_30 is its toolchain, however, and not its header files and libraries.  It is possible to use an older version of Pepper by setting the `LLVM` environment variable to point to a toolchain other than the one contained in `NACL_SDK_ROOT`.)
 
-Inside the repo:
+Inside the ppapi.js repo, run:
 
-    git submodule init
+    git submodule update --init
 
 This will clone Emscripten.  Install Emscripten's dependencies on your system:
 
@@ -17,29 +17,39 @@ This will clone Emscripten.  Install Emscripten's dependencies on your system:
 * Java
 * Optional: [Clang](http://llvm.org/releases/download.html)
 
-Run <repo root>/emscripten/emcc to let Emscripten set itself up.  You may need to manually edit ~/.emscripten (after you've run emcc once) to point it to the correct paths.  For example, you may want Emscripten to use a hermetic version of Clang instead of the one installed on the system.  For a specific example, Emscripten doesn't appear to be entirely happy with Xcode's command line tools, so downloading prebuilt binaries from LLVM's website may save some difficulty, even if you're already set up with Xcode.
+On Ubuntu, you can run the following commands to install the dependencies:
+
+    sudo apt-get install nodejs
+    sudo apt-get install python27
+
+Note, however, that Precise does not have a new enough version of node.js so you will need to build it from source.  If you get the following error while running Emscripten, your version of node.js is too old:
+
+    TypeError: Object #<Object> has no method 'appendFileSync'
 
 Emscripten expects a "python2" binary to exist.  If it does not exist on your system, such as on OSX, you can create a symlink.
 `sudo ln -s /usr/bin/python /usr/bin/python2`
 
-If you get the following error, your version of node.js is too old:
-
-    TypeError: Object #<Object> has no method 'appendFileSync'
-
 ### Building the Examples ###
     cd examples
-    make V=1 TOOLCHAIN=emscripten CONFIG=Debug
-    make V=1 TOOLCHAIN=emscripten CONFIG=Release
-    make V=1 TOOLCHAIN=newlib CONFIG=Debug
-    make V=1 TOOLCHAIN=newlib CONFIG=Release
-    make V=1 TOOLCHAIN=pnacl CONFIG=Debug
-    make V=1 TOOLCHAIN=pnacl CONFIG=Release
+    make TOOLCHAIN=emscripten CONFIG=Debug
+    make TOOLCHAIN=emscripten CONFIG=Release
+    make TOOLCHAIN=newlib CONFIG=Debug
+    make TOOLCHAIN=newlib CONFIG=Release
+    make TOOLCHAIN=pnacl CONFIG=Debug
+    make TOOLCHAIN=pnacl CONFIG=Release
+
+When you run emscripten for the first time, it will build a few dependencies in the background and the compilation may appear to hang.  Emscripten will also create a create a configuration file named `~/.emscripten`.  You may need to edit this file if it fails to guess the correct paths, or you want to use a version other than the one it guessed.
 
 There is a known issue where Emscripten will print the following warning when using the PNaCl toolchain:
 
     Warning: using an unexpected LLVM triple: armv7-none-linux-gnueabi, !== ,le32-unknown-nacl (are you using emcc for everything and not clang?)
 
 It can be ignored and will be fixed in future releases.
+
+### Clang ###
+It should be noted that the build system is configured make Emscripten use the PNaCl toolchain instead of a standard version of Clang.  (PNaCl is essentially a modified version of Clang.)  This is done for two reasons.  First, it eliminates an install-time dependency.  Second, there is no standard binary distribution of Clang on Windows, but there is a Windows version of the PNaCl toolchain.  There appear to be a few issues with using the PNaCl toolchain, such as exception support, but they are being worked on.  If you want to use another version of Clang when compiling the examples, simply set the `LLVM` environment variable to point to it before invoking `make`.  Similarly, if you want to use the PNaCl toolchain when using Emscripten in other situations, either set the `LLVM` environment variable or edit `~/emscripten`.
+
+If you want to use a version of Clang other than PNaCl, note that Emscripten doesn't appear to be entirely happy with Xcode's command line tools.  Downloading prebuilt binaries from LLVM's website or building them from source are the best options.
 
 ### Running the Examples ###
     cd .. (out of the examples directory)
@@ -57,9 +67,6 @@ To be compatible with Emscripten, it is necessary to structure the program so th
 Of course, both of these constraints can be worked around using the C preprocessor and conditional compilation.  For example, threading can be enabled on Native Client by guarding the relevant code with `#if defined(__native_client__) ... #endif`.  Emscripten-specific functionality can be conditioned on `defined(__EMSCRIPTEN__)`.  This approach is generally not recommended, but there are situations where the benefits outweigh the additional complexity - such as performance improvements from mutlithreading or calling directly to JavaScript rather than mediating through postMessage.
 
 In addition to these two constraints, there are a few subtle differences between native code compiled with Native Client and compiled with Emscripten.  For example, dereferencing a null pointer (or accessing unmapped memory of any sort) will cause a segfault in Native Client whereas it will succeed in Emscripten and return junk data.  Developers should keep these platform differences in mind - similar to how differences between 32-bit and 64-bit architectures needs to be considered in other situations.
-
-### Using the PNaCl Toolchain ###
-It is possible to make Emscripten use the PNaCl toolchain (from pepper_30 onwards) instead of the standard version of Clang.  Simply set the `LLVM` environment variable to point to the `bin` directory containing the PNaCl toolchain: `pnacl-clang`, `pnacl-dis`, etc.  ppapi.js’s examples do this by default for two reasons.  First, it eliminates an install-time dependency.  Second, there is no standard binary distribution of Clang on Windows, but there is a Windows version of the PNaCl toolchain.  There appear to be a few compatibility issues, such as exception support, but they are being worked on.
 
 ### Required Compiler Flags ###
 Building an example with `V=1 TOOLCHAIN=emscripten` will show the flags being passed to Emscripten.  If you want to set up your own build system, there’s a few flags you must pass when linking in order for your application to use ppapi.js.  
