@@ -11,10 +11,6 @@
 #include "ppapi/c/ppp_messaging.h"
 
 extern "C" {
-  // Work around a bug in Emscripten that prevent malloc from being included unless it is referenced from native code.
-  // TODO(ncbray): fix the bug and remove this hack.
-  __attribute__((used)) static void* hack = (void *)&malloc;
-
   const void* GetBrowserInterface(const char* interface_name);
 
   void DoPostMessage(PP_Instance instance, const PP_Var* var) {
@@ -45,6 +41,12 @@ extern "C" {
   }
 
   void Shutdown(PP_Instance instance) {
+    // Work around a bug in Emscripten that prevent malloc from being included unless it is referenced from native code.
+    // This appears to be live to the compiler, but instance will never be 0.
+    // TODO(ncbray): fix the bug and remove this hack.
+    if (instance == 0) {
+      free(malloc(1));
+    }
     const PPP_Instance* instance_interface = (const PPP_Instance*)PPP_GetInterface(PPP_INSTANCE_INTERFACE);
     if (instance_interface) {
       instance_interface->DidDestroy(instance);
