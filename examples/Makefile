@@ -25,6 +25,7 @@ PROJECTS:= \
   tests/ppapi_messaging \
   tests/ppapi_geturl \
   stress \
+  probe_interfaces \
 
 HTTPD:=../tools/httpd.py
 
