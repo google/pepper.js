@@ -1,5 +1,5 @@
 # ppapi.js #
-ppapi.js is a JavaScript library that enables the compilation of Pepper plugins into JavaScript using [Emscripten](https://github.com/kripken/emscripten).  This allows the simultaneous deployment of native code on the web both as a [Native Client](http://gonacl.com) executable and as JavaScript. 
+ppapi.js is a JavaScript library that enables the compilation of [Pepper](https://developers.google.com/native-client/pepperc/) plugins into JavaScript using [Emscripten](https://github.com/kripken/emscripten).  This allows the simultaneous deployment of native code on the web both as a [Native Client](http://gonacl.com) executable and as JavaScript. 
 
 ## Getting Started ##
 Clone the repo.
@@ -83,7 +83,7 @@ Emscripten defaults to a 16 MB address space, which may to be too small.  Tune t
 
 The “ppapi” library contains boilerplate needed to bind the PPAPI plugin to JS.
 
-    -s EXPORTED_FUNCTIONS="['_malloc', '_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']"
+    -s EXPORTED_FUNCTIONS="['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']"
 
 These functions are called by ppapi.js, and they must be exported by your application.
 
@@ -116,6 +116,8 @@ TODO figure out how to clearly explain how this situation impacts developers, or
 
 ### Implementation Errata ###
 The Graphics2D and Graphics3D interfaces will automatically swap buffers every frame, even if Flush or SwapBuffers is not called. This behavior should not be noticeable for most applications. Explicit swapping could be emulated by creating an offscreen buffer, but this would cost time and memory.
+
+Graphics3D may not strictly honor `PP_GRAPHICS3DATTRIB_*` parameters but best effort will be made to do something reasonable.  [WebGL](https://www.khronos.org/registry/webgl/specs/1.0/) provides less control than PPAPI, and ppapi.js is implemented on top of WebGL.  For example, if a 24-bit depth buffer is requested there will be a depth buffer but WebGL only makes guarantees that depth buffers are at least 16 bits.
 
 Using BGRA image formats will result in a silent performance penalty. In general, web APIs tend to be strongly opinionated that premultiplied RGBA is the image format that should be used. Any other format must be manually converted into premultiplied RGBA.
 
