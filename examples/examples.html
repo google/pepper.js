@@ -74,7 +74,11 @@ var examples = [
 <h4>Chrome</h4>
 <ul>
   <li>To run the NaCl examples, either enable NaCl in about:flags or pass --enable-nacl to Chrome on the command line.</li>
-  <li>This is currently the only platform that supports the NaCl examples.
+  <li>This is currently the only platform that supports the NaCl examples.</li>
+  <li>PNaCl requires Chrome 31 and above.</li>
+  <li>Note that "PNaCl Debug" examples are actually NaCl modules
+  compiled using the PNaCl toolchain - no translation is being done in
+  the browser.  Only "PNaCl Release" translates in the browser.</li>
 </ul>
 <h4>Firefox</h4>
 <ul>

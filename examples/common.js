@@ -156,6 +156,7 @@ var common = (function () {
       else
         mimetype = 'application/x-ppapi-debug';
     } else if (tool == 'pnacl') {
+      // Note: the SDK actually produces .nexe files is Debug mode, so the tool is set to 'nacl'.
       mimetype = 'application/x-pnacl';
     }
     moduleEl.setAttribute('type', mimetype);
@@ -417,6 +418,11 @@ window.onload = function() {
     var config = configs.indexOf(searchVars.config) !== -1 ?
       searchVars.config : configs[0];
     path = path.replace('{tc}', tc).replace('{config}', config);
+
+    // The SDK uses the pnacl toolchain to compile nexes in Debug mode.
+    if (tc == "pnacl" && config == "Debug") {
+      tc = "nacl";
+    }
 
     loadFunction(name, tc, path, width, height);
   }
