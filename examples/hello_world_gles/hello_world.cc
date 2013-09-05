@@ -36,6 +36,7 @@
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_opengles2.h"
 #include "ppapi/c/ppb_var.h"
+#include "ppapi/c/ppb_view.h"
 #include "ppapi/c/ppp.h"
 #include "ppapi/c/ppp_input_event.h"
 #include "ppapi/c/ppp_instance.h"
@@ -57,9 +58,13 @@ static PPB_InputEvent* ppb_input_event_interface = NULL;
 static PPB_Instance* ppb_instance_interface = NULL;
 static PPB_URLRequestInfo* ppb_urlrequestinfo_interface = NULL;
 static PPB_URLLoader* ppb_urlloader_interface = NULL;
+static PPB_View* ppb_view_interface = NULL;
 
 static PP_Instance g_instance;
 static PP_Resource g_context;
+
+int view_width = 640;
+int view_height = 480;
 
 GLuint  g_positionLoc;
 GLuint  g_texCoordLoc;
@@ -153,8 +158,8 @@ void InitGL(void)
     PP_GRAPHICS3DATTRIB_STENCIL_SIZE, 8,
     PP_GRAPHICS3DATTRIB_SAMPLES, 0,
     PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS, 0,
-    PP_GRAPHICS3DATTRIB_WIDTH, 640,
-    PP_GRAPHICS3DATTRIB_HEIGHT, 480,
+    PP_GRAPHICS3DATTRIB_WIDTH, view_width,
+    PP_GRAPHICS3DATTRIB_HEIGHT, view_height,
     PP_GRAPHICS3DATTRIB_NONE
   };
 
@@ -168,7 +173,6 @@ void InitGL(void)
   }
   glSetCurrentContextPPAPI(g_context);
 
-  glViewport(0,0, 640,480);
   glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
 }
 
@@ -284,6 +288,7 @@ void Render( void )
   if (xRot >= 360.0f) xRot = 0.0;
   if (yRot >= 360.0f) yRot = 0.0;
 
+  glViewport(0,0, view_width, view_height);
   glClearColor(0.5,0.5,0.5,1);
   glClearDepthf(1.0);
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -301,7 +306,7 @@ void Render( void )
   float rot[16];
 
   identity_matrix(mpv);
-  glhPerspectivef2(&mpv[0], 45.0f, 640.0f / 480.0f,1, 10);
+  glhPerspectivef2(&mpv[0], 45.0f, view_width / (float) view_height, 1, 10);
 
   translate_matrix(0, 0, -4.0, trs);
   rotate_matrix(xRot, yRot , 0.0f ,rot);
@@ -523,9 +528,16 @@ static void Instance_DidDestroy(PP_Instance instance) {
  */
 static void Instance_DidChangeView(PP_Instance instance,
                                    PP_Resource view_resource) {
+  PP_Rect rect;
+  ppb_view_interface->GetRect(view_resource, &rect);
+  view_width = rect.size.width;
+  view_height = rect.size.height;
+
   if (g_context == 0) {
     InitGL();
     MainLoop(NULL, 0);
+  } else {
+    ppb_g3d_interface->ResizeBuffers(g_context, view_width, view_height);
   }
 }
 
@@ -600,6 +612,8 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
 
   ppb_fullscreen_interface = (PPB_Fullscreen*)get_browser(PPB_FULLSCREEN_INTERFACE);
   ppb_input_event_interface = (PPB_InputEvent*)get_browser(PPB_INPUT_EVENT_INTERFACE);
+
+  ppb_view_interface = (PPB_View*)(get_browser(PPB_VIEW_INTERFACE));
 
   if (!glInitializePPAPI(get_browser))
     return PP_ERROR_FAILED;

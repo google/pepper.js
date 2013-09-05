@@ -271,6 +271,7 @@ var CreateInstance = function(width, height, shadow_instance) {
   style.innerHTML = ".ppapiJsEmbed {border: 0px; margin: 0px; padding: 0px; outline: none;}";
   style.innerHTML += " .ppapiJsCanvas {outline: none; image-rendering: optimizeSpeed; image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: optimize-contrast; -ms-interpolation-mode: nearest-neighbor;}";
   // Bug-ish.  Each variation needs to be specified seperately.
+  // TODO(ncbray): set width and height to screen.width and screen.height?  This would better match PPAPI's behavior, but it could also cause unanticipated problems.
   var fullscreenCSS = "{position: fixed; top: 0; left: 0; bottom: 0; right: 0; width: 100% !important; height: 100% !important; box-sizing: border-box; object-fit: contain; background-color: black;}";
   style.innerHTML += " .ppapiJsEmbed:-webkit-full-screen " + fullscreenCSS;
   style.innerHTML += " .ppapiJsEmbed:-moz-full-screen " + fullscreenCSS;

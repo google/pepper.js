@@ -125,7 +125,16 @@
   };
 
   var Graphics3D_ResizeBuffers = function(context, width, height) {
-    throw "Graphics3D_ResizeBuffers not implemented";
+    var c = resources.resolve(context, GRAPHICS_3D_RESOURCE);
+    if (c === undefined) {
+      return ppapi.PP_ERROR_BADRESOURCE;
+    }
+    if (width < 0 || height < 0) {
+      return ppapi.PP_ERROR_BADARGUMENT;
+    }
+    c.canvas.width = width;
+    c.canvas.height = height;
+    return ppapi.PP_OK;
   };
 
   var Graphics3D_SwapBuffers = function(context, callback) {
