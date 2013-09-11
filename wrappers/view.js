@@ -8,7 +8,7 @@
     if (view === undefined) {
       return 0;
     }
-    ppapi_glue.setRect(view.rect, rectptr);
+    ppapi.setRect(view.rect, rectptr);
     return 1;
   };
 
@@ -43,7 +43,7 @@
     if (view === undefined) {
       return 0;
     }
-    ppapi_glue.setRect(view.clip_rect, rectptr);
+    ppapi.setRect(view.clip_rect, rectptr);
     return 1;
   };
 

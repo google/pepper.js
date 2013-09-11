@@ -667,5 +667,25 @@ var ppapi = (function() {
     PP_GRAPHICS3DATTRIB_GPU_PREFERENCE_PERFORMANCE: 0x11002
   };
 
+  ppapi.getRect = function(ptr) {
+    return {
+      point: {
+        x: getValue(ptr, 'i32'),
+        y: getValue(ptr + 4, 'i32')
+      },
+      size: {
+        width: getValue(ptr + 8, 'i32'),
+        height: getValue(ptr + 12, 'i32')
+      }
+    };
+  };
+
+  ppapi.setRect = function(rect, ptr) {
+    setValue(ptr, rect.x, 'i32');
+    setValue(ptr + 4, rect.y, 'i32');
+    setValue(ptr + 8, rect.width, 'i32');
+    setValue(ptr + 12, rect.height, 'i32');
+  };
+
   return ppapi;
 })();

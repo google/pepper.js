@@ -104,7 +104,7 @@
     }
     // Assumes 16-bit stereo.
     var buffer_bytes = config_js.sample_frame_count * 2 * 2;
-    var buffer =  _malloc(buffer_bytes);
+    var buffer = _malloc(buffer_bytes);
 
     var context = createAudioContext();
     // Note requires power-of-two buffer size.

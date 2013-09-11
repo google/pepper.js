@@ -100,24 +100,6 @@ var ppapi_exports = {
         Runtime.dynCall('vii', func, [user_data, result]);
       };
     },
-    getRect: function(ptr) {
-      return {
-        point: {
-          x: {{{ makeGetValue('ptr + 0', '0', 'i32') }}},
-          y: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
-        },
-        size: {
-          width: {{{ makeGetValue('ptr + 8', '0', 'i32') }}},
-          height: {{{ makeGetValue('ptr + 12', '0', 'i32') }}}
-        }
-      };
-    },
-    setRect: function(rect, ptr) {
-      {{{ makeSetValue('ptr', '0', 'rect.x', 'i32') }}};
-      {{{ makeSetValue('ptr + 4', '0', 'rect.y', 'i32') }}};
-      {{{ makeSetValue('ptr + 8', '0', 'rect.width', 'i32') }}};
-      {{{ makeSetValue('ptr + 12', '0', 'rect.height', 'i32') }}};
-    },
     getSize: function(ptr) {
       return {
         width: {{{ makeGetValue('ptr', '0', 'i32') }}},

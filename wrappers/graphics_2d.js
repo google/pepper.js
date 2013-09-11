@@ -111,7 +111,7 @@
     if (src_rect_ptr == 0) {
       g2d.putImageData(res.image_data, top_left.x, top_left.y);
     } else {
-      var src_rect = ppapi_glue.getRect(src_rect_ptr);
+      var src_rect = ppapi.getRect(src_rect_ptr);
       g2d.putImageData(res.image_data, top_left.x, top_left.y, src_rect.point.x, src_rect.point.y, src_rect.size.width, src_rect.size.height);
     }
   };
@@ -122,7 +122,7 @@
     if (g2d === undefined) {
       return;
     }
-    var clip_rect =  ppapi_glue.getRect(clip_rect_ptr);
+    var clip_rect = ppapi.getRect(clip_rect_ptr);
     var amount = ppapi_glue.getPoint(amount_ptr);
     var data = g2d.getImageData(clip_rect.point.x, clip_rect.point.y, clip_rect.size.width, clip_rect.size.height);
       g2d.putImageData(data, clip_rect.point.x + amount.x, clip_rect.point.y + amount.y);
