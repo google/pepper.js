@@ -84,7 +84,7 @@ var examples = [
 <ul>
   <li>Firefox <a href="http://nightly.mozilla.org/">nightly</a> is required.  The Web Audio API, etc, are only starting to be supported.</li>
   <li>Switching to fullscreen will unlock the mouse in Firefox.  Locking the mouse outside of fullscreen is only supported in nightly.</li>
-  <li>Scaling 3D to fullscreen appears to be slow? TODO: check non-scaled 3D.</li>
+  <li>Scaling 3D to fullscreen appears to be slow? Unscaled 3D seems to be fine.</li>
 </ul>
 
 <h4>Safari</h4>
@@ -105,57 +105,6 @@ var examples = [
   <li>Not yet tested.</li>
 </ul>
 
-<h3>Developer Errata</h3>
-<ul>
-  <li>Threads are not allowed.  Blocking calls are not allowed.  Only purely asynchonous code can be compiled into both NaCl and JavaScript. Essentially, your program must use the same concurency model as JavaScript to be compiled into JavaScript.</li>
-  <li>Using BGRA image formats will result in a silent performance penalty.  In general, web APIs tend to be strongly opinionated that premultiplied RGBA is the image format that should be used.  Any other format must be manually converted into premultiplied RGBA.</li>
-  <li>The Graphics2D and Graphics3D interfaces will automatically swap buffers every frame, even if Flush or SwapBuffers is not called.  This behavior should not be noticible for most applications.  Explicit swapping could be emulated by creating an offscreen buffer, but this would cost time and memory.</li>
-  <li>The Audio API only supports one sample rate - whatever the underlying Web Audio API uses, which is whatever the OS defaults to, which tends to be a mix of 44.1k and 48k.  48k tends to be more common.  In the future, resampling could be performed as a polyfill, but this would be slow.</li>
-  <li>URLLoader intentionally deviates from the native implementation's behavior when it is at odds with XMLHttpRequest.  For example, ppapi.js does not identify CORS failures as PP_ERROR_NOACCESS, instead it returns PP_ERROR_FAILED.</li>
-  <li>URLLoader does not stream - the data appears all at once.  This is a consequence of doing an XHR with requestType "arraybuffer", it does not appear to give partial results.</li>
-  <li>Input support is a little fiddly due to inconsistencies between browsers.  For example, the delta for scroll wheel events is scaled differently in different browsers.  ppapi.js attempts to normalize this, but in general, cross-platform inconsistencies should be expected in the input event interface.</li>
-  <li>If multiple mouse buttons are held, ppapi.js will list all of them as event modifiers.  PPAPI will only list one button - the one with the lowest enum value.  There is a known but where ppapi.js will not update the modifier state if a button is pressed or released outside of ppapi.js's canvas.</li>
-  <li>Filesystem is currently supported only by Chrome. (Creation and last access time are not supported.)  A polyfill for Firefox and IE is included in ppapi.js, but it has a few known bugs - such as not being able to resize already existing files, and the Closure compiler renaming fields in persisted data structures, resulting in data incompatability/loss between Debug and Release versions, and possibally between different Release versions.</li>
-  <li>Emscripten forcibly undefines __native_client__, and currently this cannot be overriden.  As a workaround, also key off the __EMSCRIPTEN__ define.</li>
-  <li>Most of the PPAPI tests have not been ported because they wait for blocking callbacks.</li>
-</ul>
-
-<h3>Supported Interfaces</h3>
-Note that these interfaces nay not be completely implemented, yet.  In general, functionality is not implemented until there is a test case for it.
-<ul>
-<li>Audio</li>
-<li>AudioConfig</li>
-<li>Console</li>
-<li>Core</li>
-<li>FileIO</li>
-<li>FileRef</li>
-<li>FileSystem</li>
-<li>Fullscreen</li>
-<li>Graphics2D</li>
-<li>Graphics3D</li>
-<li>ImageData</li>
-<li>InputEvent</li>
-<li>MouseInputEvent</li>
-<li>WheelInputEvent</li>
-<li>KeyboardInputEvent</li>
-<li>Instance</li>
-<li>Messaging</li>
-<li>MouseLock</li>
-<li>URLLoader</li>
-<li>URLRequestInfo</li>
-<li>URLResponseInfo</li>
-<li>Var</li>
-<li>VarArrayBuffer</li>
-<li>View</li>
-</ul>
-<h3>Unsupported Interfaces</h3>
-<ul>
-<li>Gamepad</li>
-<li>MessageLoop</li>
-<li>MouseCursor</li>
-<li>TouchInputEvent</li>
-<li>WebSocket</li>
-</ul>
 </div>
 </div>
 </body>
