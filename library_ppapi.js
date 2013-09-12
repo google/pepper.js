@@ -5,13 +5,6 @@ var ppapi_exports = {
       ['i32', 'padding'],
       ['i64', 'value'],
     ]),
-    PP_VARTYPE_UNDEFINED: 0,
-    PP_VARTYPE_NULL: 1,
-    PP_VARTYPE_BOOL: 2,
-    PP_VARTYPE_INT32: 3,
-    PP_VARTYPE_DOUBLE: 4,
-    PP_VARTYPE_STRING: 5,
-    PP_VARTYPE_ARRAY_BUFFER: 9,
 
     jsForVar: function(p) {
       var o = ppapi_glue.PP_Var;
@@ -21,14 +14,14 @@ var ppapi_exports = {
 	return undefined;
       } else if (type == 1) {
 	return null;
-      } else if (type == ppapi_glue.PP_VARTYPE_BOOL) {
+      } else if (type == ppapi.PP_VARTYPE_BOOL) {
 	// PP_Bool is guarenteed to be 4 bytes.
 	return 0 != {{{ makeGetValue('p + o.value', '0', 'i32') }}};
       } else if (type == 3) {
 	return {{{ makeGetValue('p + o.value', '0', 'i32') }}};
       } else if (type == 4) {
 	return {{{ makeGetValue('p + o.value', '0', 'double') }}};
-      } else if (type == ppapi_glue.PP_VARTYPE_STRING) {
+      } else if (type == ppapi.PP_VARTYPE_STRING) {
 	var uid = {{{ makeGetValue('p + o.value', '0', 'i32') }}};
 	return resources.resolve(uid, STRING_RESOURCE).value;
       } else {

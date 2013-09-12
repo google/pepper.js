@@ -137,7 +137,7 @@
 
     // Not a valid UTF-8 string.  Return null.
     if (value === null) {
-      setValue(result + o.type, ppapi_glue.PP_VARTYPE_NULL, 'i32');
+      setValue(result + o.type, ppapi.PP_VARTYPE_NULL, 'i32');
       setValue(result + o.value, 0, 'i32');
       return
     }
@@ -154,7 +154,7 @@
     var uid = resources.registerString(value, memory, len);
 
     // Generate the return value.
-    setValue(result + o.type, ppapi_glue.PP_VARTYPE_STRING, 'i32');
+    setValue(result + o.type, ppapi.PP_VARTYPE_STRING, 'i32');
     setValue(result + o.value, uid, 'i32');
   };
 
@@ -164,7 +164,7 @@
 
     var o = ppapi_glue.PP_Var;
     var type = getValue(v + o.type, 'i32');
-    if (type !== ppapi_glue.PP_VARTYPE_STRING) {
+    if (type !== ppapi.PP_VARTYPE_STRING) {
       return 0;
     }
     var uid = getValue(v + o.value, 'i32');
@@ -202,7 +202,7 @@
   var VarArrayBuffer_Map = function(var_ptr) {
     var o = ppapi_glue.PP_Var;
     var type = getValue(var_ptr + o.type, 'i32');
-    if (type !== ppapi_glue.PP_VARTYPE_ARRAY_BUFFER) {
+    if (type !== ppapi.PP_VARTYPE_ARRAY_BUFFER) {
       return 0;
     }
     var uid = getValue(var_ptr + o.value, 'i32');

@@ -220,75 +220,75 @@
     var js_obj = ppapi_glue.jsForVar(value);
 
     if (property === 0) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_STRING) {
+      if (var_type !== ppapi.PP_VARTYPE_STRING) {
         return 0;
       }
       r.url = js_obj;
     } else if (property === 1) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_STRING) {
+      if (var_type !== ppapi.PP_VARTYPE_STRING) {
         return 0;
       }
       // PPAPI does not filter invalid methods at this level.
       r.method = js_obj;
     } else if (property === 2) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_STRING) {
+      if (var_type !== ppapi.PP_VARTYPE_STRING) {
         return 0;
       }
       r.headers = js_obj;
     } else if (property === 3) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+      if (var_type !== ppapi.PP_VARTYPE_BOOL) {
         return 0;
       }
       r.stream_to_file = js_obj;
     } else if (property === 4) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+      if (var_type !== ppapi.PP_VARTYPE_BOOL) {
         return 0;
       }
       r.follow_redirects = js_obj;
     } else if (property === 5) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+      if (var_type !== ppapi.PP_VARTYPE_BOOL) {
         return 0;
       }
       r.record_download_progress = js_obj;
     } else if (property === 6) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+      if (var_type !== ppapi.PP_VARTYPE_BOOL) {
         return 0;
       }
       r.record_upload_progress = js_obj;
     } else if (property === 7) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_STRING && var_type !== ppapi_glue.PP_VARTYPE_UNDEFINED) {
+      if (var_type !== ppapi.PP_VARTYPE_STRING && var_type !== ppapi.PP_VARTYPE_UNDEFINED) {
         return 0;
       }
       r.custom_referrer_url = js_obj;
     } else if (property === 8) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+      if (var_type !== ppapi.PP_VARTYPE_BOOL) {
         return 0;
       }
       r.allow_cross_origin_requests = js_obj;
     } else if (property === 9) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_BOOL) {
+      if (var_type !== ppapi.PP_VARTYPE_BOOL) {
         return 0;
       }
       r.allow_credentials = js_obj;
     } else if (property === 10) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_STRING && var_type !== ppapi_glue.PP_VARTYPE_UNDEFINED) {
+      if (var_type !== ppapi.PP_VARTYPE_STRING && var_type !== ppapi.PP_VARTYPE_UNDEFINED) {
         return 0;
       }
       r.custom_content_transfer_encoding = js_obj;
     } else if (property === 11) {
       // TODO(ncbray): require integer, disallow double.
-      if (var_type !== ppapi_glue.PP_VARTYPE_INT32) {
+      if (var_type !== ppapi.PP_VARTYPE_INT32) {
         return 0;
       }
       r.prefetch_buffer_upper_threshold = js_obj;
     } else if (property === 12) {
       // TODO(ncbray): require integer, disallow double.
-      if (var_type !== ppapi_glue.PP_VARTYPE_INT32) {
+      if (var_type !== ppapi.PP_VARTYPE_INT32) {
         return 0;
       }
       r.prefetch_buffer_lower_threshold = js_obj;
     } else if (property === 13) {
-      if (var_type !== ppapi_glue.PP_VARTYPE_STRING && var_type !== ppapi_glue.PP_VARTYPE_UNDEFINED) {
+      if (var_type !== ppapi.PP_VARTYPE_STRING && var_type !== ppapi.PP_VARTYPE_UNDEFINED) {
         return 0;
       }
       r.custom_user_agent = js_obj;
