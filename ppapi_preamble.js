@@ -28,8 +28,7 @@ var clamp = function(value, min, max) {
 
 var postMessage = function(message) {
   // Fill out the PP_Var structure
-  var o = ppapi_glue.PP_Var
-  var var_ptr = _malloc(o.__size__);
+  var var_ptr = _malloc(16);
   ppapi_glue.varForJS(var_ptr, message);
 
   // Send

@@ -110,20 +110,14 @@
   };
 
   var Var_AddRef = function(v) {
-    var o = ppapi_glue.PP_Var;
-    var type = getValue(v + o.type, 'i32');
-    if (isRefCountedVarType(type)) {
-      var uid = getValue(v + o.value, 'i32');
-      resources.addRef(uid);
+    if (isRefCountedVarType(ppapi_glue.varType(v))) {
+      resources.addRef(ppapi_glue.varUID(v));
     }
   };
 
   var Var_Release = function(v) {
-    var o = ppapi_glue.PP_Var;
-    var type = getValue(v + o.type, 'i32');
-    if (isRefCountedVarType(type)) {
-      var uid = getValue(v + o.value, 'i32');
-      resources.release(uid);
+    if (isRefCountedVarType(ppapi_glue.varType(v))) {
+      resources.release(ppapi_glue.varUID(v));
     }
   };
 
@@ -132,13 +126,11 @@
   };
 
   var Var_VarFromUtf8_1_1 = function(result, ptr, len) {
-    var o = ppapi_glue.PP_Var;
     var value = util.decodeUTF8(ptr, len);
 
     // Not a valid UTF-8 string.  Return null.
     if (value === null) {
-      setValue(result + o.type, ppapi.PP_VARTYPE_NULL, 'i32');
-      setValue(result + o.value, 0, 'i32');
+      ppapi_glue.varForJS(result, null);
       return
     }
 
@@ -151,23 +143,19 @@
     // Null terminate the string because why not?
     HEAPU8[memory + len] = 0;
 
-    var uid = resources.registerString(value, memory, len);
-
     // Generate the return value.
-    setValue(result + o.type, ppapi.PP_VARTYPE_STRING, 'i32');
-    setValue(result + o.value, uid, 'i32');
+    setValue(result, ppapi.PP_VARTYPE_STRING, 'i32');
+    setValue(result + 8, resources.registerString(value, memory, len), 'i32');
   };
 
   var Var_VarToUtf8 = function(v, lenptr) {
     // Defensively set the length to zero so that we can early out at any point.
     setValue(lenptr, 0, 'i32');
 
-    var o = ppapi_glue.PP_Var;
-    var type = getValue(v + o.type, 'i32');
-    if (type !== ppapi.PP_VARTYPE_STRING) {
+    if (ppapi_glue.varType(v) !== ppapi.PP_VARTYPE_STRING) {
       return 0;
     }
-    var uid = getValue(v + o.value, 'i32');
+    var uid = ppapi_glue.varUID(v);
     var resource = resources.resolve(uid, STRING_RESOURCE);
     if (resource === undefined) {
       return 0;
@@ -200,12 +188,10 @@
   }
 
   var VarArrayBuffer_Map = function(var_ptr) {
-    var o = ppapi_glue.PP_Var;
-    var type = getValue(var_ptr + o.type, 'i32');
-    if (type !== ppapi.PP_VARTYPE_ARRAY_BUFFER) {
+    if (ppapi_glue.varType(var_ptr) !== ppapi.PP_VARTYPE_ARRAY_BUFFER) {
       return 0;
     }
-    var uid = getValue(var_ptr + o.value, 'i32');
+    var uid = ppapi_glue.varUID(var_ptr);
     var resource = resources.resolve(uid, ARRAY_BUFFER_RESOURCE);
     if (resource === undefined) {
       return 0;
