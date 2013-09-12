@@ -251,6 +251,18 @@
     return ppapi.PP_OK_COMPLETIONPENDING;
   }
 
+  // This setter is only used by the file APIs, so it is implemented here rather
+  // than with the other getters and setters.
+  var setFileInfo = function(obj, ptr) {
+    setValue(ptr, obj.size_low, 'i32');
+    setValue(ptr + 4, obj.size_high, 'i32');
+    setValue(ptr + 8, obj.type, 'i32');
+    setValue(ptr + 12, obj.system_type, 'i32');
+    setValue(ptr + 16, obj.creation_time, 'double');
+    setValue(ptr + 24, obj.last_access_time, 'double');
+    setValue(ptr + 32, obj.last_modified_time, 'double');
+  };
+
   var FileIO_Query = function(file_io, info_ptr, callback_ptr) {
     return AccessFile(file_io, callback_ptr, function(io, entry, callback) {
         entry.getMetadata(function(metadata) {
@@ -269,7 +281,7 @@
               last_modified_time: metadata.modificationTime ? metadata.modificationTime.valueOf() / 1000 : 0.0
           };
 
-          ppapi_glue.setFileInfo(info, info_ptr);
+          setFileInfo(info, info_ptr);
 
           callback(ppapi.PP_OK);
         }, DummyError);

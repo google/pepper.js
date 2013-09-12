@@ -313,7 +313,7 @@
     if (_event !== undefined && isMouseEvent(_event)) {
       point = _event.pos;
     }
-    ppapi_glue.setPoint(point, ptr);
+    ppapi.setPoint(point, ptr);
   };
 
   var MouseInputEvent_ClickCount = function(event) {
@@ -327,7 +327,7 @@
     if (_event !== undefined && isMouseEvent(_event)) {
       point = _event.movement;
     }
-    ppapi_glue.setPoint(point, ptr);
+    ppapi.setPoint(point, ptr);
   };
 
   registerInterface("PPB_MouseInputEvent;1.1", [
@@ -357,7 +357,7 @@
     if (_event !== undefined && isWheelEvent(_event)) {
       point = _event.delta;
     }
-    ppapi_glue.setFloatPoint(point, ptr);
+    ppapi.setFloatPoint(point, ptr);
   };
 
   var deltaToTick = function(value) {
@@ -372,7 +372,7 @@
       point.x = deltaToTick(_event.delta.x);
       point.y = deltaToTick(_event.delta.y);
     }
-    ppapi_glue.setFloatPoint(point, ptr);
+    ppapi.setFloatPoint(point, ptr);
   };
 
   var WheelInputEvent_GetScrollByPage = function(event) {

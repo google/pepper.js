@@ -100,49 +100,6 @@ var ppapi_exports = {
         Runtime.dynCall('vii', func, [user_data, result]);
       };
     },
-    getSize: function(ptr) {
-      return {
-        width: {{{ makeGetValue('ptr', '0', 'i32') }}},
-        height: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
-      };
-    },
-
-
-    getPoint: function(ptr) {
-      return {
-	x: {{{ makeGetValue('ptr', '0', 'i32') }}},
-	y: {{{ makeGetValue('ptr + 4', '0', 'i32') }}}
-      };
-    },
-
-    setPoint: function(obj, ptr) {
-      {{{ makeSetValue('ptr', '0', 'obj.x', 'i32') }}};
-      {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'i32') }}};
-    },
-
-
-    getFloatPoint: function(ptr) {
-      return {
-	x: {{{ makeGetValue('ptr', '0', 'float') }}},
-	y: {{{ makeGetValue('ptr + 4', '0', 'float') }}}
-      };
-    },
-
-    setFloatPoint: function(obj, ptr) {
-      {{{ makeSetValue('ptr', '0', 'obj.x', 'float') }}};
-      {{{ makeSetValue('ptr + 4', '0', 'obj.y', 'float') }}};
-    },
-
-    setFileInfo: function(obj, ptr) {
-      {{{ makeSetValue('ptr', '0', 'obj.size_low', 'i32') }}};
-      {{{ makeSetValue('ptr + 4', '0', 'obj.size_high', 'i32') }}};
-      {{{ makeSetValue('ptr + 8', '0', 'obj.type', 'i32') }}};
-      {{{ makeSetValue('ptr + 12', '0', 'obj.system_type', 'i32') }}};
-      {{{ makeSetValue('ptr + 16', '0', 'obj.creation_time', 'double') }}};
-      {{{ makeSetValue('ptr + 24', '0', 'obj.last_access_time', 'double') }}};
-      {{{ makeSetValue('ptr + 32', '0', 'obj.last_modified_time', 'double') }}};
-    },
-
   },
 
   GetBrowserInterface: function(interface_name) {

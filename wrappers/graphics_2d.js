@@ -1,7 +1,7 @@
 (function() {
 
   var Graphics2D_Create = function(instance, size_ptr, is_always_opaque) {
-    var size = ppapi_glue.getSize(size_ptr);
+    var size = ppapi.getSize(size_ptr);
     var i = resources.resolve(instance, INSTANCE_RESOURCE);
     if (i === undefined) {
       return 0;
@@ -107,7 +107,7 @@
     // Note: PPAPI in Chrome does not draw the data if it is partially outside the bounds of the context.  This implementation does.
     // TODO(ncbray): only sync the portion being drawn?
     syncImageData(res);
-    var top_left = ppapi_glue.getPoint(top_left_ptr);
+    var top_left = ppapi.getPoint(top_left_ptr);
     if (src_rect_ptr == 0) {
       g2d.putImageData(res.image_data, top_left.x, top_left.y);
     } else {
@@ -123,7 +123,7 @@
       return;
     }
     var clip_rect = ppapi.getRect(clip_rect_ptr);
-    var amount = ppapi_glue.getPoint(amount_ptr);
+    var amount = ppapi.getPoint(amount_ptr);
     var data = g2d.getImageData(clip_rect.point.x, clip_rect.point.y, clip_rect.size.width, clip_rect.size.height);
       g2d.putImageData(data, clip_rect.point.x + amount.x, clip_rect.point.y + amount.y);
   };
@@ -260,7 +260,7 @@
     if (!ImageData_IsImageDataFormatSupported(format)) {
       return 0;
     }
-    var size = ppapi_glue.getSize(size_ptr);
+    var size = ppapi.getSize(size_ptr);
     if (size.width <= 0 || size.height <= 0) {
       return 0;
     }

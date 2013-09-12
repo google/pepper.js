@@ -283,9 +283,16 @@ var CreateInstance = function(width, height, shadow_instance) {
   var updateView = function() {
     // NOTE: this will give the wrong value if the canvas has any margin, border, or padding.
     var bounds = shadow_instance.getBoundingClientRect();
-    var rect = {x: bounds.left, y: bounds.top,
-                width: bounds.right - bounds.left,
-                height: bounds.bottom - bounds.top};
+    var rect = {
+      point: {
+        x: bounds.left,
+        y: bounds.top
+      },
+      size: {
+        width: bounds.right - bounds.left,
+        height: bounds.bottom - bounds.top
+      }
+    };
 
     // Clip the bounds to the viewport.
     var clipX = clamp(bounds.left, 0, window.innerWidth);
@@ -312,7 +319,16 @@ var CreateInstance = function(width, height, shadow_instance) {
       fullscreen: getFullscreenElement() === shadow_instance,
       visible: visible,
       page_visible: 1,
-      clip_rect: {x: clipX, y: clipY, width: clipWidth, height: clipHeight}
+      clip_rect: {
+        point: {
+          x: clipX,
+          y: clipY
+        },
+        size: {
+          width: clipWidth,
+          height: clipHeight
+        }
+      }
     };
     var s = JSON.stringify(event);
     if (s !== last_update) {
@@ -667,24 +683,47 @@ var ppapi = (function() {
     PP_GRAPHICS3DATTRIB_GPU_PREFERENCE_PERFORMANCE: 0x11002
   };
 
+  ppapi.getPoint = function(ptr) {
+    return {
+      x: getValue(ptr, 'i32'),
+      y: getValue(ptr + 4, 'i32')
+    };
+  };
+
+  ppapi.setPoint = function(obj, ptr) {
+    setValue(ptr, obj.x, 'i32');
+    setValue(ptr + 4, obj.y, 'i32');
+  };
+
+  // No need for getFloatPoint, yet.
+
+  ppapi.setFloatPoint = function(obj, ptr) {
+    setValue(ptr, obj.x, 'float');
+    setValue(ptr + 4, obj.y, 'float');
+  };
+
+  ppapi.getSize = function(ptr) {
+    return {
+      width: getValue(ptr, 'i32'),
+      height: getValue(ptr + 4, 'i32')
+    };
+  };
+
+  ppapi.setSize = function(obj, ptr) {
+    setValue(ptr, obj.width, 'i32');
+    setValue(ptr + 4, obj.height, 'i32');
+  };
+
   ppapi.getRect = function(ptr) {
     return {
-      point: {
-        x: getValue(ptr, 'i32'),
-        y: getValue(ptr + 4, 'i32')
-      },
-      size: {
-        width: getValue(ptr + 8, 'i32'),
-        height: getValue(ptr + 12, 'i32')
-      }
+      point: ppapi.getPoint(ptr),
+      size: ppapi.getSize(ptr + 8)
     };
   };
 
   ppapi.setRect = function(rect, ptr) {
-    setValue(ptr, rect.x, 'i32');
-    setValue(ptr + 4, rect.y, 'i32');
-    setValue(ptr + 8, rect.width, 'i32');
-    setValue(ptr + 12, rect.height, 'i32');
+    ppapi.setPoint(rect.point, ptr);
+    ppapi.setSize(rect.size, ptr + 8);
   };
 
   return ppapi;
