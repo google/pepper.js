@@ -168,7 +168,12 @@ considered in other situations.
 Exceptions
 ----------
 
-The use of exceptions is currently discouraged for two reasons.  First, Emscripten disables exception handling by default for -O1 and higher. This can be overridden by passing ``-s DISABLE_EXCEPTION_CATCHING=0`` to Emscripten, but doing so may or may not result in a noticeable performance penalty. Additional code will be generated at every call site an exception could propagate through.  Second, exceptions are currently not supported by PNaCl.
+The use of exceptions is currently discouraged for two reasons.  First,
+Emscripten disables exception handling by default for -O1 and higher. This can
+be overridden by passing ``-s DISABLE_EXCEPTION_CATCHING=0`` to Emscripten, but
+doing so may or may not result in a noticeable performance penalty. Additional
+code will be generated at every call site an exception could propagate through.
+Second, exceptions are currently not supported by PNaCl.
 
 Required Compiler Flags
 -----------------------
