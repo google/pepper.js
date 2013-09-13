@@ -11,11 +11,11 @@
   }
 
   var Console_Log = function(instance, level, value) {
-    DoLog(level, ppapi_glue.jsForVar(value));
+    DoLog(level, glue.getVar(value));
   };
 
   var Console_LogWithSource = function(instance, level, source, value) {
-    DoLog(level, ppapi_glue.jsForVar(source) + ": " + ppapi_glue.jsForVar(value));
+    DoLog(level, glue.getVar(source) + ": " + glue.getVar(value));
   };
 
   registerInterface("PPB_Console;1.0", [
@@ -94,7 +94,7 @@
     if (inst == undefined) {
       return;
     }
-    var val = ppapi_glue.jsForVar(value);
+    var val = glue.getVar(value);
     var evt = document.createEvent('Event');
     evt.initEvent('message', true, true);  // bubbles, cancelable
     evt.data = val;
@@ -110,14 +110,14 @@
   };
 
   var Var_AddRef = function(v) {
-    if (isRefCountedVarType(ppapi_glue.varType(v))) {
-      resources.addRef(ppapi_glue.varUID(v));
+    if (isRefCountedVarType(glue.getVarType(v))) {
+      resources.addRef(glue.getVarUID(v));
     }
   };
 
   var Var_Release = function(v) {
-    if (isRefCountedVarType(ppapi_glue.varType(v))) {
-      resources.release(ppapi_glue.varUID(v));
+    if (isRefCountedVarType(glue.getVarType(v))) {
+      resources.release(glue.getVarUID(v));
     }
   };
 
@@ -130,7 +130,7 @@
 
     // Not a valid UTF-8 string.  Return null.
     if (value === null) {
-      ppapi_glue.varForJS(result, null);
+      glue.setVar(result, null);
       return
     }
 
@@ -152,10 +152,10 @@
     // Defensively set the length to zero so that we can early out at any point.
     setValue(lenptr, 0, 'i32');
 
-    if (ppapi_glue.varType(v) !== ppapi.PP_VARTYPE_STRING) {
+    if (glue.getVarType(v) !== ppapi.PP_VARTYPE_STRING) {
       return 0;
     }
-    var uid = ppapi_glue.varUID(v);
+    var uid = glue.getVarUID(v);
     var resource = resources.resolve(uid, STRING_RESOURCE);
     if (resource === undefined) {
       return 0;
@@ -188,10 +188,10 @@
   }
 
   var VarArrayBuffer_Map = function(var_ptr) {
-    if (ppapi_glue.varType(var_ptr) !== ppapi.PP_VARTYPE_ARRAY_BUFFER) {
+    if (glue.getVarType(var_ptr) !== ppapi.PP_VARTYPE_ARRAY_BUFFER) {
       return 0;
     }
-    var uid = ppapi_glue.varUID(var_ptr);
+    var uid = glue.getVarUID(var_ptr);
     var resource = resources.resolve(uid, ARRAY_BUFFER_RESOURCE);
     if (resource === undefined) {
       return 0;

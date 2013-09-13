@@ -413,7 +413,7 @@
 
   var KeyboardInputEvent_GetCharacterText = function(ptr, event) {
     // TODO(grosse): Find way to implement this
-    ppapi_glue.varForJS(ptr, undefined);
+    glue.setVar(ptr, undefined);
   };
 
   registerInterface("PPB_KeyboardInputEvent;1.0", [

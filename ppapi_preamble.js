@@ -29,7 +29,7 @@ var clamp = function(value, min, max) {
 var postMessage = function(message) {
   // Fill out the PP_Var structure
   var var_ptr = _malloc(16);
-  ppapi_glue.varForJS(var_ptr, message);
+  glue.setVar(var_ptr, message);
 
   // Send
   _DoPostMessage(this.instance, var_ptr);
@@ -592,6 +592,84 @@ glue.getRect = function(ptr) {
 glue.setRect = function(rect, ptr) {
   glue.setPoint(rect.point, ptr);
   glue.setSize(rect.size, ptr + 8);
+};
+
+glue.getVarType = function(ptr) {
+  // ptr->type is offset 0.
+  return getValue(ptr, 'i32');
+};
+
+glue.getVarUID = function(ptr) {
+  // ptr->value is offset 8.
+  return getValue(ptr + 8, 'i32');
+};
+
+glue.getVar = function(ptr) {
+  var type = glue.getVarType(ptr);
+  var valptr = ptr + 8;
+
+  if (type == 0) {
+    return undefined;
+  } else if (type == 1) {
+    return null;
+  } else if (type == ppapi.PP_VARTYPE_BOOL) {
+    // PP_Bool is guarenteed to be 4 bytes.
+    return 0 != getValue(valptr, 'i32');
+  } else if (type == 3) {
+    return getValue(valptr, 'i32');
+  } else if (type == 4) {
+    return getValue(valptr, 'double');
+  } else if (type == ppapi.PP_VARTYPE_STRING) {
+    var uid = getValue(valptr, 'i32');
+    return resources.resolve(uid, STRING_RESOURCE).value;
+  } else {
+    throw "Var type conversion not implemented: " + type;
+  }
+};
+
+glue.setVar = function(ptr, obj) {
+  var typen = (typeof obj);
+  var valptr = ptr + 8;
+  if (typen === 'string') {
+    var arr = intArrayFromString(obj);
+    var memory = allocate(arr, 'i8', ALLOC_NORMAL);
+    // Length is adjusted for null terminator.
+    var uid = resources.registerString(obj, memory, arr.length-1);
+    setValue(ptr, ppapi.PP_VARTYPE_STRING, 'i32');
+    setValue(valptr, uid, 'i32');
+  } else if (typen === 'number') {
+    // Note this will always pass a double, even when the value can be represented as an int32
+    setValue(ptr, ppapi.PP_VARTYPE_DOUBLE, 'i32');
+    setValue(valptr, obj, 'double');
+  } else if (typen === 'boolean') {
+    setValue(ptr, ppapi.PP_VARTYPE_BOOL, 'i32');
+    setValue(valptr, obj ? 1 : 0, 'i32');
+  } else if (typen === 'undefined') {
+    setValue(ptr, ppapi.PP_VARTYPE_UNDEFINED, 'i32');
+  } else if (obj === null) {
+    setValue(ptr, ppapi.PP_VARTYPE_NULL, 'i32');
+  } else if (obj instanceof ArrayBuffer) {
+    var memory = _malloc(obj.byteLength);
+    // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
+    var memory_view = new Int8Array(buffer, memory, obj.byteLength);
+    memory_view.set(new Int8Array(obj));
+    var uid = resources.registerArrayBuffer(memory, obj.byteLength);
+    setValue(ptr, ppapi.PP_VARTYPE_ARRAY_BUFFER, 'i32');
+    setValue(valptr, uid, 'i32');
+  } else {
+    throw "Var type conversion not implemented: " + typen;
+  }
+};
+
+glue.setIntVar = function(ptr, obj) {
+  var typen = (typeof obj);
+  var valptr = ptr + 8;
+  if (typen === 'number') {
+    setValue(ptr, ppapi.PP_VARTYPE_INT32, 'i32');
+    setValue(valptr, obj, 'i32');
+  } else {
+    throw "Not an integer: " + typen;
+  }
 };
 
 glue.getCompletionCallback = function(ptr) {

@@ -216,8 +216,8 @@
     }
 
     // Need to use the ppapi var type to distinguish between ints and floats.
-    var var_type = ppapi_glue.varType(value);
-    var js_obj = ppapi_glue.jsForVar(value);
+    var var_type = glue.getVarType(value);
+    var js_obj = glue.getVar(value);
 
     if (property === 0) {
       if (var_type !== ppapi.PP_VARTYPE_STRING) {
@@ -331,9 +331,9 @@
       return 0;
     }
     if (property == 0) {
-      ppapi_glue.varForJS(var_ptr, r.url);
+      glue.setVar(var_ptr, r.url);
     } else if (property == 3) {
-      ppapi_glue.varForJSInt(var_ptr, r.status);
+      glue.setIntVar(var_ptr, r.status);
     } else {
       throw "URLResponseInfo_GetProperty not implemented: " + property;
     }
