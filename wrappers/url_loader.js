@@ -331,9 +331,9 @@
       return 0;
     }
     if (property == 0) {
-      glue.setVar(var_ptr, r.url);
+      glue.setVar(r.url, var_ptr);
     } else if (property == 3) {
-      glue.setIntVar(var_ptr, r.status);
+      glue.setIntVar(r.status, var_ptr);
     } else {
       throw "URLResponseInfo_GetProperty not implemented: " + property;
     }

@@ -130,7 +130,7 @@
 
     // Not a valid UTF-8 string.  Return null.
     if (value === null) {
-      glue.setVar(result, null);
+      glue.setVar(null, result);
       return
     }
 

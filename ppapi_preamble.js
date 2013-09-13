@@ -29,7 +29,7 @@ var clamp = function(value, min, max) {
 var postMessage = function(message) {
   // Fill out the PP_Var structure
   var var_ptr = _malloc(16);
-  glue.setVar(var_ptr, message);
+  glue.setVar(message, var_ptr);
 
   // Send
   _DoPostMessage(this.instance, var_ptr);
@@ -627,7 +627,7 @@ glue.getVar = function(ptr) {
   }
 };
 
-glue.setVar = function(ptr, obj) {
+glue.setVar = function(obj, ptr) {
   var typen = (typeof obj);
   var valptr = ptr + 8;
   if (typen === 'string') {
@@ -661,7 +661,7 @@ glue.setVar = function(ptr, obj) {
   }
 };
 
-glue.setIntVar = function(ptr, obj) {
+glue.setIntVar = function(obj, ptr) {
   var typen = (typeof obj);
   var valptr = ptr + 8;
   if (typen === 'number') {

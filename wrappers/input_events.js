@@ -413,7 +413,7 @@
 
   var KeyboardInputEvent_GetCharacterText = function(ptr, event) {
     // TODO(grosse): Find way to implement this
-    glue.setVar(ptr, undefined);
+    glue.setVar(undefined, ptr);
   };
 
   registerInterface("PPB_KeyboardInputEvent;1.0", [
