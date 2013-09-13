@@ -551,6 +551,49 @@ glue.decodeUTF8 = function(ptr, len) {
   return chars.join("");
 };
 
+glue.getPoint = function(ptr) {
+  return {
+    x: getValue(ptr, 'i32'),
+    y: getValue(ptr + 4, 'i32')
+  };
+};
+
+glue.setPoint = function(obj, ptr) {
+  setValue(ptr, obj.x, 'i32');
+  setValue(ptr + 4, obj.y, 'i32');
+};
+
+// No need for getFloatPoint, yet.
+
+glue.setFloatPoint = function(obj, ptr) {
+  setValue(ptr, obj.x, 'float');
+  setValue(ptr + 4, obj.y, 'float');
+};
+
+glue.getSize = function(ptr) {
+  return {
+    width: getValue(ptr, 'i32'),
+    height: getValue(ptr + 4, 'i32')
+  };
+};
+
+glue.setSize = function(obj, ptr) {
+  setValue(ptr, obj.width, 'i32');
+  setValue(ptr + 4, obj.height, 'i32');
+};
+
+glue.getRect = function(ptr) {
+  return {
+    point: glue.getPoint(ptr),
+    size: glue.getSize(ptr + 8)
+  };
+};
+
+glue.setRect = function(rect, ptr) {
+  glue.setPoint(rect.point, ptr);
+  glue.setSize(rect.size, ptr + 8);
+};
+
 
 var ppapi = (function() {
   var ppapi = {
@@ -685,49 +728,6 @@ var ppapi = (function() {
     PP_VARTYPE_DOUBLE: 4,
     PP_VARTYPE_STRING: 5,
     PP_VARTYPE_ARRAY_BUFFER: 9
-  };
-
-  ppapi.getPoint = function(ptr) {
-    return {
-      x: getValue(ptr, 'i32'),
-      y: getValue(ptr + 4, 'i32')
-    };
-  };
-
-  ppapi.setPoint = function(obj, ptr) {
-    setValue(ptr, obj.x, 'i32');
-    setValue(ptr + 4, obj.y, 'i32');
-  };
-
-  // No need for getFloatPoint, yet.
-
-  ppapi.setFloatPoint = function(obj, ptr) {
-    setValue(ptr, obj.x, 'float');
-    setValue(ptr + 4, obj.y, 'float');
-  };
-
-  ppapi.getSize = function(ptr) {
-    return {
-      width: getValue(ptr, 'i32'),
-      height: getValue(ptr + 4, 'i32')
-    };
-  };
-
-  ppapi.setSize = function(obj, ptr) {
-    setValue(ptr, obj.width, 'i32');
-    setValue(ptr + 4, obj.height, 'i32');
-  };
-
-  ppapi.getRect = function(ptr) {
-    return {
-      point: ppapi.getPoint(ptr),
-      size: ppapi.getSize(ptr + 8)
-    };
-  };
-
-  ppapi.setRect = function(rect, ptr) {
-    ppapi.setPoint(rect.point, ptr);
-    ppapi.setSize(rect.size, ptr + 8);
   };
 
   return ppapi;
