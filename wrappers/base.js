@@ -126,7 +126,7 @@
   };
 
   var Var_VarFromUtf8_1_1 = function(result, ptr, len) {
-    var value = util.decodeUTF8(ptr, len);
+    var value = glue.decodeUTF8(ptr, len);
 
     // Not a valid UTF-8 string.  Return null.
     if (value === null) {

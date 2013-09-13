@@ -32,7 +32,7 @@
     }
 
     var requestFS = window.requestFileSystem || window.webkitRequestFileSystem;
-    requestFS(type, util.ToI64(size_low, size_high), function(fs) {
+    requestFS(type, glue.ToI64(size_low, size_high), function(fs) {
       res.fs = fs;
       callback(ppapi.PP_OK);
     }, function(error) {
@@ -57,7 +57,7 @@
 
 
   var FileRef_Create = function(file_system, path_ptr) {
-    var path = util.decodeUTF8(path_ptr);
+    var path = glue.decodeUTF8(path_ptr);
     if (path === null) {
       // Not UTF8
       return 0;
@@ -272,8 +272,8 @@
           }
 
           var info = {
-              size_low: metadata.size % util.k2_32,
-              size_high: (metadata.size / util.k2_32) | 0,
+              size_low: metadata.size % glue.k2_32,
+              size_high: (metadata.size / glue.k2_32) | 0,
               type: PP_FILETYPE_REGULAR,
               system_type: io.fs_type,
               creation_time: 0.0,
@@ -298,7 +298,7 @@
           var reader = new FileReader();
           reader.onload = function(event) {
 
-            var offset = util.ToI64(offset_low, offset_high);
+            var offset = glue.ToI64(offset_low, offset_high);
             var buffer = reader.result.slice(offset, offset + bytes_to_read);
             HEAP8.set(new Int8Array(buffer), output_ptr);
             callback(buffer.byteLength);
@@ -313,7 +313,7 @@
     return AccessFile(file_io, callback_ptr, function(io, entry, callback) {
         entry.createWriter(function(writer) {
           var buffer = HEAP8.subarray(input_ptr, input_ptr + bytes_to_read);
-          var offset = util.ToI64(offset_low, offset_high);
+          var offset = glue.ToI64(offset_low, offset_high);
 
           writer.seek(offset);
           // TODO(ncbray): listen to onwrite.  The polyfill for firefox currently doesn't fire onwrite.
