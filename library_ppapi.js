@@ -77,20 +77,6 @@ var ppapi_exports = {
         throw "Not an integer: " + typen;
       }
     },
-
-    convertCompletionCallback: function(callback) {
-      // Assumes 4-byte pointers.
-      var func = getValue(callback, 'i32');
-      var user_data = getValue(callback + 4, 'i32');
-      // TODO correct way to call?
-      return function(result) {
-        if (typeof result !== 'number') {
-          throw "Invalid argument to callback: " + result;
-        }
-
-        Runtime.dynCall('vii', func, [user_data, result]);
-      };
-    },
   },
 
   GetBrowserInterface: function(interface_name) {

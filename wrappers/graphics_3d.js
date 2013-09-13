@@ -139,7 +139,7 @@
 
   var Graphics3D_SwapBuffers = function(context, callback) {
     // TODO double buffering.
-    var c = ppapi_glue.convertCompletionCallback(callback);
+    var c = glue.getCompletionCallback(callback);
     Module.requestAnimationFrame(function() {
       c(0);
     });

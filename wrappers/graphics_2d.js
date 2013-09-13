@@ -151,7 +151,7 @@
       return ppapi.PP_ERROR_INPROGRESS;
     }
     var flushCallback = {
-      callback: ppapi_glue.convertCompletionCallback(callback),
+      callback: glue.getCompletionCallback(callback),
       trigger: function() {
         if (g2d.flushCallback === this) {
           g2d.flushCallback = null;

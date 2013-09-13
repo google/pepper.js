@@ -41,7 +41,7 @@
   };
 
   var Core_CallOnMainThread = function(delay, callback, result) {
-    var js_callback = ppapi_glue.convertCompletionCallback(callback);
+    var js_callback = glue.getCompletionCallback(callback);
     setTimeout(function() {
       js_callback(result);
     }, delay);

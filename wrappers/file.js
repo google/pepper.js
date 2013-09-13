@@ -24,7 +24,7 @@
     if (res === undefined) {
       return ppapi.PP_ERROR_BADRESOURCE;
     }
-    var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
+    var callback = glue.getCompletionCallback(callback_ptr);
 
     var type = fsTypeMap[res.fs_type];
     if (type === undefined) {
@@ -101,7 +101,7 @@
   };
 
   var FileRef_Delete = function(file_ref, callback_ptr) {
-    var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
+    var callback = glue.getCompletionCallback(callback_ptr);
     var ref = resources.resolve(file_ref, FILE_REF_RESOURCE);
     if (ref === undefined) {
       return ppapi.PP_ERROR_BADRESOURCE;
@@ -196,7 +196,7 @@
       // This is an internal error.
       return ppapi.PP_ERROR_FAILED;
     }
-    var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
+    var callback = glue.getCompletionCallback(callback_ptr);
 
     if (io.closed || io.entry !== null) {
       return ppapi.PP_ERROR_FAILED;
@@ -242,7 +242,7 @@
     if (io === undefined) {
       return ppapi.PP_ERROR_BADRESOURCE;
     }
-    var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
+    var callback = glue.getCompletionCallback(callback_ptr);
     if (io.closed) {
       return callback(ppapi.PP_ERROR_ABORTED);
     }
@@ -336,7 +336,7 @@
     if (io === undefined) {
       return ppapi.PP_ERROR_BADRESOURCE;
     }
-    var callback = ppapi_glue.convertCompletionCallback(callback_ptr);
+    var callback = glue.getCompletionCallback(callback_ptr);
     callback(io.closed ? ppapi.PP_ERROR_ABORTED : ppapi.PP_OK);
   };
 

@@ -594,6 +594,17 @@ glue.setRect = function(rect, ptr) {
   glue.setSize(rect.size, ptr + 8);
 };
 
+glue.getCompletionCallback = function(ptr) {
+  var func = getValue(ptr, 'i32');
+  var user_data = getValue(ptr + 4, 'i32');
+  return function(result) {
+    if (typeof result !== 'number') {
+      throw "Invalid argument to callback: " + result;
+    }
+    Runtime.dynCall('vii', func, [user_data, result]);
+  };
+};
+
 
 var ppapi = (function() {
   var ppapi = {

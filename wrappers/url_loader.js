@@ -45,7 +45,7 @@
       return ppapi.PP_ERROR_BADRESOURCE;
     }
     // TODO(ncbray): what to do if no URL is specified?
-    callback = ppapi_glue.convertCompletionCallback(callback);
+    callback = glue.getCompletionCallback(callback);
 
     loader.data = '';
     loader.index = 0;
@@ -147,7 +147,7 @@
     if (loader === undefined) {
       return ppapi.PP_ERROR_BADRESOURCE;
     }
-    var c = ppapi_glue.convertCompletionCallback(callback);
+    var c = glue.getCompletionCallback(callback);
 
     loader.pendingReadCallback = function(status, data) {
       HEAP8.set(data, buffer_ptr);
@@ -165,7 +165,7 @@
       return ppapi.PP_ERROR_BADRESOURCE;
     }
     // TODO check STREAM_TO_FILE flag.
-    var c = ppapi_glue.convertCompletionCallback(callback);
+    var c = glue.getCompletionCallback(callback);
     // HACK to get the test running but failing.
     setTimeout(function() { c(ppapi.PP_OK); }, 0);
     return ppapi.PP_OK_COMPLETIONPENDING;
