@@ -110,7 +110,7 @@ $(LIBDIR)/emscripten/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,
 
 endef
 
-JS_LIBRARIES=$(PPAPIJS_SRC_ROOT)/library_ppapi.js
+JS_LIBRARIES=
 JS_PRE=$(PPAPIJS_SRC_ROOT)/ppapi_preamble.js $(PPAPIJS_SRC_ROOT)/third_party/idb.filesystem.js
 
 # TODO(ncbray): only include needed wrappers, testing.js in particular.

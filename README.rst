@@ -211,7 +211,7 @@ The “ppapi” library contains boilerplate needed to bind the PPAPI plugin to 
 These functions are called by ppapi.js, and they must be exported by your
 application.
 
-TODO --js-library and --pre-js
+TODO --pre-js
 
 TODO closure exports
 
