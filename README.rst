@@ -350,11 +350,15 @@ application play to the strengths of each.
 Native Client generally provides better performance than JavaScript,
 particularly when threading is leveraged.  On the downside, currently Native
 Client executables are only supported by Chrome.  JavaScript has much more
-pervasive browser support.  It should be noted that although JavaScript “runs
-everywhere,” performance can vary widely between browsers, sometimes to the
-point of making an application unusable.  Because of this, It is highly
-suggested that applications be designed to scale across differing amounts
-processing power, if possible.
+pervasive browser support.  It should be noted that although JavaScript "runs
+everywhere," performance can vary widely between browsers, sometimes an order of
+magnitude or more.  It is highly suggested that applications be designed to
+scale across differing amounts processing power, if possible.
+
+In terms of file size, it appears that Native Client and Emscripten produce
+executables of roughly the same size, once they are stripped/minimized and
+gzipped.  They are different versions of the same program, so it is unsurprising
+their compressed sizes are similar.
 
 Portable Native Client
 ----------------------
