@@ -5,15 +5,15 @@
 <body style="font-family: Verdana, Geneva, sans-serif; background-color: gray">
 <div style="background-color: white; padding: 20px; display: inline-block">
 <h2>pepper.js Examples</h2>
-<table id="examples">
+<table id="examples" cellspacing="0">
   <tr>
-    <td width=200><b>Tool</b></td>
+    <td width=200></td>
     <td colspan=2 width=100><b>Emscripten</b></td>
     <td colspan=2 width=100><b>NaCl</b></td>
     <td colspan=2 width=100><b>PNaCl</b></td>
   </tr>
   <tr>
-    <td width=200><b>Mode</b></td>
+    <td width=200></td>
     <td width=60><b>Dbg</b></td>
     <td width=60><b>Opt</b></td>
     <td width=60><b>Dbg</b></td>
@@ -34,6 +34,9 @@ var examples = [
   {"name": "Voronoi", "url": "voronoi/data/voronoi.html"},
   {"name": "Earth", "url": "earth/data/earth.html"},
   {"name": "File IO", "url": "file_io/data/file_io.html"},
+];
+
+var tests = [
   {"name": "PPAPI Messaging", "url": "tests/ppapi_messaging/ppapi_messaging.html"},
   {"name": "PPAPI GetURL", "url": "tests/ppapi_geturl/ppapi_geturl.html"},
   {"name": "PPAPI Test Suite", "url": "tests/ppapi/tests/data/test_case.html"},
@@ -42,19 +45,29 @@ var examples = [
 ];
 
 // Generate a table of examples.
-(function() {
+var createLinks = function(title, examples, table) {
   var configs = ["Debug", "Release"];
   var toolchains = [
     {"name": "Emscripten", "tc": "emscripten"},
     {"name": "NaCl", "tc": "newlib"},
     {"name": "PNaCl", "tc": "pnacl"},
   ];
-  var table = document.getElementById("examples");
+
+  var title_text = document.createElement("b");
+  title_text.appendChild(document.createTextNode(title));
+  var row = table.insertRow(-1).insertCell(-1).appendChild(title_text);
+
+  var colors = ["#fff9f9", "#f9fff9", "#f9f9ff"];
+
   for (var i in examples) {
     var example = examples[i];
     var row = table.insertRow(-1);
     var addCell = function(contents) {
+      var j = row.childElementCount;
       var cell = row.insertCell(-1);
+      if (j > 0) {
+        cell.style.backgroundColor = colors[(j-1)>>1];
+      }
       cell.appendChild(contents);
     };
     addCell(document.createTextNode(example.name));
@@ -67,7 +80,12 @@ var examples = [
       }
     }
   }
-})();
+};
+
+var table = document.getElementById("examples");
+createLinks("Examples", examples, table);
+createLinks("Tests", tests, table);
+
 </script>
 <div style="width: 800px">
 <h3>Browser Support</h3>
