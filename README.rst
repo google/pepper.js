@@ -10,6 +10,13 @@ native code on the web both as a `Native Client`_ executable and as JavaScript.
 .. _Emscripten: https://github.com/kripken/emscripten
 .. _`Native Client`: http://gonacl.com
 
+--------------
+Project Status
+--------------
+
+ppapi.js is incomplete and under development.  Expect that you'll need to get
+your hands dirty.  Bug reports, feature requests, and patches are welcome.
+
 ---------------
 Getting Started
 ---------------
@@ -247,7 +254,7 @@ ppapi.js was developed using test-driven development.  Features are only added
 when tests are available (either automatic or manual).  This means that even if
 an interface is supported, there may be missing features or subtle
 incompatibilities where test coverage is not available.  Lack of test coverage
-is the main reason ppapi.js has not been declared v1.0.
+will be the main difficulty in getting ppapi.js to v1.0.
 
 TODO figure out how to clearly explain how this situation impacts developers, or
 fix it.
