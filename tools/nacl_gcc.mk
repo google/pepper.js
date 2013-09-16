@@ -311,7 +311,12 @@ endef
 # $6 = VC Linker Switches
 #
 define LINK_RULE
+ifeq ($(CONFIG),Release)
+$(call LINKER_RULE,$(1)_unstripped,$(2),$(filter-out pthread,$(3)),$(4),$(5),$(LIB_PATHS))
+$(call STRIP_ALL_RULE,$(1),$(1)_unstripped)
+else
 $(call LINKER_RULE,$(1),$(2),$(filter-out pthread,$(3)),$(4),$(5),$(LIB_PATHS))
+endif
 endef
 
 
@@ -324,17 +329,17 @@ endef
 define STRIP_ALL_RULE
 ifneq (,$(findstring x86_32,$(ARCHES)))
 $(OUTDIR)/$(1)_x86_32.nexe: $(OUTDIR)/$(2)_x86_32.nexe
-	$(call LOG,STRIP,$$@,$(X86_32_STRIP) -o $$@ $$^)
+	$(call LOG,STRIP,$$@,$(X86_32_STRIP) -s -o $$@ $$^)
 endif
 
 ifneq (,$(findstring x86_64,$(ARCHES)))
 $(OUTDIR)/$(1)_x86_64.nexe: $(OUTDIR)/$(2)_x86_64.nexe
-	$(call LOG,STRIP,$$@,$(X86_64_STRIP) -o $$@ $$^)
+	$(call LOG,STRIP,$$@,$(X86_64_STRIP) -s -o $$@ $$^)
 endif
 
 ifneq (,$(findstring arm,$(ARCHES)))
 $(OUTDIR)/$(1)_arm.nexe: $(OUTDIR)/$(2)_arm.nexe
-	$(call LOG,STRIP,$$@,$(ARM_STRIP) -o $$@ $$^)
+	$(call LOG,STRIP,$$@,$(ARM_STRIP) -s -o $$@ $$^)
 endif
 endef
 
