@@ -205,7 +205,7 @@ ifndef IGNORE_DEPS
 
 rebuild_$(1) :| $(STAMPDIR)/dir.stamp
 ifeq (,$(2))
-	+$(MAKE) -C $(PPAPIJS_SRC_ROOT)/examples/$(1) STAMPDIR=$(abspath $(STAMPDIR)) $(abspath $(STAMPDIR)/$(1).stamp) $(3)
+	+$(MAKE) -C $(PEPPERJS_SRC_ROOT)/examples/$(1) STAMPDIR=$(abspath $(STAMPDIR)) $(abspath $(STAMPDIR)/$(1).stamp) $(3)
 else
 	+$(MAKE) -C $(2) STAMPDIR=$(abspath $(STAMPDIR)) $(abspath $(STAMPDIR)/$(1).stamp) $(3)
 endif
@@ -255,7 +255,7 @@ else
 INC_PATHS ?= $(NACL_SDK_ROOT)/include/$(OSNAME) $(NACL_SDK_ROOT)/include $(EXTRA_INC_PATHS)
 endif
 
-LIBDIR=$(PPAPIJS_SRC_ROOT)/lib
+LIBDIR=$(PEPPERJS_SRC_ROOT)/lib
 LIB_PATHS ?= $(LIBDIR) $(EXTRA_LIB_PATHS)
 
 #
@@ -324,7 +324,7 @@ include $(NACL_SDK_ROOT)/tools/host_vc.mk
 endif
 
 ifneq (,$(findstring $(TOOLCHAIN),glibc newlib))
-include $(PPAPIJS_SRC_ROOT)/tools/nacl_gcc.mk
+include $(PEPPERJS_SRC_ROOT)/tools/nacl_gcc.mk
 endif
 
 ifneq (,$(findstring $(TOOLCHAIN),pnacl))
@@ -332,7 +332,7 @@ include $(NACL_SDK_ROOT)/tools/nacl_llvm.mk
 endif
 
 ifneq (,$(findstring $(TOOLCHAIN),emscripten))
-include $(PPAPIJS_SRC_ROOT)/tools/nacl_emscripten.mk
+include $(PEPPERJS_SRC_ROOT)/tools/nacl_emscripten.mk
 endif
 
 

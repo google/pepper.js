@@ -18,10 +18,10 @@
 # toolchain we use by default will be the first valid one listed
 VALID_TOOLCHAINS:=emscripten newlib pnacl
 
-PPAPIJS_SRC_ROOT:=../../..
-include $(PPAPIJS_SRC_ROOT)/tools/common.mk
+PEPPERJS_SRC_ROOT:=../../..
+include $(PEPPERJS_SRC_ROOT)/tools/common.mk
 
-INC_PATHS+=$(PPAPIJS_SRC_ROOT)/examples
+INC_PATHS+=$(PEPPERJS_SRC_ROOT)/examples
 
 #
 # Target Name

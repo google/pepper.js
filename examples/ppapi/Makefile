@@ -18,9 +18,9 @@ VALID_TOOLCHAINS:=emscripten newlib pnacl
 
 # Really, this library shouldn't be built for newlib, but it makes the build simpler.
 
-PPAPIJS_SRC_ROOT:=../..
+PEPPERJS_SRC_ROOT:=../..
 EXTRA_INC_PATHS=
-include $(PPAPIJS_SRC_ROOT)/tools/common.mk
+include $(PEPPERJS_SRC_ROOT)/tools/common.mk
 
 #
 # Target Name
