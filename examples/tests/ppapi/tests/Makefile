@@ -35,7 +35,7 @@ TARGET=ppapi_test
 #
 # List of sources to compile
 #
-ppapi_test_SOURCES= \
+SOURCES= \
   test_audio_config.cc \
   test_case.cc \
   test_console.cc \
@@ -71,12 +71,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(ppapi_test_SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,$(TARGET),$(ppapi_test_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.

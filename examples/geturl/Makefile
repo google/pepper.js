@@ -32,7 +32,7 @@ TARGET=geturl
 #
 # List of sources to compile
 #
-geturl_SOURCES= \
+SOURCES= \
   geturl.cc \
   geturl_handler.cc \
 
@@ -61,12 +61,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(geturl_SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,geturl,$(geturl_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,geturl,$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.

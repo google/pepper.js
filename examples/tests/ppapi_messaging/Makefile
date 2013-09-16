@@ -32,7 +32,7 @@ TARGET=ppapi_messaging
 #
 # List of sources to compile
 #
-ppapi_messaging_SOURCES= \
+SOURCES= \
   ppapi_messaging.c \
 
 #
@@ -60,12 +60,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(ppapi_messaging_SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,$(TARGET),$(ppapi_messaging_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.

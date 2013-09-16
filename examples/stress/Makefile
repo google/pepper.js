@@ -32,7 +32,7 @@ TARGET=stress
 #
 # List of sources to compile
 #
-stress_SOURCES= \
+SOURCES= \
   stress.cc \
 
 #
@@ -60,12 +60,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(stress_SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,stress,$(stress_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,stress,$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.

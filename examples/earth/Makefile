@@ -35,7 +35,7 @@ TARGET=earth
 #
 # List of sources to compile
 #
-earth_SOURCES= \
+SOURCES= \
   earth.cc \
   ../sdk_util/thread_pool.cc \
 
@@ -64,12 +64,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(earth_SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,$(TARGET),$(earth_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.

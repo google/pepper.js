@@ -33,7 +33,7 @@ TARGET=pi_generator
 #
 # List of sources to compile
 #
-pi_generator_SOURCES= \
+SOURCES= \
   pi_generator.cc \
   pi_generator_module.cc \
 
@@ -62,12 +62,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(pi_generator_SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,pi_generator,$(pi_generator_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,pi_generator,$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.

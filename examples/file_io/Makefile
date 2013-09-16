@@ -33,7 +33,7 @@ TARGET=file_io
 #
 # List of sources to compile
 #
-file_io_SOURCES= \
+SOURCES= \
   file_io.cc \
 
 #
@@ -61,12 +61,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(file_io_SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,file_io,$(file_io_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,file_io,$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.

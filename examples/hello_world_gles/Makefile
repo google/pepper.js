@@ -32,7 +32,7 @@ TARGET=hello_world_gles
 #
 # List of sources to compile
 #
-hello_world_gles_SOURCES= \
+SOURCES= \
   hello_world.cc \
   matrix.cc \
 
@@ -61,12 +61,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(hello_world_gles_SOURCES),$(eval $(call COMPILE_RULE,$(src),-I../../src -I../../src/ppapi/lib/gl)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),-I../../src -I../../src/ppapi/lib/gl)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,hello_world_gles,$(hello_world_gles_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,hello_world_gles,$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.

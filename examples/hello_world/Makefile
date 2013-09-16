@@ -32,7 +32,7 @@ TARGET=hello_world
 #
 # List of sources to compile
 #
-hello_world_SOURCES= \
+SOURCES= \
   hello_world.cc \
 
 #
@@ -60,12 +60,12 @@ $(foreach dep,$(DEPS),$(eval $(call DEPEND_RULE,$(dep))))
 #
 # Use the compile macro for each source.
 #
-$(foreach src,$(hello_world_SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
 #
 # Use the link macro for this target on the list of sources.
 #
-$(eval $(call LINK_RULE,hello_world,$(hello_world_SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,hello_world,$(SOURCES),$(LIBS),$(DEPS)))
 
 #
 # Specify the NMF to be created with no additional arugments.
