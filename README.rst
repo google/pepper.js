@@ -210,7 +210,7 @@ the size for your particular application.
 
     -lppapi
 
-The “ppapi” library contains boilerplate needed to bind the PPAPI plugin to JS.
+The "ppapi" library contains boilerplate needed to bind the PPAPI plugin to JS.
 
 ::
 
@@ -219,9 +219,24 @@ The “ppapi” library contains boilerplate needed to bind the PPAPI plugin to 
 These functions are called by pepper.js, and they must be exported by your
 application.
 
-TODO --pre-js
+To make pepper.js work Emscripten needs to include a number of files using the
+``--pre-js`` flag.  In all cases, ``ppapi_preamble.js`` must be included.
+Depending on what interfaces the program being compiled needs, the corresponding
+files in the ``wrappers/`` directory must be included.  If you are using the
+File IO API, you will also need to include ``third_party/idb.filesystem.js``.
+This situation will hopefully be changed in the future to minimize the number of
+command line flags required.
 
-TODO closure exports
+The Closure compiler will mangle built-in names that it does not recognize.
+pepper.js uses a number of relatively new APIs that Closure does not recognize,
+yet.  To prevent these APIs from being mangled, they can be declared "extern" in
+a JavaScript file and passed to Closure.  Emcsripten calls Closure internally,
+and extern declarations must be tunneled to Closure through an environment
+variable.
+
+::
+
+    EMCC_CLOSURE_ARGS=--externs $(PEPPERJS_SRC_ROOT)/externs.js --externs $(PEPPERJS_SRC_ROOT)/third_party/w3c_audio.js
 
 -----------------------------
 PPAPI Interfaces in pepper.js
