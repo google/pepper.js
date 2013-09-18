@@ -12,7 +12,7 @@
 #
 # Default Paths
 #
-EM_PATH:=$(abspath $(PPAPIJS_SRC_ROOT)/emscripten)
+EM_PATH:=$(abspath $(PEPPERJS_SRC_ROOT)/emscripten)
 #$(error $(EM_PATH))
 
 # Use the PNaCl toolchain instead of a vanilla version of LLVM.
@@ -35,7 +35,7 @@ NACL_CXXFLAGS?=-Wno-long-long -Werror
 NACL_LDFLAGS?=-Wl,-as-needed
 
 # HACK closure currently does not have audio exports defined.
-export EMCC_CLOSURE_ARGS=--externs $(PPAPIJS_SRC_ROOT)/externs.js --externs $(PPAPIJS_SRC_ROOT)/third_party/w3c_audio.js
+export EMCC_CLOSURE_ARGS=--externs $(PEPPERJS_SRC_ROOT)/externs.js --externs $(PEPPERJS_SRC_ROOT)/third_party/w3c_audio.js
 
 NACL_LDFLAGS+=-Wno-warn-absolute-paths
 # Emscripten appears to key off the optimization while linking to deterimine what backend should be used.
@@ -111,7 +111,7 @@ $(LIBDIR)/emscripten/$(CONFIG)/lib$(1).a : $(foreach src,$(2),$(call SRC_TO_OBJ,
 endef
 
 JS_LIBRARIES=
-JS_PRE=$(PPAPIJS_SRC_ROOT)/ppapi_preamble.js $(PPAPIJS_SRC_ROOT)/third_party/idb.filesystem.js
+JS_PRE=$(PEPPERJS_SRC_ROOT)/ppapi_preamble.js $(PEPPERJS_SRC_ROOT)/third_party/idb.filesystem.js
 
 # TODO(ncbray): only include needed wrappers, testing.js in particular.
 WRAPPERS= \
@@ -129,7 +129,7 @@ WRAPPERS= \
     file.js \
 
 # Resolve the paths.
-WRAPPERS:=$(foreach wrapper,$(WRAPPERS),$(PPAPIJS_SRC_ROOT)/wrappers/$(wrapper))
+WRAPPERS:=$(foreach wrapper,$(WRAPPERS),$(PEPPERJS_SRC_ROOT)/wrappers/$(wrapper))
 
 #
 # Specific Link Macro
