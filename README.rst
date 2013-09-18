@@ -22,11 +22,18 @@ your hands dirty.  Bug reports, feature requests, and patches are welcome.
 Getting Started
 ---------------
 
-Clone the repo.
+Clone the repo using git_.
 
 Install the `NaCl SDK`_.  Set the ``NACL_SDK_ROOT`` environment variable to be
-an absolute path that points to the desired ``pepper_*`` directory inside of the
-NaCl SDK.  ``pepper_30`` and up are supported.  (The main dependency on
+an *absolute* path that points to the desired ``pepper_*`` directory inside of
+the NaCl SDK.  For example, to temporarily set the environment variable:
+
+::
+
+    set NACL_SDK_ROOT=c:\path\to\nacl_sdk\pepper_30  (Windows)
+    export NACL_SDK_ROOT=/path/to/nacl_sdk/pepper_30  (Almost everything else)
+
+``pepper_30`` and up are supported.  (The main dependency on
 ``pepper_30`` is its toolchain, however, and not its header files and libraries.
 It is possible to use an older version of Pepper by setting the ``LLVM``
 environment variable to point to a toolchain other than the one contained in
@@ -45,6 +52,7 @@ This will clone Emscripten.  Install Emscripten's dependencies on your system:
 * Java_
 * Optional: Clang_
 
+.. _git: http://git-scm.com/downloads
 .. _`NaCl SDK`: https://developers.google.com/native-client/sdk/download
 .. _node.js: http://nodejs.org/download/
 .. _Python: http://www.python.org/download/
@@ -101,17 +109,19 @@ It can be ignored and will be fixed in future releases.
 Clang
 -----
 
-It should be noted that the build system is configured make Emscripten use the
-PNaCl toolchain instead of a standard version of Clang.  (PNaCl is essentially a
-modified version of Clang.)  This is done for two reasons.  First, it eliminates
-an install-time dependency.  Second, there is no standard binary distribution of
-Clang on Windows, but there is a Windows version of the PNaCl toolchain.  There
-appear to be a few issues with using the PNaCl toolchain, such as exception
-support, but they are being worked on.  If you want to use another version of
-Clang when compiling the examples, simply set the ``LLVM`` environment variable
-to point to it before invoking ``make``.  Similarly, if you want to use the
-PNaCl toolchain when using Emscripten in other situations, either set the
-``LLVM`` environment variable or edit ``~/emscripten``.
+Emscripten uses Clang to compile source code into bitcode.  This means Clang is
+normally a dependency of Emscripten.  The build system in the pepper.js repo is,
+however, configured to use the PNaCl toolchain instead of a standard version of
+Clang.  PNaCl is essentially a modified version of Clang.  This is done for two
+reasons.  First, it eliminates an install-time dependency.  Second, there is no
+standard binary distribution of Clang on Windows, but there is a Windows version
+of the PNaCl toolchain.  There appear to be a few issues with using the PNaCl
+toolchain in Emscripten, such as exception support, but they are being worked
+on.  If you want to use another version of Clang when compiling the examples,
+simply set the ``LLVM`` environment variable to point to it before invoking
+``make``.  Similarly, if you want to use the PNaCl toolchain when using
+Emscripten in other situations, either set the ``LLVM`` environment variable or
+edit ``~/emscripten``.
 
 If you want to use a version of Clang other than PNaCl, note that Emscripten
 doesn't appear to be entirely happy with Xcode's command line tools.
@@ -177,11 +187,11 @@ Exceptions
 ----------
 
 The use of exceptions is currently discouraged for two reasons.  First,
-Emscripten disables exception handling by default for -O1 and higher. This can
-be overridden by passing ``-s DISABLE_EXCEPTION_CATCHING=0`` to Emscripten, but
-doing so may or may not result in a noticeable performance penalty. Additional
-code will be generated at every call site an exception could propagate through.
-Second, exceptions are currently not supported by PNaCl.
+Emscripten disables exception handling by default for ``-O1`` and higher. This
+can be overridden by passing ``-s DISABLE_EXCEPTION_CATCHING=0`` to Emscripten,
+but doing so *may* or may not result in a noticeable performance penalty.
+Additional code will be generated at every call site an exception could
+propagate through.  Second, exceptions are currently not supported by PNaCl.
 
 Required Compiler Flags
 -----------------------
@@ -272,8 +282,26 @@ an interface is supported, there may be missing features or subtle
 incompatibilities where test coverage is not available.  Lack of test coverage
 will be the main difficulty in getting pepper.js to v1.0.
 
-TODO figure out how to clearly explain how this situation impacts developers, or
-fix it.
+If an unimplemented interface is requested, pepper.js will return a null pointer
+and log the request to the JavaScript console.  If an unimplemented function is
+called, an exception with be thrown.
+
+To find which interfaces have been implemented, run the following command in the
+root of the repo:
+
+::
+
+    git grep "registerInterface(\""
+
+To find unimplemented functions:
+
+::
+
+    git grep "not implemented"
+
+If you need a particular interface or function for your application, do not
+hesitate to file a feature request.  Test cases and patches are welcome, if
+you're particularly interested in the feature.
 
 Implementation Errata
 ---------------------
@@ -313,8 +341,8 @@ to give partial results.
 
 If multiple mouse buttons are held, pepper.js will list all of them as event
 modifiers. PPAPI will only list one button - the one with the lowest enum
-value. There is a known but where pepper.js will not update the modifier state if
-a button is pressed or released outside of pepper.js's canvas.
+value. There is a known bug where pepper.js will not update the modifier state
+if a button is pressed or released outside of pepper.js's canvas.
 
 Platform Errata
 ---------------
@@ -368,7 +396,7 @@ Client executables are only supported by Chrome.  JavaScript has much more
 pervasive browser support.  It should be noted that although JavaScript "runs
 everywhere," performance can vary widely between browsers, sometimes an order of
 magnitude or more.  It is highly suggested that applications be designed to
-scale across differing amounts processing power, if possible.
+scale across differing amounts of processing power, if possible.
 
 In terms of file size, it appears that Native Client and Emscripten produce
 executables of roughly the same size, once they are stripped/minimized and
@@ -385,10 +413,10 @@ open web.  There is, however, an architecture neutral version of Native Client
 called Portable Native Client.  Portable Native Client executables contain
 platform-neutral bitcode, making it better suited for the open web.  Starting in
 Chrome 31, PNaCl executables can be loaded in arbitrary web pages.  Initial load
-times are longer than because bitcode must be translated into
-architecture-specific code before it is executed.  For applications running on
-the open web, PNaCl is required, but when deploying as a Chrome App, it may be
-advantageous to use NaCl.
+times are longer than subsequent loads because bitcode must be translated into
+architecture-specific code before it is executed for the first time.  For
+applications running on the open web, PNaCl is required, but when deploying as a
+Chrome App, it may be advantageous to use NaCl.
 
 .. _`Chrome Web App`: http://developer.chrome.com/extensions/apps.html
 
