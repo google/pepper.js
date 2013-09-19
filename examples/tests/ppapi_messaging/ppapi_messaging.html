@@ -9,13 +9,22 @@
     <script type="text/javascript" src="../nacltest.js"></script>
     <script type="application/x-javascript">
       //<![CDATA[
+      function canonicalize(obj) {
+        return JSON.stringify(obj, function(key, value) {
+          if (value === undefined) {
+            return "<undefined>";
+          }
+          return value;
+        });
+      }
+
       function setupTests(tester, plugin) {
         function TestPostMessageAndOnMessage(status, messageToSend) {
           var listener = status.wrap(function(message) {
             plugin.removeEventListener("message", listener, false);
-            status.log('Received onmessage event: ' + message.data);
+            status.log('Received onmessage event: ' + canonicalize(message.data));
             // Verify the message received against the message sent.
-            status.assertEqual(message.data, messageToSend);
+            status.assertEqual(canonicalize(message.data), canonicalize(messageToSend));
             status.assertEqual(typeof(message.data), typeof(messageToSend));
             status.pass();
           });
@@ -38,6 +47,9 @@
             });
         tester.addAsyncTest('PPB/PPP_Messaging:Undefined', function(status) {
             TestPostMessageAndOnMessage(status, undefined);
+            });
+        tester.addAsyncTest('PPB/PPP_Messaging:Array', function(status) {
+            TestPostMessageAndOnMessage(status, ["foo", ["bar", "baz"], 2, true, null, undefined]);
             });
         // TODO(dspringer): Add tests for other types like object, array, etc.
       }

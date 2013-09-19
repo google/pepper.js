@@ -74,6 +74,9 @@ var INSTANCE_RESOURCE = 18;
 var VIEW_RESOURCE = 19;
 var GRAPHICS_3D_RESOURCE = 20;
 
+var ARRAY_RESOURCE = 21;
+
+
 var ResourceManager = function() {
   this.lut = {};
   this.uid = 1;
@@ -107,6 +110,21 @@ ResourceManager.prototype.registerString = function(value, memory, len) {
       len: len,
       destroy: function() {
         _free(this.memory);
+      }
+  });
+}
+
+ResourceManager.prototype.registerArray = function(value) {
+  return this.register(ARRAY_RESOURCE, {
+      value: value,
+      destroy: function() {
+        var wrapped = this.value;
+        this.value = [];
+        for (var i = 0; i < wrapped.length; i++) {
+          if (glue.isRefCountedVarType(wrapped[i].type)) {
+            resources.release(wrapped[i].value);
+          }
+        }
       }
   });
 }
@@ -603,6 +621,10 @@ glue.getVarType = function(ptr) {
   return getValue(ptr, 'i32');
 };
 
+glue.isRefCountedVarType = function(type) {
+  return type >= 5;
+};
+
 glue.getVarUID = function(ptr) {
   // ptr->value is offset 8.
   return getValue(ptr + 8, 'i32');
@@ -610,59 +632,99 @@ glue.getVarUID = function(ptr) {
 
 glue.getVar = function(ptr) {
   var type = glue.getVarType(ptr);
-  var valptr = ptr + 8;
+  var value;
+  if (type == ppapi.PP_VARTYPE_DOUBLE) {
+    value = getValue(ptr + 8, 'double');
+  } else {
+    value = getValue(ptr + 8, 'i32');
+  }
+  return glue.unwrapVar(type, value);
+};
 
-  if (type == 0) {
+glue.unwrapVar = function(type, value) {
+  if (type == ppapi.PP_VARTYPE_UNDEFINED) {
     return undefined;
-  } else if (type == 1) {
+  } else if (type == ppapi.PP_VARTYPE_NULL) {
     return null;
   } else if (type == ppapi.PP_VARTYPE_BOOL) {
-    // PP_Bool is guarenteed to be 4 bytes.
-    return 0 != getValue(valptr, 'i32');
-  } else if (type == 3) {
+    return 0 != value;
+  } else if (type == ppapi.PP_VARTYPE_INT32) {
     return getValue(valptr, 'i32');
-  } else if (type == 4) {
-    return getValue(valptr, 'double');
+  } else if (type == ppapi.PP_VARTYPE_DOUBLE) {
+    return value;
   } else if (type == ppapi.PP_VARTYPE_STRING) {
-    var uid = getValue(valptr, 'i32');
-    return resources.resolve(uid, STRING_RESOURCE).value;
+    return resources.resolve(value, STRING_RESOURCE).value;
+  } else if (type == ppapi.PP_VARTYPE_ARRAY) {
+    // TODO(ncbray): deduplicate DAG nodes.
+    var wrapped = resources.resolve(value, ARRAY_RESOURCE).value;
+    var unwrapped = [];
+    for (var i = 0; i < wrapped.length; i++) {
+      unwrapped.push(glue.unwrapVar(wrapped[i].type, wrapped[i].value));
+    }
+    return unwrapped;
   } else {
     throw "Var type conversion not implemented: " + type;
   }
 };
 
-glue.setVar = function(obj, ptr) {
+glue.wrapJS = function(obj) {
+  var type = 0;
+  var value = 0;
+
   var typen = (typeof obj);
-  var valptr = ptr + 8;
   if (typen === 'string') {
+    type = ppapi.PP_VARTYPE_STRING;
     var arr = intArrayFromString(obj);
     var memory = allocate(arr, 'i8', ALLOC_NORMAL);
     // Length is adjusted for null terminator.
-    var uid = resources.registerString(obj, memory, arr.length-1);
-    setValue(ptr, ppapi.PP_VARTYPE_STRING, 'i32');
-    setValue(valptr, uid, 'i32');
+    value = resources.registerString(obj, memory, arr.length-1);
   } else if (typen === 'number') {
-    // Note this will always pass a double, even when the value can be represented as an int32
-    setValue(ptr, ppapi.PP_VARTYPE_DOUBLE, 'i32');
-    setValue(valptr, obj, 'double');
+    // Note this will always create a double, even when the value can be
+    // represented as an int32.
+    type = ppapi.PP_VARTYPE_DOUBLE;
+    value = obj;
   } else if (typen === 'boolean') {
-    setValue(ptr, ppapi.PP_VARTYPE_BOOL, 'i32');
-    setValue(valptr, obj ? 1 : 0, 'i32');
+    type = ppapi.PP_VARTYPE_BOOL;
+    value = obj ? 1 : 0;
   } else if (typen === 'undefined') {
-    setValue(ptr, ppapi.PP_VARTYPE_UNDEFINED, 'i32');
+    type = ppapi.PP_VARTYPE_UNDEFINED;
   } else if (obj === null) {
-    setValue(ptr, ppapi.PP_VARTYPE_NULL, 'i32');
+    type = ppapi.PP_VARTYPE_NULL;
+  } else if (obj instanceof Array) {
+    // TODO(ncbray): deduplicate DAG nodes.
+    type = ppapi.PP_VARTYPE_ARRAY;
+    var wrapped = [];
+    value = resources.registerArray(wrapped);
+    for (var i = 0; i < obj.length; i++) {
+      wrapped.push(glue.wrapJS(obj[i]));
+    }
   } else if (obj instanceof ArrayBuffer) {
+    type = ppapi.PP_VARTYPE_ARRAY_BUFFER;
     var memory = _malloc(obj.byteLength);
     // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
     var memory_view = new Int8Array(buffer, memory, obj.byteLength);
     memory_view.set(new Int8Array(obj));
-    var uid = resources.registerArrayBuffer(memory, obj.byteLength);
-    setValue(ptr, ppapi.PP_VARTYPE_ARRAY_BUFFER, 'i32');
-    setValue(valptr, uid, 'i32');
+    value = resources.registerArrayBuffer(memory, obj.byteLength);
   } else {
     throw "Var type conversion not implemented: " + typen;
   }
+  return {type: type, value: value};
+};
+
+glue.setJSVar = function(wrapped, ptr) {
+  setValue(ptr, wrapped.type, 'i32');
+  if (wrapped.type === ppapi.PP_VARTYPE_DOUBLE) {
+    setValue(ptr + 8, wrapped.value, 'double');
+  } else {
+    // Note: PPAPI defines var IDs as 64-bit values, but in practice we're only
+    // using 32 bits, so we can handle UIDs in this catch all.
+    setValue(ptr + 8, wrapped.value, 'i32');
+    setValue(ptr + 12, 0, 'i32'); // Paranoia.
+  }
+};
+
+glue.setVar = function(obj, ptr) {
+  glue.setJSVar(glue.wrapJS(obj), ptr);
 };
 
 glue.setIntVar = function(obj, ptr) {
@@ -820,6 +882,8 @@ var ppapi = (function() {
     PP_VARTYPE_INT32: 3,
     PP_VARTYPE_DOUBLE: 4,
     PP_VARTYPE_STRING: 5,
+    PP_VARTYPE_ARRAY: 7,
+    PP_VARTYPE_DICTIONARY: 8,
     PP_VARTYPE_ARRAY_BUFFER: 9
   };
 

@@ -51,14 +51,9 @@ static void SendOnMessageEventCallback(void* data, int32_t result) {
   ppb_messaging->PostMessage(message_to_send->instance,
                              message_to_send->message);
 
-  /* Since the message we're sending originally was sent from the browser,
-   * and subequently copied, if sending a string message we need to
-   * dereference it.
-   */
-  if (message_to_send->message.type == PP_VARTYPE_STRING) {
-    PPB_Var* ppb_var = GetPPB_Var();
-    ppb_var->Release(message_to_send->message);
-  }
+  PPB_Var* ppb_var = GetPPB_Var();
+  ppb_var->Release(message_to_send->message);
+
   free(message_to_send);
 }
 
@@ -72,13 +67,6 @@ void HandleMessage(PP_Instance instance, struct PP_Var message) {
   message_to_send->instance = instance;
   message_to_send->message = message;
 
-  if (message.type == PP_VARTYPE_STRING) {
-    PPB_Var* ppb_var = GetPPB_Var();
-    /* If the message is a string, add reference to go with the copy we did
-     * above.
-     */
-    ppb_var->AddRef(message);
-  }
   /* Echo message back to browser */
   ppb_core->CallOnMainThread(
       0,  /* I don't care about delay */

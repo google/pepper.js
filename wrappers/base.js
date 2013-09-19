@@ -109,18 +109,14 @@
     Messaging_PostMessage
   ]);
 
-  var isRefCountedVarType = function(type) {
-    return type >= 5;
-  };
-
   var Var_AddRef = function(v) {
-    if (isRefCountedVarType(glue.getVarType(v))) {
+    if (glue.isRefCountedVarType(glue.getVarType(v))) {
       resources.addRef(glue.getVarUID(v));
     }
   };
 
   var Var_Release = function(v) {
-    if (isRefCountedVarType(glue.getVarType(v))) {
+    if (glue.isRefCountedVarType(glue.getVarType(v))) {
       resources.release(glue.getVarUID(v));
     }
   };
