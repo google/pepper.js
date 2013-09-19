@@ -51,6 +51,12 @@
         tester.addAsyncTest('PPB/PPP_Messaging:Array', function(status) {
             TestPostMessageAndOnMessage(status, ["foo", ["bar", "baz"], 2, true, null, undefined]);
             });
+        tester.addAsyncTest('PPB/PPP_Messaging:Dictionary', function(status) {
+            // Note: comparing objects in JS is complicated and
+            // JSON.stringify is non-deterministic for dictionaries,
+            // so only test dictionaries with a single entry.  Ugly.
+            TestPostMessageAndOnMessage(status, {"foo": {"bar": 1}});
+            });
         // TODO(dspringer): Add tests for other types like object, array, etc.
       }
       //]]>

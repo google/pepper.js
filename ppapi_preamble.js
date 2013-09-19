@@ -75,7 +75,7 @@ var VIEW_RESOURCE = 19;
 var GRAPHICS_3D_RESOURCE = 20;
 
 var ARRAY_RESOURCE = 21;
-
+var DICTIONARY_RESOURCE = 21;
 
 var ResourceManager = function() {
   this.lut = {};
@@ -121,8 +121,25 @@ ResourceManager.prototype.registerArray = function(value) {
         var wrapped = this.value;
         this.value = [];
         for (var i = 0; i < wrapped.length; i++) {
-          if (glue.isRefCountedVarType(wrapped[i].type)) {
-            resources.release(wrapped[i].value);
+          var e = wrapped[i];
+          if (glue.isRefCountedVarType(e.type)) {
+            resources.release(e.value);
+          }
+        }
+      }
+  });
+}
+
+ResourceManager.prototype.registerDictionary = function(value) {
+  return this.register(DICTIONARY_RESOURCE, {
+      value: value,
+      destroy: function() {
+        var wrapped = this.value;
+        this.value = {};
+        for (var key in this.value) {
+          var e = wrapped[key];
+          if (glue.isRefCountedVarType(e.type)) {
+            resources.release(e.value);
           }
         }
       }
@@ -662,6 +679,14 @@ glue.unwrapVar = function(type, value) {
       unwrapped.push(glue.unwrapVar(wrapped[i].type, wrapped[i].value));
     }
     return unwrapped;
+  } else if (type == ppapi.PP_VARTYPE_DICTIONARY) {
+    // TODO(ncbray): deduplicate DAG nodes.
+    var wrapped = resources.resolve(value, DICTIONARY_RESOURCE).value;
+    var unwrapped = {};
+    for (var key in wrapped) {
+      unwrapped[key] = glue.unwrapVar(wrapped[key].type, wrapped[key].value);
+    }
+    return unwrapped;
   } else {
     throw "Var type conversion not implemented: " + type;
   }
@@ -701,10 +726,23 @@ glue.wrapJS = function(obj) {
   } else if (obj instanceof ArrayBuffer) {
     type = ppapi.PP_VARTYPE_ARRAY_BUFFER;
     var memory = _malloc(obj.byteLength);
-    // Note: "buffer" is an implementation detail of Emscripten and is likely not a stable interface.
+    // Note: "buffer" is an implementation detail of Emscripten and is likely
+    // not a stable interface.
     var memory_view = new Int8Array(buffer, memory, obj.byteLength);
     memory_view.set(new Int8Array(obj));
     value = resources.registerArrayBuffer(memory, obj.byteLength);
+  } else if (typen === 'object') {
+    // Note that this need to go last because many things are "objects", such as
+    // ArrayBuffers.  Is there a good way to distinguish between plain-old
+    // objects and other types?
+
+    // TODO(ncbray): deduplicate DAG nodes.
+    type = ppapi.PP_VARTYPE_DICTIONARY;
+    var wrapped = {};
+    value = resources.registerDictionary(wrapped);
+    for (var key in obj) {
+      wrapped[key] = glue.wrapJS(obj[key]);
+    }
   } else {
     throw "Var type conversion not implemented: " + typen;
   }
