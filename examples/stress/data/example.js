@@ -5,9 +5,20 @@
 var kMaxArraySize = 20;
 var messageArray = new Array();
 
-// Once we load, hide the plugin
+var Config = function() {
+  this.dx = 3;
+  this.dy = 2;
+};
+
+var config = new Config();
+
 function moduleDidLoad() {
-  //common.hideModule();
+  var gui = new dat.GUI();
+  var sync = function() {
+    common.naclModule.postMessage(config);
+  };
+  gui.add(config, 'dx', -5, 5).step(1).onFinishChange(sync);
+  gui.add(config, 'dy', -5, 5).step(1).onFinishChange(sync);
 }
 
 // Called by the common.js module.

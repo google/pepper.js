@@ -22,6 +22,7 @@
 #include "ppapi/c/ppb_instance.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_var.h"
+#include "ppapi/c/ppb_var_dictionary.h"
 #include "ppapi/c/ppb_view.h"
 #include "ppapi/c/ppp.h"
 #include "ppapi/c/ppp_instance.h"
@@ -44,6 +45,7 @@ static PPB_Console* ppb_console_interface = NULL;
 static PPB_Instance* ppb_instance_interface = NULL;
 static PPB_Messaging* ppb_messaging_interface = NULL;
 static PPB_Var* ppb_var_interface = NULL;
+static PPB_VarDictionary* ppb_var_dictionary_interface = NULL;
 static PPB_View* ppb_view_interface = NULL;
 static PPB_Graphics2D* ppb_graphics_2d_interface = NULL;
 static PPB_ImageData* ppb_image_data_interface = NULL;
@@ -57,6 +59,12 @@ PP_TimeTicks last;
 float phase = 0;
 
 PP_Instance inst = 0;
+
+PP_Var dx_name;
+PP_Var dy_name;
+
+int dx;
+int dy;
 
 extern void Draw();
 
@@ -133,6 +141,11 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
                                   const char* argv[]) {
 
   inst = instance;
+
+  dx_name = CStrToVar("dx");
+  dy_name = CStrToVar("dy");
+  dx = 3;
+  dy = 2;
 
   const char* post_msg = "Hello World (" TCNAME ")!";
   const char* console_msg = "Hello World (JavaScript Console)!";
@@ -280,8 +293,8 @@ void Draw() {
   }
 
   PP_Point delta;
-  delta.x = 3;
-  delta.y = 2;
+  delta.x = dx;
+  delta.y = dy;
   PP_Rect clip;
   clip.point.x = 10;
   clip.point.y = 10;
@@ -363,12 +376,34 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   ppb_messaging_interface =
       (PPB_Messaging*)(get_browser(PPB_MESSAGING_INTERFACE));
   ppb_var_interface = (PPB_Var*)(get_browser(PPB_VAR_INTERFACE));
+  ppb_var_dictionary_interface = (PPB_VarDictionary*)(get_browser(PPB_VAR_DICTIONARY_INTERFACE));
+
   ppb_view_interface = (PPB_View*)(get_browser(PPB_VIEW_INTERFACE));
 
   ppb_graphics_2d_interface = (PPB_Graphics2D*)(get_browser(PPB_GRAPHICS_2D_INTERFACE));
   ppb_image_data_interface = (PPB_ImageData*)(get_browser(PPB_IMAGEDATA_INTERFACE));
 
   return PP_OK;
+}
+
+int ExtractInt(PP_Var dict, PP_Var key, int default_value) {
+  int int_val = default_value;
+  PP_Var val = ppb_var_dictionary_interface->Get(dict, key);
+  if (val.type == PP_VARTYPE_DOUBLE) {
+    int_val = (int)val.value.as_double;
+  } else if (val.type == PP_VARTYPE_INT32) {
+    int_val = val.value.as_int;
+  }
+  Release(val);
+  return int_val;
+}
+
+void Messaging_HandleMessage(PP_Instance instance, struct PP_Var message) {
+  if (message.type == PP_VARTYPE_DICTIONARY && ppb_var_dictionary_interface) {
+    dx = ExtractInt(message, dx_name, 0);
+    dy = ExtractInt(message, dy_name, 0);
+  }
+  Release(message);
 }
 
 
@@ -388,6 +423,11 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
       &Instance_HandleDocumentLoad,
     };
     return &instance_interface;
+  } else if (strcmp(interface_name, PPP_MESSAGING_INTERFACE) == 0) {
+    static PPP_Messaging messaging_interface = {
+      &Messaging_HandleMessage,
+    };
+    return &messaging_interface;
   }
   return NULL;
 }
