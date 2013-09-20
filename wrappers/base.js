@@ -171,13 +171,60 @@
     Var_VarToUtf8
   ]);
 
-  // TODO eliminate redundantly defined function pointers?
   registerInterface("PPB_Var;1.1", [
     Var_AddRef,
     Var_Release,
     Var_VarFromUtf8_1_1,
     Var_VarToUtf8
   ]);
+
+  var VarDictionary_Create = function(result) {
+    throw "VarDictionary_Create not implemented";
+  };
+
+  var VarDictionary_Get = function(result, dict, key) {
+    if (glue.getVarType(dict) === ppapi.PP_VARTYPE_DICTIONARY &&
+        glue.getVarType(key) === ppapi.PP_VARTYPE_STRING) {
+      var d = resources.resolve(glue.getVarUID(dict), DICTIONARY_RESOURCE).value;
+      var k = resources.resolve(glue.getVarUID(key), STRING_RESOURCE).value;
+      if (d !== undefined && k !== undefined && k in d) {
+        var e = d[k];
+        if (glue.isRefCountedVarType(e.type)) {
+          resources.addRef(e.value);
+        }
+        glue.setJSVar(e.type, e.value, result);
+        return;
+      }
+    }
+    glue.setVar(undefined, result);
+    return;
+  };
+
+  var VarDictionary_Set = function(result, dict, key, value) {
+    throw "VarDictionary_Set not implemented";
+  };
+
+  var VarDictionary_Delete = function(result, dict, key) {
+    throw "VarDictionary_Delete not implemented";
+  };
+
+  var VarDictionary_HasKey = function(result, dict, key) {
+    throw "VarDictionary_HasKey not implemented";
+  };
+
+  var VarDictionary_GetKeys = function(result, dict) {
+    throw "VarDictionary_Delete not implemented";
+  };
+
+  registerInterface("PPB_VarDictionary;1.0", [
+    VarDictionary_Create,
+    VarDictionary_Get,
+    VarDictionary_Set,
+    VarDictionary_Delete,
+    VarDictionary_HasKey,
+    VarDictionary_GetKeys,
+  ]);
+
 
   var VarArrayBuffer_Create = function(var_ptr, size_in_bytes) {
     throw "VarArrayBuffer_Create not implemented";

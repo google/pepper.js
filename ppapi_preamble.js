@@ -749,20 +749,21 @@ glue.wrapJS = function(obj) {
   return {type: type, value: value};
 };
 
-glue.setJSVar = function(wrapped, ptr) {
-  setValue(ptr, wrapped.type, 'i32');
-  if (wrapped.type === ppapi.PP_VARTYPE_DOUBLE) {
-    setValue(ptr + 8, wrapped.value, 'double');
+glue.setJSVar = function(type, value, ptr) {
+  setValue(ptr, type, 'i32');
+  if (type === ppapi.PP_VARTYPE_DOUBLE) {
+    setValue(ptr + 8, value, 'double');
   } else {
     // Note: PPAPI defines var IDs as 64-bit values, but in practice we're only
     // using 32 bits, so we can handle UIDs in this catch all.
-    setValue(ptr + 8, wrapped.value, 'i32');
+    setValue(ptr + 8, value, 'i32');
     setValue(ptr + 12, 0, 'i32'); // Paranoia.
   }
 };
 
 glue.setVar = function(obj, ptr) {
-  glue.setJSVar(glue.wrapJS(obj), ptr);
+  var e = glue.wrapJS(obj);
+  glue.setJSVar(e.type, e.value, ptr);
 };
 
 glue.setIntVar = function(obj, ptr) {
