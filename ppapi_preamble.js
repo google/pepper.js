@@ -31,17 +31,18 @@ var clamp = function(value, min, max) {
 }
 
 var postMessage = function(message) {
+  var instance = this.instance;
   // Fill out the PP_Var structure
   var var_ptr = _malloc(16);
   glue.setVar(message, var_ptr);
 
-  // Send
-  _DoPostMessage(this.instance, var_ptr);
-
-  // Cleanup
-  // Note: the callee releases the var so we don't need to.
-  // This is different than most interfaces.
-  _free(var_ptr);
+  // Post messages are resolved asynchronously.
+  glue.defer(function() {
+    _DoPostMessage(instance, var_ptr);
+    // Note: the callee releases the var so we don't need to.
+    // This is different than most interfaces.
+    _free(var_ptr);
+  });
 }
 
 // Encoding types as numbers instead of string saves ~2kB when minified because closure will inline these constants.
@@ -749,6 +750,10 @@ glue.getCompletionCallback = function(ptr) {
     }
     Runtime.dynCall('vii', func, [user_data, result]);
   };
+};
+
+glue.defer = function(callback) {
+  setTimeout(callback, 0);
 };
 
 

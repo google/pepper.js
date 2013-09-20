@@ -98,14 +98,13 @@
     if (inst == undefined) {
       return;
     }
-    var val = glue.getVar(value);
     var evt = document.createEvent('Event');
     evt.initEvent('message', true, true);  // bubbles, cancelable
-    evt.data = val;
-    // Prevent reentrancy.
-    setTimeout(function() {
+    evt.data = glue.getVar(value);
+    // dispatchEvent is resolved synchonously, defer it to prevent reentrancy.
+    glue.defer(function() {
       inst.element.dispatchEvent(evt);
-    }, 0);
+    });
   };
 
   registerInterface("PPB_Messaging;1.0", [

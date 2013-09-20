@@ -15,12 +15,12 @@
     if (loader.pendingReadCallback) {
       var full_read_possible = loader.data.byteLength >= loader.index + loader.pendingReadSize
       if (loader.done || full_read_possible){
-	var cb = loader.pendingReadCallback;
-	loader.pendingReadCallback = null;
-	var readSize = full_read_possible ? loader.pendingReadSize : loader.data.byteLength - loader.index;
-	var index = loader.index;
-	loader.index += readSize;
-	cb(readSize, new Uint8Array(loader.data, index, readSize));
+        var cb = loader.pendingReadCallback;
+        loader.pendingReadCallback = null;
+        var readSize = full_read_possible ? loader.pendingReadSize : loader.data.byteLength - loader.index;
+        var index = loader.index;
+        loader.index += readSize;
+        cb(readSize, new Uint8Array(loader.data, index, readSize));
       }
     }
   };
@@ -64,10 +64,10 @@
       status: 0,
       file_ref: 0,
       destroy: function() {
-	if (this.file_ref !== 0) {
-	  resources.release(this.file_ref);
-	  this.file_ref = 0;
-	}
+        if (this.file_ref !== 0) {
+          resources.release(this.file_ref);
+          this.file_ref = 0;
+        }
       }
     };
     resources.register(URL_RESPONSE_INFO_RESOURCE, loader.response_info);
@@ -158,7 +158,9 @@
       c(status);
     };
     loader.pendingReadSize = read_size;
-    setTimeout(function() { updatePendingRead(loader); }, 0);
+    glue.defer(function() {
+      updatePendingRead(loader);
+    });
     return ppapi.PP_OK_COMPLETIONPENDING;
 
   };
@@ -171,7 +173,9 @@
     // TODO check STREAM_TO_FILE flag.
     var c = glue.getCompletionCallback(callback);
     // HACK to get the test running but failing.
-    setTimeout(function() { c(ppapi.PP_OK); }, 0);
+    glue.defer(function() {
+      c(ppapi.PP_OK);
+    });
     return ppapi.PP_OK_COMPLETIONPENDING;
   };
   var URLLoader_Close = function() {
