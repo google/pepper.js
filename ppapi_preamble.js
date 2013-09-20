@@ -75,7 +75,7 @@ var VIEW_RESOURCE = 19;
 var GRAPHICS_3D_RESOURCE = 20;
 
 var ARRAY_RESOURCE = 21;
-var DICTIONARY_RESOURCE = 21;
+var DICTIONARY_RESOURCE = 22;
 
 var ResourceManager = function() {
   this.lut = {};
@@ -136,7 +136,7 @@ ResourceManager.prototype.registerDictionary = function(value) {
       destroy: function() {
         var wrapped = this.value;
         this.value = {};
-        for (var key in this.value) {
+        for (var key in wrapped) {
           var e = wrapped[key];
           if (glue.isRefCountedVarType(e.type)) {
             resources.release(e.value);

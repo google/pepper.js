@@ -102,7 +102,10 @@
     var evt = document.createEvent('Event');
     evt.initEvent('message', true, true);  // bubbles, cancelable
     evt.data = val;
-    inst.element.dispatchEvent(evt);
+    // Prevent reentrancy.
+    setTimeout(function() {
+      inst.element.dispatchEvent(evt);
+    }, 0);
   };
 
   registerInterface("PPB_Messaging;1.0", [

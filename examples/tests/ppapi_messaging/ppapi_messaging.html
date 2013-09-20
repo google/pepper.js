@@ -18,6 +18,14 @@
         });
       }
 
+      function getNumResources() {
+        if(window.resources) {
+          return resources.getNumResources()
+        } else {
+          return 0;
+        }
+      }
+
       function setupTests(tester, plugin) {
         function TestPostMessageAndOnMessage(status, messageToSend) {
           var listener = status.wrap(function(message) {
@@ -26,9 +34,11 @@
             // Verify the message received against the message sent.
             status.assertEqual(canonicalize(message.data), canonicalize(messageToSend));
             status.assertEqual(typeof(message.data), typeof(messageToSend));
+            status.assertEqual(getNumResources(), num);
             status.pass();
           });
 
+          var num = getNumResources();
           plugin.addEventListener("message", listener, false);
           plugin.postMessage(messageToSend);
         }
