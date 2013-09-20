@@ -472,50 +472,13 @@ var CreateInstance = function(width, height, shadow_instance) {
 
   // TODO(ncbray): element resize.
 
-  // TODO(grosse): Make this work when creating multiple instances or modules.
-  // It should only be called once when the page loads.
-  // Currently it's called everytime an instance is created.
-  var fullscreenChange = function() {
-    var doSend = function(entering_fullscreen, target) {
-      var instance_id = target.instance;
-      var inst = resources.resolve(instance_id, INSTANCE_RESOURCE);
-      if (inst === undefined) {
-        return;
-      }
-    };
-
-    setTimeout(updateView, 1);
-
-    // Keep track of current fullscreen element
-    var lastTarget = null;
-    return function(event) {
-      // When an event occurs because fullscreen is lost, the element will be null but we have no direct way of determining
-      // which element lost fullscreen. So we keep track of the previous element ot enter fullscreen.
-      var target = getFullscreenElement();
-      var entering_fullscreen = (target !== null);
-
-      if (target !== lastTarget) {
-        // Send a fullscreen lost event to previous element if any
-        if (lastTarget !== null) {
-          doSend(false, lastTarget);
-          lastTarget = null;
-        }
-
-        if (target !== null) {
-          doSend(true, target);
-        }
-        lastTarget = target;
-      }
-    };
-  }();
-
   var target = shadow_instance;
   if (target.requestFullscreen) {
-    document.addEventListener('fullscreenchange', fullscreenChange);
+    document.addEventListener('fullscreenchange', updateView);
   } else if (target.mozRequestFullScreen) {
-    document.addEventListener('mozfullscreenchange', fullscreenChange);
+    document.addEventListener('mozfullscreenchange', updateView);
   } else if (target.webkitRequestFullscreen) {
-    document.addEventListener('webkitfullscreenchange', fullscreenChange);
+    document.addEventListener('webkitfullscreenchange', updateView);
   }
 
   // TODO handle removal events.
