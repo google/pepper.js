@@ -15,11 +15,11 @@
   }
 
   var Console_Log = function(instance, level, value) {
-    DoLog(level, glue.getVar(value));
+    DoLog(level, glue.memoryToJSVar(value));
   };
 
   var Console_LogWithSource = function(instance, level, source, value) {
-    DoLog(level, glue.getVar(source) + ": " + glue.getVar(value));
+    DoLog(level, glue.memoryToJSVar(source) + ": " + glue.memoryToJSVar(value));
   };
 
   registerInterface("PPB_Console;1.0", [
@@ -100,7 +100,7 @@
     }
     var evt = document.createEvent('Event');
     evt.initEvent('message', true, true);  // bubbles, cancelable
-    evt.data = glue.getVar(value);
+    evt.data = glue.memoryToJSVar(value);
     // dispatchEvent is resolved synchonously, defer it to prevent reentrancy.
     glue.defer(function() {
       inst.element.dispatchEvent(evt);
@@ -132,7 +132,7 @@
 
     // Not a valid UTF-8 string.  Return null.
     if (value === null) {
-      glue.setVar(null, result);
+      glue.jsToMemoryVar(null, result);
       return
     }
 
@@ -187,31 +187,54 @@
   var VarDictionary_Get = function(result, dict, key) {
     if (glue.getVarType(dict) === ppapi.PP_VARTYPE_DICTIONARY &&
         glue.getVarType(key) === ppapi.PP_VARTYPE_STRING) {
-      var d = resources.resolve(glue.getVarUID(dict), DICTIONARY_RESOURCE).value;
-      var k = resources.resolve(glue.getVarUID(key), STRING_RESOURCE).value;
-      if (d !== undefined && k !== undefined && k in d) {
-        var e = d[k];
-        if (glue.isRefCountedVarType(e.type)) {
-          resources.addRef(e.value);
-        }
-        glue.setJSVar(e.type, e.value, result);
+      var d = resources.resolve(glue.getVarUID(dict), DICTIONARY_RESOURCE);
+      var k = resources.resolve(glue.getVarUID(key), STRING_RESOURCE);
+      if (d !== undefined && k !== undefined && k.value in d.value) {
+        var e = d.value[k.value];
+        glue.structAddRef(e);
+        glue.structToMemoryVar(e, result);
         return;
       }
     }
-    glue.setVar(undefined, result);
+    glue.jsToMemoryVar(undefined, result);
     return;
   };
 
-  var VarDictionary_Set = function(result, dict, key, value) {
-    throw "VarDictionary_Set not implemented";
+  var VarDictionary_Set = function(dict, key, value) {
+    if (glue.getVarType(dict) === ppapi.PP_VARTYPE_DICTIONARY &&
+        glue.getVarType(key) === ppapi.PP_VARTYPE_STRING) {
+      var d = resources.resolve(glue.getVarUID(dict), DICTIONARY_RESOURCE);
+      var k = resources.resolve(glue.getVarUID(key), STRING_RESOURCE);
+      if (d !== undefined && k !== undefined) {
+        d.remove(k.value);
+        var e = glue.memoryToStructVar(value);
+        glue.structAddRef(e);
+        d.value[k.value] = e;
+      }
+    }
   };
 
-  var VarDictionary_Delete = function(result, dict, key) {
-    throw "VarDictionary_Delete not implemented";
+  var VarDictionary_Delete = function(dict, key) {
+    if (glue.getVarType(dict) === ppapi.PP_VARTYPE_DICTIONARY &&
+        glue.getVarType(key) === ppapi.PP_VARTYPE_STRING) {
+      var d = resources.resolve(glue.getVarUID(dict), DICTIONARY_RESOURCE);
+      var k = resources.resolve(glue.getVarUID(key), STRING_RESOURCE);
+      if (d !== undefined && k !== undefined) {
+        d.remove(k.value);
+      }
+    }
   };
 
-  var VarDictionary_HasKey = function(result, dict, key) {
-    throw "VarDictionary_HasKey not implemented";
+  var VarDictionary_HasKey = function(dict, key) {
+    if (glue.getVarType(dict) === ppapi.PP_VARTYPE_DICTIONARY &&
+        glue.getVarType(key) === ppapi.PP_VARTYPE_STRING) {
+      var d = resources.resolve(glue.getVarUID(dict), DICTIONARY_RESOURCE);
+      var k = resources.resolve(glue.getVarUID(key), STRING_RESOURCE);
+      if (d !== undefined && k !== undefined && k.value in d.value) {
+        return 1;
+      }
+    }
+    return 0;
   };
 
   var VarDictionary_GetKeys = function(result, dict) {

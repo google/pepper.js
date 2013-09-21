@@ -225,7 +225,7 @@
 
     // Need to use the ppapi var type to distinguish between ints and floats.
     var var_type = glue.getVarType(value);
-    var js_obj = glue.getVar(value);
+    var js_obj = glue.memoryToJSVar(value);
 
     if (property === 0) {
       if (var_type !== ppapi.PP_VARTYPE_STRING) {
@@ -339,7 +339,7 @@
       return 0;
     }
     if (property == 0) {
-      glue.setVar(r.url, var_ptr);
+      glue.jsToMemoryVar(r.url, var_ptr);
     } else if (property == 3) {
       glue.setIntVar(r.status, var_ptr);
     } else {

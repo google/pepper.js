@@ -34,7 +34,7 @@ var postMessage = function(message) {
   var instance = this.instance;
   // Fill out the PP_Var structure
   var var_ptr = _malloc(16);
-  glue.setVar(message, var_ptr);
+  glue.jsToMemoryVar(message, var_ptr);
 
   // Post messages are resolved asynchronously.
   glue.defer(function() {
@@ -122,10 +122,7 @@ ResourceManager.prototype.registerArray = function(value) {
         var wrapped = this.value;
         this.value = [];
         for (var i = 0; i < wrapped.length; i++) {
-          var e = wrapped[i];
-          if (glue.isRefCountedVarType(e.type)) {
-            resources.release(e.value);
-          }
+          glue.structRelease(wrapped[i]);
         }
       }
   });
@@ -134,14 +131,18 @@ ResourceManager.prototype.registerArray = function(value) {
 ResourceManager.prototype.registerDictionary = function(value) {
   return this.register(DICTIONARY_RESOURCE, {
       value: value,
+      remove: function(key) {
+        if (key in this.value) {
+          var e = this.value[key];
+          delete this.value[key];
+          glue.structRelease(e);
+        }
+      },
       destroy: function() {
         var wrapped = this.value;
         this.value = {};
         for (var key in wrapped) {
-          var e = wrapped[key];
-          if (glue.isRefCountedVarType(e.type)) {
-            resources.release(e.value);
-          }
+          glue.structRelease(wrapped[key]);
         }
       }
   });
@@ -611,7 +612,7 @@ glue.getVarUID = function(ptr) {
   return getValue(ptr + 8, 'i32');
 };
 
-glue.getVar = function(ptr) {
+glue.memoryToStructVar = function(ptr) {
   var type = glue.getVarType(ptr);
   var value;
   if (type == ppapi.PP_VARTYPE_DOUBLE) {
@@ -619,10 +620,28 @@ glue.getVar = function(ptr) {
   } else {
     value = getValue(ptr + 8, 'i32');
   }
-  return glue.unwrapVar(type, value);
+  return {type: type, value: value};
 };
 
-glue.unwrapVar = function(type, value) {
+glue.structAddRef = function(e) {
+  if (glue.isRefCountedVarType(e.type)) {
+    resources.addRef(e.value);
+  }
+};
+
+glue.structRelease = function(e) {
+  if (glue.isRefCountedVarType(e.type)) {
+    resources.release(e.value);
+  }
+};
+
+glue.memoryToJSVar = function(ptr) {
+  return glue.structToJSVar(glue.memoryToStructVar(ptr));
+};
+
+glue.structToJSVar = function(e) {
+  var type = e.type;
+  var value = e.value;
   if (type == ppapi.PP_VARTYPE_UNDEFINED) {
     return undefined;
   } else if (type == ppapi.PP_VARTYPE_NULL) {
@@ -640,7 +659,7 @@ glue.unwrapVar = function(type, value) {
     var wrapped = resources.resolve(value, ARRAY_RESOURCE).value;
     var unwrapped = [];
     for (var i = 0; i < wrapped.length; i++) {
-      unwrapped.push(glue.unwrapVar(wrapped[i].type, wrapped[i].value));
+      unwrapped.push(glue.structToJSVar(wrapped[i]));
     }
     return unwrapped;
   } else if (type == ppapi.PP_VARTYPE_DICTIONARY) {
@@ -648,7 +667,7 @@ glue.unwrapVar = function(type, value) {
     var wrapped = resources.resolve(value, DICTIONARY_RESOURCE).value;
     var unwrapped = {};
     for (var key in wrapped) {
-      unwrapped[key] = glue.unwrapVar(wrapped[key].type, wrapped[key].value);
+      unwrapped[key] = glue.structToJSVar(wrapped[key]);
     }
     return unwrapped;
   } else {
@@ -656,7 +675,7 @@ glue.unwrapVar = function(type, value) {
   }
 };
 
-glue.wrapJS = function(obj) {
+glue.jsToStructVar = function(obj) {
   var type = 0;
   var value = 0;
 
@@ -685,7 +704,7 @@ glue.wrapJS = function(obj) {
     var wrapped = [];
     value = resources.registerArray(wrapped);
     for (var i = 0; i < obj.length; i++) {
-      wrapped.push(glue.wrapJS(obj[i]));
+      wrapped.push(glue.jsToStructVar(obj[i]));
     }
   } else if (obj instanceof ArrayBuffer) {
     type = ppapi.PP_VARTYPE_ARRAY_BUFFER;
@@ -705,7 +724,7 @@ glue.wrapJS = function(obj) {
     var wrapped = {};
     value = resources.registerDictionary(wrapped);
     for (var key in obj) {
-      wrapped[key] = glue.wrapJS(obj[key]);
+      wrapped[key] = glue.jsToStructVar(obj[key]);
     }
   } else {
     throw "Var type conversion not implemented: " + typen;
@@ -713,21 +732,20 @@ glue.wrapJS = function(obj) {
   return {type: type, value: value};
 };
 
-glue.setJSVar = function(type, value, ptr) {
-  setValue(ptr, type, 'i32');
-  if (type === ppapi.PP_VARTYPE_DOUBLE) {
-    setValue(ptr + 8, value, 'double');
+glue.structToMemoryVar = function(e, ptr) {
+  setValue(ptr, e.type, 'i32');
+  if (e.type === ppapi.PP_VARTYPE_DOUBLE) {
+    setValue(ptr + 8, e.value, 'double');
   } else {
     // Note: PPAPI defines var IDs as 64-bit values, but in practice we're only
     // using 32 bits, so we can handle UIDs in this catch all.
-    setValue(ptr + 8, value, 'i32');
+    setValue(ptr + 8, e.value, 'i32');
     setValue(ptr + 12, 0, 'i32'); // Paranoia.
   }
 };
 
-glue.setVar = function(obj, ptr) {
-  var e = glue.wrapJS(obj);
-  glue.setJSVar(e.type, e.value, ptr);
+glue.jsToMemoryVar = function(obj, ptr) {
+  glue.structToMemoryVar(glue.jsToStructVar(obj), ptr);
 };
 
 glue.setIntVar = function(obj, ptr) {

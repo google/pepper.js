@@ -386,15 +386,39 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   return PP_OK;
 }
 
+// This function is somewhat inefficient for the sake of testing the dictionary
+// interface.
 int ExtractInt(PP_Var dict, PP_Var key, int default_value) {
   int int_val = default_value;
-  PP_Var val = ppb_var_dictionary_interface->Get(dict, key);
-  if (val.type == PP_VARTYPE_DOUBLE) {
-    int_val = (int)val.value.as_double;
-  } else if (val.type == PP_VARTYPE_INT32) {
-    int_val = val.value.as_int;
+  if (ppb_var_dictionary_interface->HasKey(dict, key)) {
+    PP_Var val = ppb_var_dictionary_interface->Get(dict, key);
+    if (val.type == PP_VARTYPE_DOUBLE) {
+      int_val = (int)val.value.as_double;
+    } else if (val.type == PP_VARTYPE_INT32) {
+      int_val = val.value.as_int;
+    } else {
+      printf("bad var type %d.\n", val.type);
+    }
+
+    // Make sure delete works.
+    ppb_var_dictionary_interface->Delete(dict, key);
+    if(ppb_var_dictionary_interface->HasKey(dict, key)) {
+      printf("delete failed.\n");
+      int_val = default_value;
+    }
+
+    // Make sure set works.
+    ppb_var_dictionary_interface->Set(dict, key, val);
+    if(!ppb_var_dictionary_interface->HasKey(dict, key)) {
+      printf("set failed.\n");
+      int_val = default_value;
+    }
+
+    // Cleanup.
+    Release(val);
+  } else {
+    printf("does not ahve key.\n");
   }
-  Release(val);
   return int_val;
 }
 
