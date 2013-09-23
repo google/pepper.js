@@ -148,8 +148,8 @@ Developing with pepper.js
 
 To create an application that can target both Native Client and Emscripten, it
 is necessary to work within the constraints of both platforms.  To do this, an
-application must be written to use the Pepper Plugin API and must *not* use
-threads.
+application must be written to use the Pepper Plugin API, must *not* use
+threads, and must *not* rely on mmaping or any sort of memory page protection.
 
 To be compatible with Native Client, it is necessary to use the Pepper_ Plugin
 API to interact with the browser.  In the general case, Emscripten lets a
@@ -166,7 +166,30 @@ requirement on its main thread of execution, so this constraint is equivalent to
 requiring that a Pepper plugin only runs on the main thread and does not create
 any additional threads.
 
-Of course, both of these constraints can be worked around using the C
+Emscripten also exposes a simplified version of the traditional native memory
+model: memory is a linear array.  This means that page protections do not exist,
+memory accesses never fault, and mmap is not supported.  The Pepper Plugin API
+`implicitly uses mmap`_ in a few of its APIs, and pepper.js emulates mmaping by
+silently copying on use any memory that may have been modified.  This approach
+has obvious performance implications, but for the moment it provides the best
+emulation of Pepper’s semantics.
+
+.. _`implicitly uses mmap`: https://developers.google.com/native-client/pepperc/struct_p_p_b___image_data__1__0
+
+Note: not having page protections results in a subtle "gotcha" when porting to
+Emscripten.  Dereferencing a null pointer (or accessing unmapped memory of any
+sort) will cause a segfault in Native Client (and pretty much any other native
+platform) whereas it will succeed in Emscripten and return junk data.  According
+to the C spec, dereferencing a null pointer results in `undefined behavior`_, so
+this is theoretically "working as intended".  In practice, however, existing
+code may rely on null pointer dereferences causing memory faults to implicitly
+assert a pointer is not null.  This is a subtle portability issue for Emscripten
+and generally a `bad idea`_, even when not targeting Emscripten.
+
+.. _`undefined behavior`: http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html
+.. _`bad idea`: http://codearcana.com/posts/2013/04/23/exploiting-a-go-binary.html
+
+Of course, all of these constraints can be worked around using the C
 preprocessor and conditional compilation.  For example, threading can be enabled
 on Native Client by guarding the relevant code with ``#if
 defined(__native_client__) ... #endif``.  Emscripten-specific functionality can
@@ -174,14 +197,6 @@ be conditioned on ``defined(__EMSCRIPTEN__)``.  This approach is generally not
 recommended, but there are situations where the benefits outweigh the additional
 complexity - such as performance improvements from mutlithreading or calling
 directly to JavaScript rather than mediating through postMessage.
-
-In addition to these two constraints, there are a few subtle differences between
-native code compiled with Native Client and compiled with Emscripten.  For
-example, dereferencing a null pointer (or accessing unmapped memory of any sort)
-will cause a segfault in Native Client whereas it will succeed in Emscripten and
-return junk data.  Developers should keep these platform differences in mind -
-similar to how differences between 32-bit and 64-bit architectures needs to be
-considered in other situations.
 
 Exceptions
 ----------
@@ -318,6 +333,18 @@ than PPAPI, and pepper.js is implemented on top of WebGL.  For example, if a
 makes guarantees that depth buffers are at least 16 bits.
 
 .. _WebGL: https://www.khronos.org/registry/webgl/specs/1.0/
+
+In NaCl, ``PPB_View`` specifies coordinates in terms of device independent
+pixels (the resolution of your screen, divided by a constant factor for high DPI
+displays).  Most DOM elements work in terms of CSS pixels, however, which are
+affected by zooming in or out on a page and other forms of full-page scaling.
+If effect, NaCl sees the rectangle it occupies on the screen grow and shrink
+when the page is scaled.  NaCl can transform from device independent pixels to
+CSS pixels by using the scaling factor returned from ``GetCSSScale``.  pepper.js
+always works in terms of CSS pixels because JavaScript does not appear to expose
+such a scaling factor.  ``GetCSSScale`` will always return ``1``.  In effect,
+pepper.js does not see the rectangle it occupies change when zooming in or out
+on a page.
 
 Using BGRA image formats will result in a silent performance penalty. In
 general, web APIs tend to be strongly opinionated that premultiplied RGBA is the
