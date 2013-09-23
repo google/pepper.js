@@ -128,8 +128,34 @@
     }
     var clip_rect = glue.getRect(clip_rect_ptr);
     var amount = glue.getPoint(amount_ptr);
-    var data = g2d.getImageData(clip_rect.point.x, clip_rect.point.y, clip_rect.size.width, clip_rect.size.height);
-      g2d.putImageData(data, clip_rect.point.x + amount.x, clip_rect.point.y + amount.y);
+    var x = clip_rect.point.x;
+    var y = clip_rect.point.y;
+    var w =  clip_rect.size.width;
+    var h =  clip_rect.size.height;
+    var dx = amount.x;
+    var dy = amount.y;
+
+    // Clip the shifted image by shifting and clipping the source.
+    if (dx < 0) {
+      x -= dx;
+      w += dx;
+    } else {
+      w -= dx;
+    }
+    if (dy < 0) {
+      y -= dy;
+      h += dy;
+    } else {
+      h -= dy;
+    }
+
+    // Shifting everything out of the clip rect results in a no-op.
+    if (w <= 0 || h <= 0) {
+      return;
+    }
+
+    var data = g2d.getImageData(x, y, w, h);
+    g2d.putImageData(data, x + dx, y + dy);
   };
 
   var Graphics2D_ReplaceContents = function(resource, image_data) {
