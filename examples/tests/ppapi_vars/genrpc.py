@@ -167,6 +167,7 @@ def generateJSClient(interface):
 
 if __name__ == "__main__":
   c = Interface()
+  c.method("emptyArray")
   c.method("emptyDictionary")
 
   generateCServer(c)

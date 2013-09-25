@@ -180,6 +180,39 @@
     Var_VarToUtf8
   ]);
 
+
+  var VarArray_Create = function(result) {
+    glue.structToMemoryVar({
+      type: ppapi.PP_VARTYPE_ARRAY,
+      value: resources.registerArray([])
+    }, result);
+  };
+
+  var VarArray_Get = function(result, array, index) {
+    throw "VarArray_Get not implemented";
+  };
+
+  var VarArray_Set = function(array, index, value) {
+    throw "VarArray_Set not implemented";
+  };
+
+  var VarArray_GetLength = function(array) {
+    throw "VarArray_GetLength not implemented";
+  };
+
+  var VarArray_SetLength = function(array, length) {
+    throw "VarArray_SetLength not implemented";
+  };
+
+  registerInterface("PPB_VarArray;1.0", [
+    VarArray_Create,
+    VarArray_Get,
+    VarArray_Set,
+    VarArray_GetLength,
+    VarArray_SetLength,
+  ]);
+
+
   var VarDictionary_Create = function(result) {
     glue.structToMemoryVar({
       type: ppapi.PP_VARTYPE_DICTIONARY,

@@ -28,6 +28,15 @@
 
       function setupTests(tester, plugin) {
         var rpc = new RPC(plugin);
+
+        tester.addAsyncTest('Empty array', function(status) {
+          expectPostmessage(plugin, status, function(data) {
+            status.assertEqual(JSON.stringify(data),  JSON.stringify([]));
+            status.pass();
+          });
+          rpc.emptyArray();
+        });
+
         tester.addAsyncTest('Empty dictionary', function(status) {
           expectPostmessage(plugin, status, function(data) {
             status.assertEqual(JSON.stringify(data),  JSON.stringify({}));

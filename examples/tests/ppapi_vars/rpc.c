@@ -7,6 +7,7 @@
 #include "ppapi/c/pp_instance.h"
 #include "ppapi/c/pp_var.h"
 
+extern void emptyArray(PP_Instance instance);
 extern void emptyDictionary(PP_Instance instance);
 
 static int GetInteger(struct PP_Var v) {
@@ -22,6 +23,9 @@ static int GetInteger(struct PP_Var v) {
 void HandleMessage(PP_Instance instance, struct PP_Var message) {
   switch(GetInteger(message)) {
   case 0:
+    emptyArray(instance);
+    break;
+  case 1:
     emptyDictionary(instance);
     break;
   }

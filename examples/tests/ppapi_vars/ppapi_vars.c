@@ -18,6 +18,7 @@
 #include "ppapi/c/ppb_instance.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_var.h"
+#include "ppapi/c/ppb_var_array.h"
 #include "ppapi/c/ppb_var_dictionary.h"
 #include "ppapi/c/ppp.h"
 #include "ppapi/c/ppp_instance.h"
@@ -33,9 +34,16 @@ PP_Module module = 0;
 
 static PPB_Messaging* ppb_messaging = NULL;
 static PPB_Var* ppb_var = NULL;
+static PPB_VarArray* ppb_var_array = NULL;
 static PPB_VarDictionary* ppb_var_dictionary = NULL;
 
 extern void HandleMessage(PP_Instance instance, struct PP_Var message);
+
+void emptyArray(PP_Instance instance) {
+  struct PP_Var result = ppb_var_array->Create();
+  ppb_messaging->PostMessage(instance, result);
+  ppb_var->Release(result);
+}
 
 void emptyDictionary(PP_Instance instance) {
   struct PP_Var result = ppb_var_dictionary->Create();
@@ -88,6 +96,9 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module module_id,
 
   ppb_var =
       (PPB_Var*)(get_browser_interface(PPB_VAR_INTERFACE));
+
+  ppb_var_array =
+      (PPB_VarArray*)(get_browser_interface(PPB_VAR_ARRAY_INTERFACE));
 
   ppb_var_dictionary =
       (PPB_VarDictionary*)(get_browser_interface(PPB_VAR_DICTIONARY_INTERFACE));

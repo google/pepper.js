@@ -6,6 +6,10 @@ var RPC = function(embed) {
   this.embed = embed;
 };
 
-RPC.prototype.emptyDictionary = function() {
+RPC.prototype.emptyArray = function() {
   this.embed.postMessage(0);
+};
+
+RPC.prototype.emptyDictionary = function() {
+  this.embed.postMessage(1);
 };
