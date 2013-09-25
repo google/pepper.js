@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <!-- Copyright 2011 Google Inc.  All rights reserved. -->
+  <head>
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache" />
+    <META HTTP-EQUIV="Expires" CONTENT="-1" />
+    <script type="text/javascript" src="../nacltest.js"></script>
+    <script type="text/javascript" src="rpc.js"></script>
+    <script type="application/x-javascript">
+      //<![CDATA[
+      function getNumResources() {
+        if(window.resources) {
+          return resources.getNumResources()
+        } else {
+          return 0;
+        }
+      }
+
+      function expectPostmessage(plugin, status, callback) {
+        var listener = status.wrap(function(message) {
+          plugin.removeEventListener("message", listener, false);
+          callback(message.data);
+        });
+        plugin.addEventListener("message", listener, false);
+      }
+
+      function setupTests(tester, plugin) {
+        var rpc = new RPC(plugin);
+        tester.addAsyncTest('Empty dictionary', function(status) {
+          expectPostmessage(plugin, status, function(data) {
+            status.assertEqual(JSON.stringify(data),  JSON.stringify({}));
+            status.pass();
+          });
+          rpc.emptyDictionary();
+        });
+      }
+      //]]>
+    </script>
+    <title>PPAPI Vars Test</title>
+  </head>
+  <body>
+    <h1>PPAPI Vars Test</h1>
+
+    <div id="listener"></div>
+
+    <script type="text/javascript">
+      //<![CDATA[
+      var tester = new Tester();
+      var e = createTestModule("ppapi_vars", 0, 0);
+      setupTests(tester, e);
+      tester.waitFor(e);
+      tester.run();
+      //]]>
+    </script>
+  </body>
+</html>
