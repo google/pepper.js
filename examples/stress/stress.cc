@@ -22,6 +22,7 @@
 #include "ppapi/c/ppb_instance.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_var.h"
+#include "ppapi/c/ppb_var_array.h"
 #include "ppapi/c/ppb_var_dictionary.h"
 #include "ppapi/c/ppb_view.h"
 #include "ppapi/c/ppp.h"
@@ -45,6 +46,7 @@ static PPB_Console* ppb_console_interface = NULL;
 static PPB_Instance* ppb_instance_interface = NULL;
 static PPB_Messaging* ppb_messaging_interface = NULL;
 static PPB_Var* ppb_var_interface = NULL;
+static PPB_VarArray* ppb_var_array_interface = NULL;
 static PPB_VarDictionary* ppb_var_dictionary_interface = NULL;
 static PPB_View* ppb_view_interface = NULL;
 static PPB_Graphics2D* ppb_graphics_2d_interface = NULL;
@@ -376,6 +378,7 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   ppb_messaging_interface =
       (PPB_Messaging*)(get_browser(PPB_MESSAGING_INTERFACE));
   ppb_var_interface = (PPB_Var*)(get_browser(PPB_VAR_INTERFACE));
+  ppb_var_array_interface = (PPB_VarArray*)(get_browser(PPB_VAR_ARRAY_INTERFACE));
   ppb_var_dictionary_interface = (PPB_VarDictionary*)(get_browser(PPB_VAR_DICTIONARY_INTERFACE));
 
   ppb_view_interface = (PPB_View*)(get_browser(PPB_VIEW_INTERFACE));
@@ -427,6 +430,15 @@ void Messaging_HandleMessage(PP_Instance instance, struct PP_Var message) {
     dx = ExtractInt(message, dx_name, 0);
     dy = ExtractInt(message, dy_name, 0);
   }
+
+  PP_Var response = ppb_var_dictionary_interface->Create();
+  PP_Var keys = ppb_var_dictionary_interface->GetKeys(message);
+  ppb_var_dictionary_interface->Set(response, dx_name, keys);
+  Release(keys);
+
+  ppb_messaging_interface->PostMessage(instance, response);
+  Release(response);
+
   Release(message);
 }
 

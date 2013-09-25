@@ -31,5 +31,6 @@ function handleMessage(message) {
   var newData = messageArray.join('<BR>');
   document.getElementById('outputString').innerHTML = newData;
   // Print event to console.
+  console.log("Got post message: " + JSON.stringify(message.data));
   console.log(message.data);
 }

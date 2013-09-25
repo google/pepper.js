@@ -181,7 +181,10 @@
   ]);
 
   var VarDictionary_Create = function(result) {
-    throw "VarDictionary_Create not implemented";
+    glue.structToMemoryVar({
+      type: ppapi.PP_VARTYPE_DICTIONARY,
+      value: resources.registerDictionary({})
+    }, result);
   };
 
   var VarDictionary_Get = function(result, dict, key) {
@@ -238,7 +241,26 @@
   };
 
   var VarDictionary_GetKeys = function(result, dict) {
-    throw "VarDictionary_Delete not implemented";
+    var d = undefined;
+    if (glue.getVarType(dict) === ppapi.PP_VARTYPE_DICTIONARY) {
+      d = resources.resolve(glue.getVarUID(dict), DICTIONARY_RESOURCE);
+    }
+    if (d === undefined) {
+      // Note: it is somewhat inconsistent to return "null" rather than
+      // "undefined" but this is what the spec says and what Chrome does.
+      glue.jsToMemoryVar(null, result);
+      return;
+    }
+
+    var wrapped = [];
+    for (var key in d.value) {
+      wrapped.push(glue.jsToStructVar(key));
+    }
+
+    glue.structToMemoryVar({
+      type: ppapi.PP_VARTYPE_ARRAY,
+      value: resources.registerArray(wrapped)
+    }, result);
   };
 
   registerInterface("PPB_VarDictionary;1.0", [
