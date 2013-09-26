@@ -10,6 +10,10 @@ RPC.prototype.emptyArray = function() {
   this.embed.postMessage(0);
 };
 
-RPC.prototype.emptyDictionary = function() {
+RPC.prototype.simpleArray = function() {
   this.embed.postMessage(1);
+};
+
+RPC.prototype.emptyDictionary = function() {
+  this.embed.postMessage(2);
 };

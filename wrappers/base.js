@@ -193,15 +193,43 @@
   };
 
   var VarArray_Set = function(array, index, value) {
-    throw "VarArray_Set not implemented";
+    if (glue.getVarType(array) !== ppapi.PP_VARTYPE_ARRAY) {
+      return 0;
+    }
+    var a = resources.resolve(glue.getVarUID(array), ARRAY_RESOURCE);
+    if (a === undefined) {
+      return 0;
+    }
+    if (index >= a.value.length) {
+      return 0;
+    }
+    glue.structRelease(a.value[index]);
+    a.value[index] = glue.memoryToStructVar(value);
+    glue.structAddRef(a.value[index]);
+    return 1;
   };
 
   var VarArray_GetLength = function(array) {
-    throw "VarArray_GetLength not implemented";
+    if (glue.getVarType(array) !== ppapi.PP_VARTYPE_ARRAY) {
+      return 0;
+    }
+    var a = resources.resolve(glue.getVarUID(array), ARRAY_RESOURCE);
+    if (a === undefined) {
+      return 0;
+    }
+    return a.value.length;
   };
 
   var VarArray_SetLength = function(array, length) {
-    throw "VarArray_SetLength not implemented";
+    if (glue.getVarType(array) !== ppapi.PP_VARTYPE_ARRAY) {
+      return 0;
+    }
+    var a = resources.resolve(glue.getVarUID(array), ARRAY_RESOURCE);
+    if (a === undefined) {
+      return 0;
+    }
+    a.setLength(length);
+    return 1;
   };
 
   registerInterface("PPB_VarArray;1.0", [

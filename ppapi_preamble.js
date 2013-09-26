@@ -118,6 +118,14 @@ ResourceManager.prototype.registerString = function(value, memory, len) {
 ResourceManager.prototype.registerArray = function(value) {
   return this.register(ARRAY_RESOURCE, {
       value: value,
+      setLength: function(length) {
+        while(this.value.length > length) {
+          glue.structRelease(this.value.pop());
+        }
+        while(this.value.length < length) {
+          this.value.push({type: ppapi.PP_VARTYPE_UNDEFINED, value: 0});
+        }
+      },
       destroy: function() {
         var wrapped = this.value;
         this.value = [];
@@ -649,7 +657,7 @@ glue.structToJSVar = function(e) {
   } else if (type == ppapi.PP_VARTYPE_BOOL) {
     return 0 != value;
   } else if (type == ppapi.PP_VARTYPE_INT32) {
-    return getValue(valptr, 'i32');
+    return value | 0;
   } else if (type == ppapi.PP_VARTYPE_DOUBLE) {
     return value;
   } else if (type == ppapi.PP_VARTYPE_STRING) {

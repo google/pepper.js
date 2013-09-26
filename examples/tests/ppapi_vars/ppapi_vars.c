@@ -45,6 +45,21 @@ void emptyArray(PP_Instance instance) {
   ppb_var->Release(result);
 }
 
+void simpleArray(PP_Instance instance) {
+  struct PP_Var value;
+  struct PP_Var result = ppb_var_array->Create();
+  ppb_var_array->SetLength(result, 6);
+  for (int i = 0; i < 4; i++) {
+    value = PP_MakeInt32((i + 1) * (i + 1));
+    ppb_var_array->Set(result, i, value);
+  }
+  value = PP_MakeInt32(ppb_var_array->GetLength(result));
+  ppb_var_array->Set(result, 5, value);
+  ppb_messaging->PostMessage(instance, result);
+  ppb_var->Release(result);
+}
+
+
 void emptyDictionary(PP_Instance instance) {
   struct PP_Var result = ppb_var_dictionary->Create();
   ppb_messaging->PostMessage(instance, result);

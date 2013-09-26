@@ -37,6 +37,14 @@
           rpc.emptyArray();
         });
 
+        tester.addAsyncTest('Simple array', function(status) {
+          expectPostmessage(plugin, status, function(data) {
+            status.assertEqual(JSON.stringify(data), JSON.stringify([1, 4, 9, 16, undefined, 6]));
+            status.pass();
+          });
+          rpc.simpleArray();
+        });
+
         tester.addAsyncTest('Empty dictionary', function(status) {
           expectPostmessage(plugin, status, function(data) {
             status.assertEqual(JSON.stringify(data),  JSON.stringify({}));
