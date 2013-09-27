@@ -72,6 +72,7 @@ void Messaging_HandleMessage(PP_Instance instance, struct PP_Var var_message) {
   if (var_message.type != PP_VARTYPE_STRING)
     return;
   std::string message = Module::Get()->VarToStr(var_message);
+  Module::Get()->ppb_var_interface()->Release(var_message);
   printf("--- Messaging_HandleMessage(%s)\n", message.c_str());
   // Look for the "loadUrl" message.  The expected string format looks like:
   //     loadUrl|<url>|<stream_as_file>

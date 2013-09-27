@@ -158,10 +158,16 @@ bool UrlLoadRequest::Load(bool as_file, std::string url) {
   if (!GetRequiredInterfaces(&error)) {
     return ReportFailure(error);
   }
+  PP_Var value = Module::StrToVar(url);
   PP_Bool set_url = request_interface_->SetProperty(
-      request_, PP_URLREQUESTPROPERTY_URL, Module::StrToVar(url));
+      request_, PP_URLREQUESTPROPERTY_URL, value);
+  Module::Get()->ppb_var_interface()->Release(value);
+
+  value = Module::StrToVar("GET");
   PP_Bool set_method = request_interface_->SetProperty(
-      request_, PP_URLREQUESTPROPERTY_METHOD, Module::StrToVar("GET"));
+      request_, PP_URLREQUESTPROPERTY_METHOD, value);
+  Module::Get()->ppb_var_interface()->Release(value);
+
   PP_Bool pp_as_file = as_file ? PP_TRUE : PP_FALSE;
   PP_Bool set_file = request_interface_->SetProperty(
       request_, PP_URLREQUESTPROPERTY_STREAMTOFILE, PP_MakeBool(pp_as_file));
@@ -274,6 +280,8 @@ void UrlLoadRequest::OpenCallback(int32_t pp_error) {
     return;
   }
   url_ = Module::VarToStr(url);  // Update url to be fully qualified.
+  Module::Get()->ppb_var_interface()->Release(url);
+
   PP_Var status_code =
       response_interface_->GetProperty(response_,
                                        PP_URLRESPONSEPROPERTY_STATUSCODE);

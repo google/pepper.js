@@ -827,7 +827,31 @@ function TestStatus(tester, name, async) {
     this.tester.rpc.log(this.name, toString(message), !this.running);
   }
 
+  this.getNumResources = function() {
+    if (window.resources) {
+      return resources.getNumResources();
+    } else {
+      return 0;
+    }
+  }
+
+  this.getResourceInfo = function() {
+    if (window.resources) {
+      return resources.getResourceTypeHistogram();
+    } else {
+      return {};
+    }
+  }
+
+  this.initial = this.getNumResources();
+
   this.pass = function() {
+    var current = this.getNumResources();
+    if (this.initial != current) {
+      this.fail('Resource leak detected: ' + current + ' != ' + this.initial + '  / ' + JSON.stringify(this.getResourceInfo()));
+      return;
+    }
+
     // TODO raise if not running.
     this.tester.rpc.pass(this.name, !this.running);
     this._done();
