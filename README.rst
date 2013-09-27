@@ -98,13 +98,13 @@ edit this file if it fails to guess the correct paths, or you want to use a
 version other than the one it guessed.
 
 There is a known issue where Emscripten will print the following warning when
-using the PNaCl toolchain:
+using the pepper_30 PNaCl toolchain:
 
 ::
 
     Warning: using an unexpected LLVM triple: armv7-none-linux-gnueabi, !== ,le32-unknown-nacl (are you using emcc for everything and not clang?)
 
-It can be ignored and will be fixed in future releases.
+It can be ignored, and is fixed in pepper_31 onwards.
 
 Clang
 -----

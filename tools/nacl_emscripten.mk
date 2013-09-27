@@ -16,7 +16,14 @@ EM_PATH:=$(abspath $(PEPPERJS_SRC_ROOT)/emscripten)
 #$(error $(EM_PATH))
 
 # Use the PNaCl toolchain instead of a vanilla version of LLVM.
+# The folder layout changed at version 31, but "less than" is annoying in
+# Makefiles and we don't support an SDK less than 30, anyways.
+SDK_VERSION=$(shell python $(NACL_SDK_ROOT)/tools/getos.py --sdk-version)
+ifeq ($(SDK_VERSION),30)
 export LLVM?=$(TC_PATH)/$(OSNAME)_x86_pnacl/newlib/bin
+else
+export LLVM?=$(TC_PATH)/$(OSNAME)_pnacl/bin
+endif
 
 #
 # Macros for TOOLS
