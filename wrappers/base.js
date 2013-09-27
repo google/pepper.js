@@ -189,7 +189,16 @@
   };
 
   var VarArray_Get = function(result, array, index) {
-    throw "VarArray_Get not implemented";
+    if (glue.getVarType(array) === ppapi.PP_VARTYPE_ARRAY) {
+      var a = resources.resolve(glue.getVarUID(array), ARRAY_RESOURCE);
+      if (a !== undefined && index < a.value.length) {
+        var e = a.value[index];
+        glue.structToMemoryVar(e, result);
+        glue.structAddRef(e);
+        return;
+      }
+    }
+    glue.jsToMemoryVar(undefined, result);
   };
 
   var VarArray_Set = function(array, index, value) {

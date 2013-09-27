@@ -46,15 +46,24 @@ void emptyArray(PP_Instance instance) {
 }
 
 void simpleArray(PP_Instance instance) {
+  int i;
   struct PP_Var value;
   struct PP_Var result = ppb_var_array->Create();
-  ppb_var_array->SetLength(result, 6);
-  for (int i = 0; i < 4; i++) {
+  ppb_var_array->SetLength(result, 8);
+  for (i = 0; i < 4; i++) {
     value = PP_MakeInt32((i + 1) * (i + 1));
     ppb_var_array->Set(result, i, value);
   }
-  value = PP_MakeInt32(ppb_var_array->GetLength(result));
+  value = ppb_var->VarFromUtf8("foo", 3);
+  ppb_var_array->Set(result, 4, value);
+  ppb_var->Release(value);
+
+  value = ppb_var_array->Get(result, 4);
   ppb_var_array->Set(result, 5, value);
+  ppb_var->Release(value);
+
+  value = PP_MakeInt32(ppb_var_array->GetLength(result));
+  ppb_var_array->Set(result, 7, value);
   ppb_messaging->PostMessage(instance, result);
   ppb_var->Release(result);
 }

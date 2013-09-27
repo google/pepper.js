@@ -39,7 +39,7 @@
 
         tester.addAsyncTest('Simple array', function(status) {
           expectPostmessage(plugin, status, function(data) {
-            status.assertEqual(JSON.stringify(data), JSON.stringify([1, 4, 9, 16, undefined, 6]));
+            status.assertEqual(JSON.stringify(data), JSON.stringify([1, 4, 9, 16, "foo", "foo", undefined, 8]));
             status.pass();
           });
           rpc.simpleArray();
