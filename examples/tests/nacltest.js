@@ -109,7 +109,7 @@ function createEmscriptenModule(name, tool, path, width, height) {
  * @param {number} height The height to create the plugin.
  * @param {Object} optional dictionary of args to send to DidCreateInstance
  */
-function createNaClModule(name, tool, path, width, height, args) {
+function createNaClModule(name, tool, config, path, width, height, args) {
   if (tool == 'emscripten') {
     return createEmscriptenModule(name, tool, path, width, height);
   }
@@ -138,7 +138,7 @@ function createNaClModule(name, tool, path, width, height, args) {
       mimetype = 'application/x-ppapi-release';
     else
       mimetype = 'application/x-ppapi-debug';
-  } else if (tool == 'pnacl') {
+  } else if (tool == 'pnacl' && config != 'Debug') {
     mimetype = 'application/x-pnacl';
   }
   moduleEl.setAttribute('type', mimetype);
@@ -164,7 +164,7 @@ function createNaClModule(name, tool, path, width, height, args) {
 
 function createTestModule(name, width, height) {
   args = getTestArguments({"tc": "emscripten", "config": "Debug"});
-  return createNaClModule(name, args["tc"], args["tc"] + "/" + args["config"], width, height);
+  return createNaClModule(name, args["tc"], args["config"], args["tc"] + "/" + args["config"], width, height);
 }
 // END MODIFICATION
 

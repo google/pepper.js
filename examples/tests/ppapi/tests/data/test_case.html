@@ -276,7 +276,7 @@ onload = function() {
   } else if (mode == "nacl_pnacl_debug" || tc == "pnacl" && config == "Debug") {
     obj = document.createElement("EMBED");
     obj.setAttribute("src", "../pnacl/Debug/ppapi_test.nmf");
-    obj.setAttribute("type", "application/x-pnacl");
+    obj.setAttribute("type", "application/x-nacl");
     obj.setAttribute("mode", "nacl_pnacl_debug");
   } else if (mode == "nacl_pnacl_debug" || tc == "pnacl" && config == "Release") {
     obj = document.createElement("EMBED");
