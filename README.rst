@@ -4,8 +4,8 @@ pepper.js
 
 pepper.js is a JavaScript library that enables the compilation of Pepper_
 plugins into JavaScript using Emscripten_.  This allows the simultaneous
-deployment of native code on the web both as a `Native Client`_ executable and
-as JavaScript.
+deployment of native code on the web both as a `Native Client`_ (NaCl)
+executable and as JavaScript.
 
 .. _Pepper: https://developers.google.com/native-client/pepperc/
 .. _Emscripten: https://github.com/kripken/emscripten
@@ -22,7 +22,7 @@ your hands dirty.  Bug reports, feature requests, and patches are welcome.
 Getting Started
 ---------------
 
-Clone the repo using git_.
+Clone this repo using git_.
 
 Install the `NaCl SDK`_.  Set the ``NACL_SDK_ROOT`` environment variable to be
 an *absolute* path that points to the desired ``pepper_*`` directory inside of
@@ -50,14 +50,14 @@ This will clone Emscripten.  Install Emscripten's dependencies on your system:
 * node.js_ 0.8 or above
 * Python_ 2.7
 * Java_
-* Optional: Clang_
+* Optional: `Clang and LLVM`_
 
 .. _git: http://git-scm.com/downloads
 .. _`NaCl SDK`: https://developers.google.com/native-client/sdk/download
 .. _node.js: http://nodejs.org/download/
 .. _Python: http://www.python.org/download/
 .. _Java: http://java.com/en/download/index.jsp
-.. _Clang: http://llvm.org/releases/download.html
+.. _`Clang and LLVM`: http://llvm.org/releases/download.html
 
 On Ubuntu, you can run the following commands to install the dependencies:
 
@@ -66,9 +66,9 @@ On Ubuntu, you can run the following commands to install the dependencies:
     sudo apt-get install nodejs
     sudo apt-get install python27
 
-Note, however, that Precise does not have a new enough version of node.js so you
-will need to build it from source.  If you get the following error while running
-Emscripten, your version of node.js is too old:
+Note, however, that Ubuntu Precise does not have a new enough version of node.js
+so you will need to build it from source.  If you get the following error while
+running Emscripten, your version of node.js is too old:
 
 ::
 
@@ -91,14 +91,14 @@ Building the Examples
     make TOOLCHAIN=pnacl CONFIG=Debug
     make TOOLCHAIN=pnacl CONFIG=Release
 
-When you run emscripten for the first time, it will build a few dependencies in
+When you run Emscripten for the first time, it will build a few dependencies in
 the background and the compilation may appear to hang.  Emscripten will also
 create a create a configuration file named ``~/.emscripten``.  You may need to
 edit this file if it fails to guess the correct paths, or you want to use a
 version other than the one it guessed.
 
 There is a known issue where Emscripten will print the following warning when
-using the pepper_30 PNaCl toolchain:
+using the pepper_30 Portable Native Client (PNaCl) toolchain:
 
 ::
 
@@ -113,18 +113,19 @@ Emscripten uses Clang to compile source code into bitcode.  This means Clang is
 normally a dependency of Emscripten.  The build system in the pepper.js repo is,
 however, configured to use the PNaCl toolchain instead of a standard version of
 Clang.  PNaCl is essentially a modified version of Clang.  This is done for two
-reasons.  First, it eliminates an install-time dependency.  Second, there is no
-standard binary distribution of Clang on Windows, but there is a Windows version
-of the PNaCl toolchain.  There appear to be a few issues with using the PNaCl
+reasons.  First, it eliminates an install-time dependency.  Second, Clang was
+historically not supported on Windows (but this is beginning to change).
+
+There appear to be a few issues with using the PNaCl
 toolchain in Emscripten, such as exception support, but they are being worked
 on.  If you want to use another version of Clang when compiling the examples,
 simply set the ``LLVM`` environment variable to point to it before invoking
 ``make``.  Similarly, if you want to use the PNaCl toolchain when using
 Emscripten in other situations, either set the ``LLVM`` environment variable or
-edit ``~/emscripten``.
+edit ``~/.emscripten``.
 
-If you want to use a version of Clang other than PNaCl, note that Emscripten
-doesn't appear to be entirely happy with Xcode's command line tools.
+If you want to use a version of Clang other than PNaCl on Mac OSX, note that
+Emscripten doesn't appear to be entirely happy with Xcode's command line tools.
 Downloading prebuilt binaries from LLVM's website or building them from source
 are the best options.
 
@@ -149,7 +150,8 @@ Developing with pepper.js
 To create an application that can target both Native Client and Emscripten, it
 is necessary to work within the constraints of both platforms.  To do this, an
 application must be written to use the Pepper Plugin API, must *not* use
-threads, and must *not* rely on mmaping or any sort of memory page protection.
+threads, and must *not* rely on memory mapping or any sort of memory page
+protection.
 
 To be compatible with Native Client, it is necessary to use the Pepper_ Plugin
 API to interact with the browser.  In the general case, Emscripten lets a
@@ -195,26 +197,72 @@ on Native Client by guarding the relevant code with ``#if
 defined(__native_client__) ... #endif``.  Emscripten-specific functionality can
 be conditioned on ``defined(__EMSCRIPTEN__)``.  This approach is generally not
 recommended, but there are situations where the benefits outweigh the additional
-complexity - such as performance improvements from mutlithreading or calling
+complexity - such as performance improvements from multithreading or calling
 directly to JavaScript rather than mediating through postMessage.
 
-Exceptions
-----------
+C++ Exceptions
+--------------
 
-The use of exceptions is currently discouraged for two reasons.  First,
+The use of C++ exceptions is currently discouraged for two reasons.  First,
 Emscripten disables exception handling by default for ``-O1`` and higher. This
 can be overridden by passing ``-s DISABLE_EXCEPTION_CATCHING=0`` to Emscripten,
 but doing so *may* or may not result in a noticeable performance penalty.
 Additional code will be generated at every call site an exception could
-propagate through.  Second, exceptions are currently not supported by PNaCl.
+propagate through.  Second, exceptions are `currently not supported` by PNaCl.
 
-Required Compiler Flags
------------------------
+.. _`currently not supported`: https://code.google.com/p/nativeclient/issues/detail?id=2798
+
+----------
+Deployment
+----------
+
+pepper.js lets a single Pepper plugin be deployed as both a Native Client
+executable and as JavaScript.  Choosing a single technology and sticking with it
+would make life simpler, but there are advantages and disadvantages to each
+technology.  Deploying different technologies in different circumstances let an
+application play to the strengths of each.
+
+Native Client generally provides better performance than JavaScript,
+particularly when threading is leveraged.  On the downside, Native Client
+executables are currently only supported by Chrome.  JavaScript has much more
+pervasive browser support.  It should be noted that although JavaScript "runs
+everywhere," performance can vary widely between browsers, even on the same
+hardware.  Web users also have a wide spectrum of CPU and GPU power.  If
+possible, it is highly suggested that applications be designed to scale across
+differing amounts of processing power, no matter which technology is being used.
+
+In terms of file size, it appears that Native Client and Emscripten produce
+executables of roughly the same size, once they are stripped/minimized and
+gzipped.  They are different versions of the same program, so it is unsurprising
+their compressed sizes are similar.
+
+Portable Native Client
+----------------------
+
+In addition to only running on Chrome, the original version of Native Client is
+further restricted to only run as a `Chrome Web App`_.  Native Client
+executables contain architecture-specific code, which makes them inappropriate
+for running on the open web.  There is, however, an architecture neutral version
+of Native Client called Portable Native Client.  Portable Native Client
+executables contain platform-neutral bitcode, making it better suited for the
+open web.  Starting in Chrome 31, PNaCl executables can be loaded in arbitrary
+web pages.  For applications running on the open web, PNaCl is required, but
+when deploying as a Chrome App, it may be advantageous to use NaCl.
+
+.. _`Chrome Web App`: http://developer.chrome.com/extensions/apps.html
+
+--------------------------
+Build System Configuration
+--------------------------
+
+Note: configuring the build system to use pepper.js is currently a little
+complicated.  The instructions will likely change in future versions.  Expect
+that you may need to update your build when pulling a new version of pepper.js.
 
 Building an example with ``V=1 TOOLCHAIN=emscripten`` will show the flags being
-passed to Emscripten.  If you want to set up your own build system, there’s a
-few flags you must pass when linking in order for your application to use
-pepper.js.
+passed to Emscripten.  If you want to set up your *own* build system, there's a
+few flags you must pass to the linker to use pepper.js.  Here's a flag-by-flag
+breakdown of what's going on when the examples are built.
 
 ::
 
@@ -252,12 +300,25 @@ File IO API, you will also need to include ``third_party/idb.filesystem.js``.
 This situation will hopefully be changed in the future to minimize the number of
 command line flags required.
 
-The Closure compiler will mangle built-in names that it does not recognize.
-pepper.js uses a number of relatively new APIs that Closure does not recognize,
-yet.  To prevent these APIs from being mangled, they can be declared "extern" in
-a JavaScript file and passed to Closure.  Emcsripten calls Closure internally,
-and extern declarations must be tunneled to Closure through an environment
-variable.
+::
+
+    --closure 1
+
+Emscripten has a built-in option to use the `Closure Compiler` to minimize the
+JavaScript it generates.  This option should only be used for release builds
+because minification obfuscates the generated code, similar to optimization
+passes in C compilers. The minimization process renames variables and methods.
+To maintain correctness, the Closure Compiler needs to avoid renaming variables
+and methods that are built in to the browser.  If it renames built-in names, the
+resulting program breaks.  pepper.js uses a number of relatively new APIs that
+Closure does not know about, yet.  Closure will mangle these names unless it is
+explicitly told to preserve them.  To prevent these APIs from being mangled,
+they can be declared "extern" in a JavaScript file and passed to Closure.
+Emcsripten calls Closure internally, and extern declarations must be tunneled to
+Closure through an environment variable rather than being passed on the command
+line.
+
+.. _`Closure Compiler`: https://developers.google.com/closure/compiler/
 
 ::
 
@@ -278,8 +339,6 @@ simply haven’t been implemented, yet:
 * ``PPB_Gamepad``
 * ``PPB_MouseCursor``
 * ``PPB_TouchInputEvent``
-* ``PPB_VarArray``
-* ``PPB_VarDictionary``
 * Networking-related interfaces
     * ``PPB_HostResolver``
     * ``PPB_NetAddress``
@@ -315,8 +374,8 @@ To find unimplemented functions:
     git grep "not implemented"
 
 If you need a particular interface or function for your application, do not
-hesitate to file a feature request.  Test cases and patches are welcome, if
-you're particularly interested in the feature.
+hesitate to file a feature request on the bug tracker.  Test cases and patches
+are welcome, if you're particularly interested in the feature.
 
 Implementation Errata
 ---------------------
@@ -391,11 +450,11 @@ between Debug and Release versions, and possibly even between different Release
 versions.
 
 Chrome will smoothly scale the image composited into the page when using
-pepper.js, all other browsers will do nearest-neighbor scaling.  Nexes and pexes
-will also do nearest-neighbor scaling.  This means low res or pixel style
-graphics will be slightly blurred on Chrome with pepper.js, unless the back
-buffer is the same size as the view port and the scaling factor for high DPI
-displays is accounted for.
+pepper.js, all other browsers will do nearest-neighbor scaling.  Native Client
+executables will do nearest-neighbor scaling in Chrome.  This means low res or
+pixel style graphics will be slightly blurred on Chrome with pepper.js, unless
+the back buffer is the same size as the view port and the scaling factor for
+high DPI displays is accounted for.
 
 Input events are a little fiddly due to inconsistencies between browsers. For
 example, the delta for scroll wheel events is scaled differently in different
@@ -406,46 +465,6 @@ Mobile browsers have not been tested.
 
 The "Probe Interfaces" example should help discover what interfaces are
 available on a particular platform.
-
-----------
-Deployment
-----------
-
-pepper.js lets a single Pepper plugin be deployed as both a Native Client
-executable and as JavaScript.  Choosing a single technology and sticking with it
-would make life simpler, but there are advantages and disadvantages to each
-technology.  Deploying different technologies in different circumstances let an
-application play to the strengths of each.
-
-Native Client generally provides better performance than JavaScript,
-particularly when threading is leveraged.  On the downside, currently Native
-Client executables are only supported by Chrome.  JavaScript has much more
-pervasive browser support.  It should be noted that although JavaScript "runs
-everywhere," performance can vary widely between browsers, sometimes an order of
-magnitude or more.  It is highly suggested that applications be designed to
-scale across differing amounts of processing power, if possible.
-
-In terms of file size, it appears that Native Client and Emscripten produce
-executables of roughly the same size, once they are stripped/minimized and
-gzipped.  They are different versions of the same program, so it is unsurprising
-their compressed sizes are similar.
-
-Portable Native Client
-----------------------
-
-In addition to only running on Chrome, Native Client is further restricted to
-only run as a `Chrome Web App`_.  Native Client executables contain
-architecture-specific code, which makes them inappropriate for running on the
-open web.  There is, however, an architecture neutral version of Native Client
-called Portable Native Client.  Portable Native Client executables contain
-platform-neutral bitcode, making it better suited for the open web.  Starting in
-Chrome 31, PNaCl executables can be loaded in arbitrary web pages.  Initial load
-times are longer than subsequent loads because bitcode must be translated into
-architecture-specific code before it is executed for the first time.  For
-applications running on the open web, PNaCl is required, but when deploying as a
-Chrome App, it may be advantageous to use NaCl.
-
-.. _`Chrome Web App`: http://developer.chrome.com/extensions/apps.html
 
 ------------
 Getting Help
