@@ -92,16 +92,18 @@ createLinks("Tests", tests, table);
 <h3>Browser Support</h3>
 <h4>Chrome</h4>
 <ul>
-  <li>To run the NaCl examples, either enable NaCl in about:flags or pass --enable-nacl to Chrome on the command line.</li>
-  <li>This is currently the only platform that supports the NaCl examples.</li>
+  <li>Chrome is currently the only platform that supports the NaCl and
+  PNaCl examples.</li>
   <li>PNaCl requires Chrome 31 and above.</li>
-  <li>Note that "PNaCl Debug" examples are actually NaCl modules
+  <li>To run the non-PNaCl NaCl examples, either enable NaCl in
+  about:flags or pass --enable-nacl to Chrome on the command line.</li>
+  <li>Note that "PNaCl Debug" examples are actually plain-old NaCl modules
   compiled using the PNaCl toolchain - no translation is being done in
   the browser.  Only "PNaCl Release" translates in the browser.</li>
 </ul>
 <h4>Firefox</h4>
 <ul>
-  <li>Firefox <a href="http://nightly.mozilla.org/">nightly</a> is required.  The Web Audio API, etc, are only starting to be supported.</li>
+  <li>Firefox <a href="http://nightly.mozilla.org/">25 or later</a> is required.  The Web Audio API, etc, are only starting to be supported.</li>
   <li>Switching to fullscreen will unlock the mouse in Firefox.  Locking the mouse outside of fullscreen is only supported in nightly.</li>
   <li>Scaling 3D to fullscreen appears to be slow. Unscaled 3D seems to be fine.</li>
 </ul>
@@ -110,7 +112,6 @@ createLinks("Tests", tests, table);
 <ul>
   <li>WebGL must be <a href="https://discussions.apple.com/thread/3300585">manually enabled</a> on Safari.</li>
   <li>Mouse lock is not supported in Safari.</li>
-  <li>Voronoi appears to be <i>brutally</i> slow on Safari.</li>
 </ul>
 
 <h4>Internet Explorer</h4>

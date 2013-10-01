@@ -208,7 +208,7 @@ Emscripten disables exception handling by default for ``-O1`` and higher. This
 can be overridden by passing ``-s DISABLE_EXCEPTION_CATCHING=0`` to Emscripten,
 but doing so *may* or may not result in a noticeable performance penalty.
 Additional code will be generated at every call site an exception could
-propagate through.  Second, exceptions are `currently not supported` by PNaCl.
+propagate through.  Second, exceptions are `currently not supported`_ by PNaCl.
 
 .. _`currently not supported`: https://code.google.com/p/nativeclient/issues/detail?id=2798
 
