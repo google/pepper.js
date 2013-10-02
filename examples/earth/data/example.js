@@ -31,10 +31,14 @@ function attachListeners() {
       common.naclModule.postMessage('run benchmark');
       common.updateStatus('BENCHMARKING... (please wait)');
     });
+  // Disable controls for threading if threading is not supported.
+  var disabled = document.location.search.search("emscripten") != -1;
   var threads = [0, 1, 2, 4, 6, 8, 12, 16, 24, 32];
   for (var i = 0; i < threads.length; i++) {
-    document.getElementById('radio'+i).addEventListener('click',
-        postThreadFunc(threads[i]));
+    var e = document.getElementById('radio' + i);
+    // Disable controls for threading if threading is not supported.
+    e.disabled = disabled;
+    e.addEventListener('click', postThreadFunc(threads[i]));
   }
   document.getElementById('zoomRange').addEventListener('change',
     function() {

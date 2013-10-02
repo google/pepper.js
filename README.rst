@@ -228,8 +228,8 @@ executables are currently only supported by Chrome.  JavaScript has much more
 pervasive browser support.  It should be noted that although JavaScript "runs
 everywhere," performance can vary widely between browsers, even on the same
 hardware.  Web users also have a wide spectrum of CPU and GPU power.  If
-possible, it is highly suggested that applications be designed to scale across
-differing amounts of processing power, no matter which technology is being used.
+possible, design your applications to scale across differing amounts of
+processing power, no matter which technology is being used.
 
 In terms of file size, it appears that Native Client and Emscripten produce
 executables of roughly the same size, once they are stripped/minimized and
@@ -397,7 +397,7 @@ In NaCl, ``PPB_View`` specifies coordinates in terms of device independent
 pixels (the resolution of your screen, divided by a constant factor for high DPI
 displays).  Most DOM elements work in terms of CSS pixels, however, which are
 affected by zooming in or out on a page and other forms of full-page scaling.
-If effect, NaCl sees the rectangle it occupies on the screen grow and shrink
+In effect, NaCl sees the rectangle it occupies on the screen grow and shrink
 when the page is scaled.  NaCl can transform from device independent pixels to
 CSS pixels by using the scaling factor returned from ``GetCSSScale``.  pepper.js
 always works in terms of CSS pixels because JavaScript does not appear to expose

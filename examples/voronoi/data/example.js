@@ -63,6 +63,12 @@ function moduleDidLoad() {
       common.naclModule.postMessage("threads: 32");
     }, false);
 
+  var buttons = document.getElementsByName("thread_count");
+  var disabled = document.location.search.search("emscripten") != -1;
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].disabled = disabled;
+  }
+
   document.getElementById("point_range").addEventListener("change",
     function() {
       var value = document.getElementById("point_range").value;
