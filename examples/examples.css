@@ -13,3 +13,7 @@ body {
 
 .unselected_item {
 }
+
+.disabled_item {
+  color: #a0a0a0;
+}

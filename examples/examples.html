@@ -5,7 +5,7 @@
 </head>
 <body style="background-color: #fafafa;">
 <h2>pepper.js Examples</h2>
-<div>
+<div style="width: 1000px">
 <div id="menu" style="float: left; display: block; width: 150px; margin-right: 10px;">
   <a href="https://github.com/google/pepper.js">Try it!</a>
   | <a href="#" onclick="show('help.html'); return false;">Help?</a>
@@ -53,21 +53,30 @@ var sectionTitle = function(text) {
   return div;
 };
 
-var menuItem = function(text, callback) {
-  var a = document.createElement("a");
-  a.href = "#";
-  a.onclick = callback;
-  a.appendChild(document.createTextNode(text));
-  var div = document.createElement("div");
-  div.appendChild(a);
-  return div;
+var menuItem = function(text, callback, disable) {
+  if (disable) {
+    var div = document.createElement("div");
+    div.className = "disabled_item";
+    div.appendChild(document.createTextNode(text));
+    return div;
+  } else {
+    var a = document.createElement("a");
+    a.href = "#";
+    a.onclick = callback;
+    a.appendChild(document.createTextNode(text));
+    var div = document.createElement("div");
+    div.className = "unselected_item";
+    div.appendChild(a);
+    return div;
+  }
 };
 
+var isChrome = window.chrome !== undefined;
   
 var toolchains = [
-  {"name": "Emscripten", "tc": "emscripten"},
-  {"name": "PNaCl", "tc": "pnacl"},
-  {"name": "NaCl", "tc": "newlib"},
+  {"name": "Emscripten", "tc": "emscripten", enabled: true},
+  {"name": "PNaCl", "tc": "pnacl", enabled: isChrome},
+  {"name": "NaCl", "tc": "newlib", enabled: isChrome},
 ];
 
 var createToolchains = function(parent) {
@@ -84,7 +93,7 @@ var createToolchains = function(parent) {
         return false;
     };
     })(toolchain.tc);
-    var item = menuItem(toolchain.name, callback);
+    var item = menuItem(toolchain.name, callback, !toolchain.enabled);
     toolchain_map[toolchain.tc] = item;
     menu.appendChild(item);
   }
