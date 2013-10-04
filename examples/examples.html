@@ -1,39 +1,38 @@
 <html>
 <head>
   <title>pepper.js Examples</title>
+  <link rel="stylesheet" type="text/css" href="examples.css" />
 </head>
-<body style="font-family: Verdana, Geneva, sans-serif; background-color: gray">
-<div style="background-color: white; padding: 20px; display: inline-block">
+<body style="background-color: #fafafa;">
 <h2>pepper.js Examples</h2>
-<table id="examples" cellspacing="0">
-  <tr>
-    <td width=200></td>
-    <td colspan=2 width=100><b>Emscripten</b></td>
-    <td colspan=2 width=100><b>NaCl</b></td>
-    <td colspan=2 width=100><b>PNaCl</b></td>
-  </tr>
-  <tr>
-    <td width=200></td>
-    <td width=60><b>Dbg</b></td>
-    <td width=60><b>Opt</b></td>
-    <td width=60><b>Dbg</b></td>
-    <td width=60><b>Opt</b></td>
-    <td width=60><b>Dbg</b></td>
-    <td width=60><b>Opt</b></td>
-  </tr>
-</table>
+<div>
+<div id="menu" style="float: left; display: block; width: 150px; margin-right: 10px;">
+  <a href="https://github.com/google/pepper.js">Try it!</a>
+  | <a href="#" onclick="show('help.html'); return false;">Help?</a>
+</div>
+<div style="width: 100%; margin: 0 0 0 160px;">
+<iframe id="content" src="help.html" width="840px" height="100%"
+  style="padding: 0; border: 0; margin: 0; background-color: white;"
+  allowfullscreen="true"></iframe>
+</div>
+</div>
 <script>
+var show = function(url) {
+  document.getElementById("content").src = url;
+  return false;
+};
+
 var examples = [
-  {"name": "Hello World", "url": "hello_world/data/hello_world.html"},
-  {"name": "GetURL", "url": "geturl/data/geturl.html"},
-  {"name": "Pi Generator", "url": "pi_generator/data/pi_generator.html"},
-  {"name": "Hello World GLES", "url": "hello_world_gles/data/hello_world_gles.html"},
-  {"name": "Input Events", "url": "input_events/data/input_events.html"},
-  {"name": "Pointer Lock", "url": "mouselock/data/mouselock.html"},
-  {"name": "Sine Synth", "url": "sine_synth/data/sine_synth.html"},
-  {"name": "Voronoi", "url": "voronoi/data/voronoi.html"},
   {"name": "Earth", "url": "earth/data/earth.html"},
+  {"name": "Voronoi", "url": "voronoi/data/voronoi.html"},
+  {"name": "OpenGL ES", "url": "hello_world_gles/data/hello_world_gles.html"},
+  {"name": "Pi Generator", "url": "pi_generator/data/pi_generator.html"},
+  {"name": "Sine Synth", "url": "sine_synth/data/sine_synth.html"},
   {"name": "File IO", "url": "file_io/data/file_io.html"},
+  {"name": "GetURL", "url": "geturl/data/geturl.html"},
+  {"name": "Pointer Lock", "url": "mouselock/data/mouselock.html"},
+  {"name": "Input Events", "url": "input_events/data/input_events.html"},
+  {"name": "Hello World", "url": "hello_world/data/hello_world.html"},
 ];
 
 var tests = [
@@ -45,87 +44,152 @@ var tests = [
   {"name": "Probe Interfaces", "url": "probe_interfaces/data/probe_interfaces.html"},
 ];
 
-// Generate a table of examples.
-var createLinks = function(title, examples, table) {
-  var configs = ["Debug", "Release"];
-  var toolchains = [
-    {"name": "Emscripten", "tc": "emscripten"},
-    {"name": "NaCl", "tc": "newlib"},
-    {"name": "PNaCl", "tc": "pnacl"},
-  ];
+var sectionTitle = function(text) {
+  var b = document.createElement("b");
+  b.appendChild(document.createTextNode(text));
+  var div = document.createElement("div");
+  div.className = "section_title";
+  div.appendChild(b);
+  return div;
+};
 
-  var title_text = document.createElement("b");
-  title_text.appendChild(document.createTextNode(title));
-  var row = table.insertRow(-1).insertCell(-1).appendChild(title_text);
+var menuItem = function(text, callback) {
+  var a = document.createElement("a");
+  a.href = "#";
+  a.onclick = callback;
+  a.appendChild(document.createTextNode(text));
+  var div = document.createElement("div");
+  div.appendChild(a);
+  return div;
+};
 
-  var colors = ["#fff9f9", "#f9fff9", "#f9f9ff"];
+  
+var toolchains = [
+  {"name": "Emscripten", "tc": "emscripten"},
+  {"name": "PNaCl", "tc": "pnacl"},
+  {"name": "NaCl", "tc": "newlib"},
+];
 
-  for (var i in examples) {
-    var example = examples[i];
-    var row = table.insertRow(-1);
-    var addCell = function(contents) {
-      var j = row.childElementCount;
-      var cell = row.insertCell(-1);
-      if (j > 0) {
-        cell.style.backgroundColor = colors[(j-1)>>1];
-      }
-      cell.appendChild(contents);
+var createToolchains = function(parent) {
+  var menu = document.createElement("div");
+  menu.style.marginBottom = "10px";
+  parent.appendChild(menu);
+
+  menu.appendChild(sectionTitle("Toolchain"));
+  for (var i = 0; i < toolchains.length; i++) {
+    var toolchain = toolchains[i];
+    var callback = (function(tc) {
+      return function() {
+        setToolchain(tc);
+        return false;
     };
-    addCell(document.createTextNode(example.name));
-    for (var t in toolchains) {
-      for (var c in configs) {
-        var a = document.createElement("a");
-        a.href = example.url + "?tc=" + toolchains[t].tc + "&config=" + configs[c];
-        a.appendChild(document.createTextNode("Run"));
-        addCell(a);
-      }
+    })(toolchain.tc);
+    var item = menuItem(toolchain.name, callback);
+    toolchain_map[toolchain.tc] = item;
+    menu.appendChild(item);
+  }
+};
+
+  
+var configs = [
+  "Release",
+  "Debug",
+];
+
+var createConfigs = function(parent) {
+  var menu = document.createElement("div");
+  menu.style.marginBottom = "10px";
+  parent.appendChild(menu);
+
+  menu.appendChild(sectionTitle("Config"));
+  for (var i = 0; i < configs.length; i++) {
+    var config = configs[i];
+    var callback = (function(config) {
+      return function() {
+        setConfig(config);
+        return false;
+    };
+    })(config);
+    var item = menuItem(config, callback);
+    config_map[config] = item;
+    menu.appendChild(item);
+  }
+};
+
+var state = {
+  example: examples[0].url,
+  tc: toolchains[0].tc,
+  config: configs[0]
+};
+
+var toolchain_map = {};
+var config_map = {};
+var example_map = {};
+
+var loadExample = function() {
+  show(state.example + "?tc=" + state.tc + "&config=" + state.config);
+};
+
+var setSelected = function(element, selected) {
+  if (element) {
+    if (selected) {
+      element.className = "selected_item";
+    } else {
+      element.className = "unselected_item";
     }
   }
 };
 
-var table = document.getElementById("examples");
-createLinks("Examples", examples, table);
-createLinks("Tests", tests, table);
+var setToolchain = function(tc) {
+  setSelected(toolchain_map[state.tc], false);
+  state.tc = tc;
+  setSelected(toolchain_map[state.tc], true);
+  loadExample();
+};
+
+var setConfig = function(config) {
+  setSelected(config_map[state.config], false);
+  state.config = config;
+  setSelected(config_map[state.config], true);
+  loadExample();
+};
+
+var setExample = function(example) {
+  setSelected(example_map[state.example], false);
+  state.example = example;
+  setSelected(example_map[state.example], true);
+  loadExample();
+};
+
+
+// Generate a table of examples.
+var createLinks = function(title, examples, parent) {
+  var menu = document.createElement("div");
+  parent.appendChild(menu);
+  menu.appendChild(sectionTitle(title));
+  for (var i = 0; i < examples.length; i++) {
+    var example = examples[i];
+    var callback = (function(name) {
+      return function() {
+        setExample(name);
+        return false;
+    };
+    })(example.url);
+    var item = menuItem(example.name, callback)
+    example_map[example.url] = item;
+    menu.appendChild(item);
+  }
+};
+
+var menu = document.getElementById("menu");
+createToolchains(menu);
+createConfigs(menu);
+createLinks("Example", examples.concat(tests), menu);
+
+setSelected(toolchain_map[state.tc], true);
+setSelected(config_map[state.config], true);
+setSelected(example_map[state.example], true);
 
 </script>
-<div style="width: 800px">
-<h3>Browser Support</h3>
-<h4>Chrome</h4>
-<ul>
-  <li>Chrome is currently the only platform that supports the NaCl and
-  PNaCl examples.</li>
-  <li>PNaCl requires Chrome 31 and above.</li>
-  <li>To run the non-PNaCl NaCl examples, either enable NaCl in
-  about:flags or pass --enable-nacl to Chrome on the command line.</li>
-  <li>Note that "PNaCl Debug" examples are actually plain-old NaCl modules
-  compiled using the PNaCl toolchain - no translation is being done in
-  the browser.  Only "PNaCl Release" translates in the browser.</li>
-</ul>
-<h4>Firefox</h4>
-<ul>
-  <li>Firefox <a href="http://nightly.mozilla.org/">25 or later</a> is required.  The Web Audio API, etc, are only starting to be supported.</li>
-  <li>Switching to fullscreen will unlock the mouse in Firefox.  Locking the mouse outside of fullscreen is only supported in nightly.</li>
-  <li>Scaling 3D to fullscreen appears to be slow. Unscaled 3D seems to be fine.</li>
-</ul>
-
-<h4>Safari</h4>
-<ul>
-  <li>WebGL must be <a href="https://discussions.apple.com/thread/3300585">manually enabled</a> on Safari.</li>
-  <li>Mouse lock is not supported in Safari.</li>
-</ul>
-
-<h4>Internet Explorer</h4>
-<ul>
-  <li>IE10 is partially supported - Graphics_3D, Audio, Fullscreen, and MouseLock APIs cannot be implemented.</li>
-  <li>IE9 does not support typed arrays, which means that it cannot run code generated by Emscripten's asm.js backend.  It may be possible to use Emscripten's non-typed array code generation mode, but this has not been investigated (and will be slow).</li>
-</ul>
-
-<h4>Mobile</h4>
-<ul>
-  <li>Not yet tested.</li>
-</ul>
-
-</div>
-</div>
 </body>
 </html>

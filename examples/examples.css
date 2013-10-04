@@ -1,0 +1,15 @@
+body {
+  font-family: Verdana, Geneva, sans-serif;
+  background-color: white;
+}
+
+.section_title {
+  margin: 15px 0 5px 0;
+}
+
+.selected_item {
+  background: #e0e0ff;
+}
+
+.unselected_item {
+}
