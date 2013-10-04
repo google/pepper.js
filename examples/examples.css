@@ -17,3 +17,9 @@ body {
 .disabled_item {
   color: #a0a0a0;
 }
+
+div.options {
+  margin: 10px 0 10px 0;
+  font-size: 70%;
+  color: #505050;
+}

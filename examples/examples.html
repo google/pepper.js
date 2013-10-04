@@ -6,10 +6,18 @@
 <body style="background-color: #fafafa;">
 <h2>pepper.js Examples</h2>
 <div style="width: 1000px">
-<div id="menu" style="float: left; display: block; width: 150px; margin-right: 10px;">
+
+<div id="sidebar" style="float: left; display: block; width: 150px; margin-right: 10px;">
   <a href="https://github.com/google/pepper.js">Try it!</a>
   | <a href="#" onclick="show('help.html'); return false;">Help?</a>
+<div id="menu">
 </div>
+<div class="options">
+<input type="checkbox" id="dev_mode" onchange="buildMenu()"/>
+<label for="dev_mode">Developer Mode</label>
+</div>
+</div>
+
 <div style="width: 100%; margin: 0 0 0 160px;">
 <iframe id="content" src="help.html" width="840px" height="100%"
   style="padding: 0; border: 0; margin: 0; background-color: white;"
@@ -79,7 +87,7 @@ var toolchains = [
   {"name": "NaCl", "tc": "newlib", enabled: isChrome},
 ];
 
-var createToolchains = function(parent) {
+var createToolchains = function(toolchains, parent) {
   var menu = document.createElement("div");
   menu.style.marginBottom = "10px";
   parent.appendChild(menu);
@@ -125,12 +133,7 @@ var createConfigs = function(parent) {
   }
 };
 
-var state = {
-  example: examples[0].url,
-  tc: toolchains[0].tc,
-  config: configs[0]
-};
-
+var state = {};
 var toolchain_map = {};
 var config_map = {};
 var example_map = {};
@@ -190,15 +193,45 @@ var createLinks = function(title, examples, parent) {
   }
 };
 
-var menu = document.getElementById("menu");
-createToolchains(menu);
-createConfigs(menu);
-createLinks("Example", examples.concat(tests), menu);
+var buildMenu = function() {
+  // Reset the global state.
+  state = {
+    example: examples[0].url,
+    tc: toolchains[0].tc,
+    config: configs[0]
+  };
 
-setSelected(toolchain_map[state.tc], true);
-setSelected(config_map[state.config], true);
-setSelected(example_map[state.example], true);
+  toolchain_map = {};
+  config_map = {};
+  example_map = {};
 
+  // Clear the DOM.
+  var menu = document.getElementById("menu");
+  while (menu.hasChildNodes()) {
+    menu.removeChild(menu.lastChild);
+  }
+
+  var dev_mode = document.getElementById("dev_mode").checked;
+
+  var all_toolchains = toolchains;
+  var all_examples = examples.concat(tests);
+  if (!dev_mode) {
+    all_toolchains = all_toolchains.slice(0, -1);
+    all_examples = all_examples.slice(0, -7);
+  }
+
+  createToolchains(all_toolchains, menu);
+  if (dev_mode) {
+    createConfigs(menu);
+  }
+  createLinks("Example", all_examples, menu);
+
+  setSelected(toolchain_map[state.tc], true);
+  setSelected(config_map[state.config], true);
+  setSelected(example_map[state.example], true);
+};
+
+buildMenu();
 </script>
 </body>
 </html>
