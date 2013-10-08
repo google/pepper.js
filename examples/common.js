@@ -158,6 +158,13 @@ var common = (function () {
     } else if (tool == 'pnacl') {
       // Note: the SDK actually produces .nexe files is Debug mode, so the tool is set to 'nacl'.
       mimetype = 'application/x-pnacl';
+      if(navigator.mimeTypes[mimetype] === undefined) {
+        updateStatus('PNaCl requires Chrome 31 or newer.');
+      }
+    } else {
+      if(navigator.mimeTypes[mimetype] === undefined) {
+        updateStatus('NaCl requires Chrome.');
+      }
     }
     moduleEl.setAttribute('type', mimetype);
 

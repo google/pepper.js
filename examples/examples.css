@@ -23,3 +23,11 @@ div.options {
   font-size: 70%;
   color: #505050;
 }
+
+span.ok {
+  color: #00B000;
+}
+
+span.error {
+  color: #B00000;
+}

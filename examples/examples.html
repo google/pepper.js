@@ -2,6 +2,7 @@
 <head>
   <title>pepper.js Examples</title>
   <link rel="stylesheet" type="text/css" href="examples.css" />
+  <script type="text/javascript" src="hasnacl.js"></script>
 </head>
 <body style="background-color: #fafafa;">
 <h2>pepper.js Examples</h2>
@@ -9,7 +10,7 @@
 
 <div id="sidebar" style="float: left; display: block; width: 150px; margin-right: 10px;">
   <a href="https://github.com/google/pepper.js">Try it!</a>
-  | <a href="#" onclick="show('help.html'); return false;">Help?</a>
+  | <a href="help.html">Help?</a>
 <div id="menu">
 </div>
 <div class="options">
@@ -19,7 +20,7 @@
 </div>
 
 <div style="width: 100%; margin: 0 0 0 160px;">
-<iframe id="content" src="help.html" width="840px" height="100%"
+<iframe id="content" width="840px" height="100%"
   style="padding: 0; border: 0; margin: 0; background-color: white;"
   allowfullscreen="true"></iframe>
 </div>
@@ -79,12 +80,10 @@ var menuItem = function(text, callback, disable) {
   }
 };
 
-var isChrome = window.chrome !== undefined;
-  
 var toolchains = [
-  {"name": "Emscripten", "tc": "emscripten", enabled: true},
-  {"name": "PNaCl", "tc": "pnacl", enabled: isChrome},
-  {"name": "NaCl", "tc": "newlib", enabled: isChrome},
+  {"name": "Emscripten", "tc": "emscripten", enabled: nacl.hasEmscripten()},
+  {"name": "PNaCl", "tc": "pnacl", enabled: nacl.hasPNaCl()},
+  {"name": "NaCl", "tc": "newlib", enabled: nacl.hasNaCl()},
 ];
 
 var createToolchains = function(toolchains, parent) {
@@ -229,6 +228,7 @@ var buildMenu = function() {
   setSelected(toolchain_map[state.tc], true);
   setSelected(config_map[state.config], true);
   setSelected(example_map[state.example], true);
+  loadExample();
 };
 
 buildMenu();

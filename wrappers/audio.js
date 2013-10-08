@@ -173,6 +173,8 @@
     Audio_GetCurrentConfig,
     Audio_StartPlayback,
     Audio_StopPlayback,
-  ]);
+  ], function() {
+    return !!(window["AudioContext"] || window["webkitAudioContext"]);
+  });
 
 })();
