@@ -19,14 +19,19 @@ found in the LICENSE file.
   data-tools="emscripten newlib pnacl" data-configs="Debug Release" data-path="../{tc}/{config}">
   <h2>Voronoi</h2>
   <p><b>Status:</b> <span id="statusField">no status</span></p>
+  <!-- The NaCl plugin will be embedded inside the element with id "listener".
+      See common.js.-->
+  <div id="listener"></div>
   <div>
-    This demo renders the Voronoi diagram for a moving set of points using a
-    brute force technique.
-    <br />
     Number of points:
     <input type="range" id="point_range"
         min="1" max="1024" step="1" value="256" />
     <label id="point_count" >256 points</label>
+    <br>
+    <input type="checkbox" id="draw_points" checked="checked" />
+    <label for="draw_points">Draw Points</label>
+    <input type="checkbox" id="draw_interiors" checked="checked" />
+    <label for="draw_interiors">Draw Interiors</label>
     <br />
     Number of threads:
     <input type="radio" name="thread_count" id="one" value="1"
@@ -48,16 +53,13 @@ found in the LICENSE file.
     <label for="twentyfour">24</label>
     <input type="radio" name="thread_count" id="thirtytwo" value="32" />
     <label for="thirtytwo">32</label>
-    <br />
-    <input type="checkbox" id="draw_points" checked="checked" />
-    <label for="draw_points">Draw Points</label>
-    <input type="checkbox" id="draw_interiors" checked="checked" />
-    <label for="draw_interiors">Draw Interiors</label>
+    <br>
     <input type="submit" id="benchmark" value="Run Benchmark"/>
     <label id="result" name="result"> </label>
   </div>
-  <!-- The NaCl plugin will be embedded inside the element with id "listener".
-      See common.js.-->
-  <div id="listener"></div>
+  <div style="margin-top: 20px;">
+    This demo renders the Voronoi diagram for a moving set of points using a
+    brute force technique.
+  </div>
 </body>
 </html>

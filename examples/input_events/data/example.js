@@ -18,9 +18,9 @@ function attachListeners() {
 // Called by the common.js module.
 function handleMessage(message) {
   // Show last |kMaxArraySize| events in html.
-  messageArray.push(message.data);
+  messageArray.unshift(message.data);
   if (messageArray.length > kMaxArraySize) {
-    messageArray.shift();
+    messageArray.pop();
   }
   var newData = messageArray.join('<BR>');
   document.getElementById('eventString').innerHTML = newData;

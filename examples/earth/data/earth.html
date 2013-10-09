@@ -18,18 +18,10 @@ found in the LICENSE file.
 <body data-name="earth" data-width="480" data-height="480" data-tools="emscripten newlib pnacl" data-configs="Debug Release" data-path="../{tc}/{config}">
   <h2>Earth</h2>
   <p><b>Status:</b> <span id="statusField">no status</span></p>
+  <!-- The NaCl plugin will be embedded inside the element with id "listener".
+      See common.js.-->
+  <div id="listener"></div>
   <div>
-    This demo renders a rotating globe using the Graphics2D interface.
-    Image Credit:
-    NASA Goddard Space Flight Center Image by Reto Stöckli (land surface,
-    shallow water, clouds). Enhancements by Robert Simmon (ocean color,
-    compositing, 3D globes, animation).
-    Data and technical support: MODIS Land Group; MODIS Science Data,
-    Support Team; MODIS Atmosphere Group; MODIS Ocean Group Additional data:
-    USGS EROS Data Center (topography); USGS Terrestrial Remote Sensing
-    Flagstaff Field Center (Antarctica); Defense Meteorological
-    Satellite Program (city lights).
-    <br>
     Zoom:
     <input type="range" id="zoomRange"
         min="1.0" max="50.0" step="0.5" value="14.0" />
@@ -63,8 +55,17 @@ found in the LICENSE file.
     <input type="submit" id="benchmark" value="Run Benchmark">
     <label id="result" name="result"> </label>
   </div>
-  <!-- The NaCl plugin will be embedded inside the element with id "listener".
-      See common.js.-->
-  <div id="listener"></div>
+  <div style="margin-top: 20px">
+    This demo renders a rotating globe using the Graphics2D interface.
+    Image Credit:
+    NASA Goddard Space Flight Center Image by Reto Stöckli (land surface,
+    shallow water, clouds). Enhancements by Robert Simmon (ocean color,
+    compositing, 3D globes, animation).
+    Data and technical support: MODIS Land Group; MODIS Science Data,
+    Support Team; MODIS Atmosphere Group; MODIS Ocean Group Additional data:
+    USGS EROS Data Center (topography); USGS Terrestrial Remote Sensing
+    Flagstaff Field Center (Antarctica); Defense Meteorological
+    Satellite Program (city lights).
+  </div>
 </body>
 </html>
