@@ -5,12 +5,18 @@
   <script type="text/javascript" src="hasnacl.js"></script>
 </head>
 <body style="background-color: #fafafa;">
-<h2>pepper.js Examples</h2>
+<div style="padding-bottom: 10px; width: 1000px;">
+<h2 style="display: inline;">pepper.js Examples</h2>
+<span style="float: right;">
+  (<a href="https://github.com/google/pepper.js">Get the source</a>)
+</span>
+</div>
 <div style="width: 1000px">
 
 <div id="sidebar" style="float: left; display: block; width: 150px; margin-right: 10px;">
-  <a href="https://github.com/google/pepper.js">Try it!</a>
-  | <a href="help.html">Help?</a>
+
+<a href="help.html">Need help?</a>
+
 <div id="menu">
 </div>
 <div class="options">
@@ -62,6 +68,13 @@ var sectionTitle = function(text) {
   return div;
 };
 
+var createMenu = function(title) {
+  var menu = document.createElement("div");
+  menu.className = "menu";
+  menu.appendChild(sectionTitle(title));
+  return menu;
+};
+
 var menuItem = function(text, callback, disable) {
   if (disable) {
     var div = document.createElement("div");
@@ -87,11 +100,9 @@ var toolchains = [
 ];
 
 var createToolchains = function(toolchains, parent) {
-  var menu = document.createElement("div");
-  menu.style.marginBottom = "10px";
+  var menu = createMenu("Toolchain");
   parent.appendChild(menu);
 
-  menu.appendChild(sectionTitle("Toolchain"));
   for (var i = 0; i < toolchains.length; i++) {
     var toolchain = toolchains[i];
     var callback = (function(tc) {
@@ -113,11 +124,9 @@ var configs = [
 ];
 
 var createConfigs = function(parent) {
-  var menu = document.createElement("div");
-  menu.style.marginBottom = "10px";
+  var menu = createMenu("Config");
   parent.appendChild(menu);
 
-  menu.appendChild(sectionTitle("Config"));
   for (var i = 0; i < configs.length; i++) {
     var config = configs[i];
     var callback = (function(config) {
@@ -175,9 +184,9 @@ var setExample = function(example) {
 
 // Generate a table of examples.
 var createLinks = function(title, examples, parent) {
-  var menu = document.createElement("div");
+  var menu = createMenu(title);
   parent.appendChild(menu);
-  menu.appendChild(sectionTitle(title));
+
   for (var i = 0; i < examples.length; i++) {
     var example = examples[i];
     var callback = (function(name) {

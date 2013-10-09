@@ -1,21 +1,61 @@
 body {
   font-family: Verdana, Geneva, sans-serif;
+  font-size: 95%;
   background-color: white;
+  color: #202020;
 }
 
-.section_title {
-  margin: 15px 0 5px 0;
+div.menu {
+  margin: 22px 0 22px 0;
+}
+
+div.section_title {
+  margin: 5px 0 5px 0;
 }
 
 .selected_item {
-  background: #e0e0ff;
+  background: #bfcce8;
 }
+
+div.menu div.selected_item a {
+  color: #202020;
+}
+
+div.menu div.unselected_item a:visited {
+  color: #143C92;
+}
+
 
 .unselected_item {
 }
 
+.unselected_item:hover {
+  background-color: #f5dfb2;
+}
+
 .disabled_item {
   color: #a0a0a0;
+}
+
+.selected_item a, .unselected_item a, .disabled_item {
+  padding: 3px;
+}
+
+a:link {
+  color: #143C92;
+}
+
+a:visited {
+  color: #331697;
+}
+
+a:active {
+  color: #DB9308;
+}
+
+div.menu div a {
+  display: block;
+  text-decoration:none;
 }
 
 div.options {
