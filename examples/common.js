@@ -213,7 +213,7 @@ var common = (function () {
    * This event listener is registered in attachDefaultListeners above.
    */
   function handleCrash(event) {
-    updateStatus('CRASHED')
+    updateStatus('module crashed')
     if (typeof window.handleCrash !== 'undefined') {
       window.handleCrash(common.naclModule.lastError);
     }
@@ -226,7 +226,7 @@ var common = (function () {
    */
   function moduleDidLoad() {
     common.naclModule = document.getElementById('nacl_module');
-    updateStatus('SUCCESS');
+    updateStatus('loaded');
     console.log("Create instance: " + (new Date()-loadStart) + " ms");
 
     if (typeof window.moduleDidLoad !== 'undefined') {
@@ -331,9 +331,9 @@ var common = (function () {
     // If the page loads before the Native Client module loads, then set the
     // status message indicating that the module is still loading.  Otherwise,
     // do not change the status message.
-    updateStatus('Page loaded.');
+    updateStatus('page loaded');
     if (common.naclModule == null) {
-      updateStatus('Creating embed: ' + tool)
+      updateStatus('creating ' + tool + ' embed')
 
       // We use a non-zero sized embed to give Chrome space to place the bad
       // plug-in graphic, if there is a problem.
@@ -346,7 +346,7 @@ var common = (function () {
       // before the page's onload event.  In this case, the status message
       // will reflect 'SUCCESS', but won't be displayed.  This call will
       // display the current message.
-      updateStatus('Waiting.');
+      updateStatus('waiting');
     }
   }
 

@@ -13,9 +13,9 @@ function domContentLoaded(name, tc, config, width, height) {
       window.PERSISTENT,
       1024*1024,
       function(bytes) {
-	common.updateStatus(
-	  'Allocated '+bytes+' bytes of persistant storage.');
-	startup();
+        common.updateStatus(
+          'allocated '+bytes+' bytes of persistant storage');
+        startup();
       },
       function(e) {
 	alert('Failed to allocate space')
@@ -84,6 +84,6 @@ function handleMessage(message_event) {
   }
   else if (messageParts[0] == "READY") {
     var statusField = document.getElementById('statusField');
-    common.updateStatus(statusField.innerHTML + ' Ready!');
+    common.updateStatus('ready');
   }
 }
