@@ -2,9 +2,20 @@
 <head>
   <title>pepper.js Examples</title>
   <link rel="stylesheet" type="text/css" href="examples.css" />
+<script>
+var isOfficial = location.hostname === "trypepperjs.appspot.com";
+if (isOfficial) {
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-44787103-1', 'trypepperjs.appspot.com');
+  ga('send', 'pageview');
+}
+</script>
   <script type="text/javascript" src="hasnacl.js"></script>
 </head>
-<body style="background-color: #fafafa;">
+<body class="pepperjs">
 <div style="padding-bottom: 10px; width: 1000px;">
 <h1 style="display: inline;">pepper.js Examples</h1>
 <span style="float: right;">
@@ -33,6 +44,9 @@
 </div>
 <script>
 var show = function(url) {
+  if (isOfficial) {
+    url = "http://gonacl.commondatastorage.googleapis.com/pepper.js/" + url;
+  }
   document.getElementById("content").src = url;
   return false;
 };
