@@ -2,14 +2,15 @@
 pepper.js
 =========
 
-pepper.js is a JavaScript library that enables the compilation of Pepper_
-plugins into JavaScript using Emscripten_.  This allows the simultaneous
-deployment of native code on the web both as a `Native Client`_ (NaCl)
-executable and as JavaScript.
+pepper.js is a JavaScript library that enables the compilation of native Pepper_
+applications into JavaScript using Emscripten_. This allows the simultaneous
+deployment of native code on the web both as a `Portable Native Client`_ (PNaCl)
+executable and as JavaScript. Native Pepper applications can now be run in
+Chrome, Firefox, Internet Explorer, Safari, and more.
 
 .. _Pepper: https://developers.google.com/native-client/pepperc/
 .. _Emscripten: https://github.com/kripken/emscripten
-.. _`Native Client`: http://gonacl.com
+.. _`Portable Native Client`: http://gonacl.com
 
 --------------
 Project Status
@@ -17,6 +18,10 @@ Project Status
 
 pepper.js is incomplete and under development.  Expect that you'll need to get
 your hands dirty.  Bug reports, feature requests, and patches are welcome.
+
+Note: for more up-to-date documentation, check out the wiki_.
+
+.. _wiki: https://github.com/google/pepper.js/wiki
 
 ---------------
 Getting Started
@@ -30,11 +35,11 @@ the NaCl SDK.  For example, to temporarily set the environment variable:
 
 ::
 
-    set NACL_SDK_ROOT=c:\path\to\nacl_sdk\pepper_30  (Windows)
-    export NACL_SDK_ROOT=/path/to/nacl_sdk/pepper_30  (Almost everything else)
+    set NACL_SDK_ROOT=c:\path\to\nacl_sdk\pepper_31  (Windows)
+    export NACL_SDK_ROOT=/path/to/nacl_sdk/pepper_31  (Almost everything else)
 
-``pepper_30`` and up are supported.  (The main dependency on
-``pepper_30`` is its toolchain, however, and not its header files and libraries.
+``pepper_31`` and up are supported.  (The main dependency on
+``pepper_31`` is its toolchain, however, and not its header files and libraries.
 It is possible to use an older version of Pepper by setting the ``LLVM``
 environment variable to point to a toolchain other than the one contained in
 ``NACL_SDK_ROOT``.)
@@ -86,8 +91,6 @@ Building the Examples
     cd examples
     make TOOLCHAIN=emscripten CONFIG=Debug
     make TOOLCHAIN=emscripten CONFIG=Release
-    make TOOLCHAIN=newlib CONFIG=Debug
-    make TOOLCHAIN=newlib CONFIG=Release
     make TOOLCHAIN=pnacl CONFIG=Debug
     make TOOLCHAIN=pnacl CONFIG=Release
 
@@ -96,15 +99,6 @@ the background and the compilation may appear to hang.  Emscripten will also
 create a create a configuration file named ``~/.emscripten``.  You may need to
 edit this file if it fails to guess the correct paths, or you want to use a
 version other than the one it guessed.
-
-There is a known issue where Emscripten will print the following warning when
-using the pepper_30 Portable Native Client (PNaCl) toolchain:
-
-::
-
-    Warning: using an unexpected LLVM triple: armv7-none-linux-gnueabi, !== ,le32-unknown-nacl (are you using emcc for everything and not clang?)
-
-It can be ignored, and is fixed in pepper_31 onwards.
 
 Clang
 -----

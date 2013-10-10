@@ -96,3 +96,7 @@ h1 {
   margin: 0 auto;
   background-color: white;
 }
+
+pre {
+  font-size: 12px;
+}
