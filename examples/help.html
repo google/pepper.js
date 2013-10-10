@@ -1,15 +1,16 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
 <head>
-  <title>pepper.js Examples Help</title>
+  <title>pepper.js Example Help</title>
   <link rel="stylesheet" type="text/css" href="examples.css" />
   <script type="text/javascript" src="hasnacl.js"></script>
 </head>
 
-<body style="background-color: #fafafa;">
-<div style="width: 800px; background-color: white; padding: 8px;">
-<h3>pepper.js Examples Help</h3>
-
+<body class="pepperjs">
+<div class="outer">
+<div class="inner">
+<h1>pepper.js Examples Help</h1>
+<div class="content">
 <p>The examples are <a href="examples.html">here</a>.  Before you
 dive in, please make sure your browser is set up to run them.  For the
 most part, this means "make sure your browser is up to date."</p>
@@ -33,7 +34,7 @@ chrome://components and click "Check for update" to push it along.</p>
 
 <p>If you're having problems, please send a message to <a href="https://groups.google.com/forum/#!forum/native-client-discuss">native-client-discuss</a>.</p>
 
-<h4>JavaScript API Support</h4>
+<h3>JavaScript API Support</h3>
 
 <p>pepper.js uses APIs that are currently not supported by every
 browser.  If your browser does not support these APIs, some of the
@@ -46,16 +47,19 @@ examples may not work.</p>
   <li><a href="http://caniuse.com/audio-api">Web Audio</a> <span id="webaudio_check" class="error">will not work</span> in your browser.</li>
 </ul>
 
-<h4>Developer Mode</h4>
+<h3>Developer Mode</h3>
 <p>Checking the "Developer Mode" checkbox reveals options that are
 handy for day-to-day development but don't make for a compelling
 demo.  Developer mode adds the NaCl toolchain, Debug and Release
 builds, and a bunch of tests.</p>
 
-<p>NaCl is the predecessor or PNaCl.  Because it uses architecture-specific binaries, it is restricted to the Chrome Web
-Store by default.  Running NaCl on the web requires it be explicitly enabled in Chrome, either by enabling "Native Client" in chrome://flags or
-passing --enable-nacl to Chrome on the command line.  The NaCl examples <span id="nacl_check"
-class="error">will not work</span> in your browser.</p>
+<p>The "NaCl" toolchain is the predecessor or PNaCl.  Because the
+original NaCl toolchain produces architecture-specific binaries, they
+are restricted to the Chrome Web Store by default.  Running NaCl on
+the web requires it be explicitly enabled in Chrome, either by
+enabling "Native Client" in chrome://flags or passing --enable-nacl to
+Chrome on the command line.  Check chrome://nacl to see if
+non-portable NaCl is enabled outside the web store.</p>
 
 <p>Note that "PNaCl Debug" examples are actually plain-old NaCl modules
 compiled using the PNaCl toolchain - no translation is being done in
@@ -88,7 +92,6 @@ the browser.  Only "PNaCl Release" translates in the browser.</p>
   setStatus("pointerlock_check", nacl.hasPointerLock());
   setStatus("webaudio_check", nacl.hasWebAudio());
 
-
   var version = nacl.chromeMajorVersion();
   if (version != null) {
     var s = document.getElementById("chrome_version");
@@ -96,16 +99,6 @@ the browser.  Only "PNaCl Release" translates in the browser.</p>
     if (version >= 31) {
       s.className = "ok";
     }
-  }
-  if (nacl.hasNaCl()) {
-    // Sadly, the best way to figure out if NaCl is enabled is to try
-    // loading a non-existent module.
-    var ne = makeEmbed('does_not_exist.nmf', nacl.naclMimeType);
-    ne.addEventListener('error', function(evt) {
-      setStatus("nacl_check", true);
-      document.body.removeChild(ne);
-    }, true);
-    document.body.appendChild(ne);
   }
 })();
 </script>
@@ -140,6 +133,8 @@ the browser.  Only "PNaCl Release" translates in the browser.</p>
   <li>Not throughly tested.  There are known issues with the examples,
   such as requiring "escape" and "enter" key presses.</li>
 </ul>
+</div>
+</div>
 </div>
 </body>
 </html>

@@ -1,8 +1,13 @@
 body {
   font-family: Verdana, Geneva, sans-serif;
-  font-size: 95%;
+  font-size: 16px;
+  line-height: 1.5;
   background-color: white;
   color: #202020;
+}
+
+body.pepperjs {
+  background-color: #f8f8f8;
 }
 
 div.menu {
@@ -13,11 +18,15 @@ div.section_title {
   margin: 5px 0 5px 0;
 }
 
-.selected_item {
+.selected_item, .linkbutton {
   background: #bfcce8;
 }
 
 div.menu div.selected_item a {
+  color: #202020;
+}
+
+.linkbutton {
   color: #202020;
 }
 
@@ -53,7 +62,7 @@ a:active {
   color: #DB9308;
 }
 
-div.menu div a {
+div.menu div a, .linkbutton {
   display: block;
   text-decoration:none;
 }
@@ -70,4 +79,16 @@ span.ok {
 
 span.error {
   color: #B00000;
+}
+
+.outer {
+  width: 100%
+}
+
+.inner {
+  position: relative;
+  max-width: 640px;
+  padding: 20px 10px;
+  margin: 0 auto;
+  background-color: white;
 }
