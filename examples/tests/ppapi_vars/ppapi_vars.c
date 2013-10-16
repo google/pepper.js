@@ -19,6 +19,7 @@
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_var.h"
 #include "ppapi/c/ppb_var_array.h"
+#include "ppapi/c/ppb_var_array_buffer.h"
 #include "ppapi/c/ppb_var_dictionary.h"
 #include "ppapi/c/ppp.h"
 #include "ppapi/c/ppp_instance.h"
@@ -35,6 +36,7 @@ PP_Module module = 0;
 static PPB_Messaging* ppb_messaging = NULL;
 static PPB_Var* ppb_var = NULL;
 static PPB_VarArray* ppb_var_array = NULL;
+static PPB_VarArrayBuffer* ppb_var_array_buffer = NULL;
 static PPB_VarDictionary* ppb_var_dictionary = NULL;
 
 extern void HandleMessage(PP_Instance instance, struct PP_Var message);
@@ -71,6 +73,32 @@ void simpleArray(PP_Instance instance) {
 
 void emptyDictionary(PP_Instance instance) {
   struct PP_Var result = ppb_var_dictionary->Create();
+  ppb_messaging->PostMessage(instance, result);
+  ppb_var->Release(result);
+}
+
+void emptyArrayBuffer(PP_Instance instance) {
+  struct PP_Var result = ppb_var_array_buffer->Create(0);
+  ppb_messaging->PostMessage(instance, result);
+  ppb_var->Release(result);
+}
+
+void simpleArrayBuffer(PP_Instance instance) {
+  struct PP_Var result = ppb_var_array_buffer->Create(10);
+  uint32_t length;
+  uint8_t* data;
+
+  if (ppb_var_array_buffer->ByteLength(result, &length)) {
+    data = (uint8_t*)ppb_var_array_buffer->Map(result);
+
+    if (data) {
+      for (int i = 0; i < length; ++i) {
+        data[i] = i;
+      }
+      ppb_var_array_buffer->Unmap(result);
+    }
+  }
+
   ppb_messaging->PostMessage(instance, result);
   ppb_var->Release(result);
 }
@@ -123,6 +151,9 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module module_id,
 
   ppb_var_array =
       (PPB_VarArray*)(get_browser_interface(PPB_VAR_ARRAY_INTERFACE));
+
+  ppb_var_array_buffer = (PPB_VarArrayBuffer*)(get_browser_interface(
+      PPB_VAR_ARRAY_BUFFER_INTERFACE));
 
   ppb_var_dictionary =
       (PPB_VarDictionary*)(get_browser_interface(PPB_VAR_DICTIONARY_INTERFACE));

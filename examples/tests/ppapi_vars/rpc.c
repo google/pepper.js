@@ -10,6 +10,8 @@
 extern void emptyArray(PP_Instance instance);
 extern void simpleArray(PP_Instance instance);
 extern void emptyDictionary(PP_Instance instance);
+extern void emptyArrayBuffer(PP_Instance instance);
+extern void simpleArrayBuffer(PP_Instance instance);
 
 static int GetInteger(struct PP_Var v) {
   if (v.type == PP_VARTYPE_DOUBLE) {
@@ -31,6 +33,12 @@ void HandleMessage(PP_Instance instance, struct PP_Var message) {
     break;
   case 2:
     emptyDictionary(instance);
+    break;
+  case 3:
+    emptyArrayBuffer(instance);
+    break;
+  case 4:
+    simpleArrayBuffer(instance);
     break;
   }
 }

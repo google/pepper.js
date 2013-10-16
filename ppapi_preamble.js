@@ -5,6 +5,16 @@
 // TODO(ncbray): re-enable once Emscripten stops including code with octal values.
 //"use strict";
 
+var clamp = function(value, min, max) {
+  if (value < min) {
+    return min;
+  } else if (value > max) {
+    return max;
+  } else {
+    return value;
+  }
+}
+
 // Polyfill for Safari.
 if (window.performance === undefined) {
   window.performance = {};
@@ -16,18 +26,40 @@ if (window.performance.now === undefined) {
   }
 }
 
-var getFullscreenElement = function() {
-  return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || null;
+// Polyfill for IE 10.
+if (ArrayBuffer.prototype.slice === undefined) {
+  // From https://developer.mozilla.org/en-US/docs/Web/API/ArrayBuffer:
+  // Returns a new ArrayBuffer whose contents are a copy of this ArrayBuffer's
+  // bytes from begin, inclusive, up to end, exclusive. If either begin or end
+  // is negative, it refers to an index from the end of the array, as opposed
+  // to from the beginning.
+  ArrayBuffer.prototype.slice = function(begin, end) {
+    if (begin < 0) {
+      begin = this.byteLength + begin;
+    }
+    begin = clamp(begin, 0, this.byteLength);
+
+    if (end === undefined) {
+      end = this.byteLength;
+    } else if (end < 0) {
+      end = this.byteLength + end;
+    }
+    end = clamp(end, 0, this.byteLength);
+
+    var length = end - begin;
+    if (length < 0) {
+      length = 0;
+    }
+
+    var src = new Int8Array(this, begin, length);
+    var dst = new Int8Array(length);
+    dst.set(src);
+    return dst.buffer;
+  };
 }
 
-var clamp = function(value, min, max) {
-  if (value < min) {
-    return min;
-  } else if (value > max) {
-    return max;
-  } else {
-    return value;
-  }
+var getFullscreenElement = function() {
+  return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || null;
 }
 
 var postMessage = function(message) {
@@ -677,6 +709,13 @@ glue.structToJSVar = function(e) {
     for (var key in wrapped) {
       unwrapped[key] = glue.structToJSVar(wrapped[key]);
     }
+    return unwrapped;
+  } else if (type == ppapi.PP_VARTYPE_ARRAY_BUFFER) {
+    var wrapped = resources.resolve(value, ARRAY_BUFFER_RESOURCE);
+
+    // Note: "buffer" is an implementation detail of Emscripten and is likely
+    // not a stable interface.
+    var unwrapped = buffer.slice(wrapped.memory, wrapped.memory + wrapped.len);
     return unwrapped;
   } else {
     throw "Var type conversion not implemented: " + type;

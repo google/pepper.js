@@ -17,3 +17,11 @@ RPC.prototype.simpleArray = function() {
 RPC.prototype.emptyDictionary = function() {
   this.embed.postMessage(2);
 };
+
+RPC.prototype.emptyArrayBuffer = function() {
+  this.embed.postMessage(3);
+};
+
+RPC.prototype.simpleArrayBuffer = function() {
+  this.embed.postMessage(4);
+};

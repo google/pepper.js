@@ -52,6 +52,26 @@
           });
           rpc.emptyDictionary();
         });
+
+        tester.addAsyncTest('Empty array buffer', function(status) {
+          expectPostmessage(plugin, status, function(data) {
+            status.assertEqual(data.byteLength, 0);
+            status.pass();
+          });
+          rpc.emptyArrayBuffer();
+        });
+
+        tester.addAsyncTest('Simple array buffer', function(status) {
+          expectPostmessage(plugin, status, function(data) {
+            status.assertEqual(data.byteLength, 10);
+            var view = new Int8Array(data);
+            for (var i = 0; i < 10; ++i) {
+              status.assertEqual(view[i], i);
+            }
+            status.pass();
+          });
+          rpc.simpleArrayBuffer();
+        });
       }
       //]]>
     </script>

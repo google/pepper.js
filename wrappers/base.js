@@ -344,11 +344,23 @@
 
 
   var VarArrayBuffer_Create = function(var_ptr, size_in_bytes) {
-    throw "VarArrayBuffer_Create not implemented";
+    var memory = _malloc(size_in_bytes);
+
+    glue.structToMemoryVar({
+      type: ppapi.PP_VARTYPE_ARRAY_BUFFER,
+      value: resources.registerArrayBuffer(memory, size_in_bytes),
+    }, var_ptr);
   }
 
   var VarArrayBuffer_ByteLength = function(var_ptr, byte_length_ptr) {
-    throw "VarArrayBuffer_ByteLength not implemented";
+    var uid = glue.getVarUID(var_ptr);
+    var resource = resources.resolve(uid, ARRAY_BUFFER_RESOURCE);
+    if (resource === undefined) {
+      return 0;
+    }
+
+    setValue(byte_length_ptr, resource.len, 'i32');
+    return 1;
   }
 
   var VarArrayBuffer_Map = function(var_ptr) {

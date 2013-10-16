@@ -170,6 +170,8 @@ if __name__ == "__main__":
   c.method("emptyArray")
   c.method("simpleArray")
   c.method("emptyDictionary")
+  c.method("emptyArrayBuffer")
+  c.method("simpleArrayBuffer")
 
   generateCServer(c)
   generateJSClient(c)
