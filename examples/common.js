@@ -14,7 +14,7 @@ var common = (function () {
     if (elt.addEventListener) {
       elt.addEventListener(event_name, callback, false);
     } else {
-      elt.attachEvent("on" + event_name, callback);
+      elt.attachEvent('on' + event_name, callback);
     }
   };
 
@@ -44,7 +44,7 @@ var common = (function () {
     var scripts = document.getElementsByTagName('script');
     for (var i = 0; i < scripts.length; i++) {
       if (scripts[i].src === src) {
-	return scripts[i];
+        return scripts[i];
       }
     }
     return null;
@@ -74,7 +74,7 @@ var common = (function () {
           if (waiting[src][i].onerror) {
             waiting[src][i].onerror();
           }
-	}
+        }
         delete waiting[src];
       };
       document.getElementsByTagName('head')[0].appendChild(script);
@@ -90,27 +90,43 @@ var common = (function () {
     }
   }
 
-  function createEmscriptenModule(name, tool, path, width, height) {
-    // Create a fake embed element.  The actual script may take a while to load.
-    var e = document.createElement("span");
-    e.setAttribute("name", "nacl_module");
-    e.setAttribute("id", "nacl_module");
-    document.getElementById('listener').appendChild(e);
+  var createEmscriptenInstance = function(url, width, height) {
+    var e = document.createElement('span');
+    e.style.display = 'inline-block';
+    e.style.width = width + 'px';
+    e.style.height = height + 'px';
 
-    var src = path + '/' + name + '.js';
-    loadScript(src, function() {
-      CreateInstance(width, height, e);
-      // Instead of listening to DOM mutation events (which has cross-platform
-      // compatibility issues), explicitly notify the instance that it has been
-      // inserted into the document.
-      e.finishLoading();
-    }, function() {
-      // TODO send event.
-      e.readyState = 4;
-      e.lastError = "Could not load " + src;
-    });
+    // Emulate an embed attributes.
+    e.setAttribute('width', width);
+    e.setAttribute('height', height);
+
+    // To be called after the element is inserted into the page.
+    e.load = function() {
+      e.setAttribute('src', url);
+      loadScript(url, function() {
+        CreateInstance(width, height, e);
+        e.finishLoading();
+      }, function() {
+        // TODO send event.
+        e.readyState = 4;
+        e.lastError = 'Could not load ' + src;
+      });
+    };
     return e;
-  }
+  };
+
+  var createEmbedInstance = function(url, mimetype, width, height) {
+    var e = document.createElement('embed');
+    e.setAttribute('src', url);
+    e.setAttribute('type', mimetype);
+    e.setAttribute('width', width);
+    e.setAttribute('height', height);
+    // The embed actually starts loading as soon as you attach it to
+    // the page, so this API lies.  If you try to set "src" after
+    // putting the embed in page, however, it does not actually load.
+    e.load = function() {};
+    return e;
+  };
 
   var loadStart;
 
@@ -127,46 +143,48 @@ var common = (function () {
    */
   function createNaClModule(name, tool, path, width, height, args) {
     loadStart = new Date();
+
+    var moduleEl;
+    var isHost = false;
+
     if (tool == 'emscripten') {
-      return createEmscriptenModule(name, tool, path, width, height);
+      var url = path + '/' + name + '.js';
+      moduleEl = createEmscriptenInstance(url, width, height);
+    } else {
+      // For NaCL modules use application/x-nacl.
+      var mimetype = 'application/x-nacl';
+      isHost = tool == 'win' || tool == 'linux' || tool == 'mac';
+      if (isHost) {
+        // For non-nacl PPAPI plugins use the x-ppapi-debug/release
+        // mime type.
+        if (path.toLowerCase().indexOf('release') != -1)
+          mimetype = 'application/x-ppapi-release';
+        else
+          mimetype = 'application/x-ppapi-debug';
+      } else if (tool == 'pnacl') {
+        // Note: the SDK actually produces .nexe files is Debug mode, so the tool is set to 'nacl'.
+        mimetype = 'application/x-pnacl';
+        if(navigator.mimeTypes[mimetype] === undefined) {
+          updateStatus('PNaCl requires Chrome 31 or newer.');
+        }
+      } else {
+        if(navigator.mimeTypes[mimetype] === undefined) {
+          updateStatus('NaCl requires Chrome.');
+        }
+      }
+      var url = path + '/' + name + '.nmf';
+      moduleEl = createEmbedInstance(url, mimetype, width, height);
     }
-    var moduleEl = document.createElement('embed');
+
     moduleEl.setAttribute('name', 'nacl_module');
     moduleEl.setAttribute('id', 'nacl_module');
-    moduleEl.setAttribute('width', width);
-    moduleEl.setAttribute('height',height);
     moduleEl.setAttribute('path', path);
-    moduleEl.setAttribute('src', path + '/' + name + '.nmf');
-
     // Add any optional arguments
     if (args) {
       for (var key in args) {
         moduleEl.setAttribute(key, args[key])
       }
     }
-
-    // For NaCL modules use application/x-nacl.
-    var mimetype = 'application/x-nacl';
-    var isHost = tool == 'win' || tool == 'linux' || tool == 'mac';
-    if (isHost) {
-      // For non-nacl PPAPI plugins use the x-ppapi-debug/release
-      // mime type.
-      if (path.toLowerCase().indexOf('release') != -1)
-        mimetype = 'application/x-ppapi-release';
-      else
-        mimetype = 'application/x-ppapi-debug';
-    } else if (tool == 'pnacl') {
-      // Note: the SDK actually produces .nexe files is Debug mode, so the tool is set to 'nacl'.
-      mimetype = 'application/x-pnacl';
-      if(navigator.mimeTypes[mimetype] === undefined) {
-        updateStatus('PNaCl requires Chrome 31 or newer.');
-      }
-    } else {
-      if(navigator.mimeTypes[mimetype] === undefined) {
-        updateStatus('NaCl requires Chrome.');
-      }
-    }
-    moduleEl.setAttribute('type', mimetype);
 
     // The <EMBED> element is wrapped inside a <DIV>, which has both a 'load'
     // and a 'message' event listener attached.  This wrapping method is used
@@ -175,6 +193,7 @@ var common = (function () {
     // event fires.
     var listenerDiv = document.getElementById('listener');
     listenerDiv.appendChild(moduleEl);
+    moduleEl.load();
 
     // Host plugins don't send a moduleDidLoad message. We'll fake it here.
     if (isHost) {
