@@ -673,7 +673,8 @@ function NaClWaiter(body_element) {
         return true;
       }
     }
-    return (embed.readyState == 4) && !this_.has_errored(embed);
+    return (embed.readyState == 4) && !this_.has_errored(embed) ||
+        (embed.readState == 'complete' && e.instance);
   }
 
   this.has_errored = function(embed) {
@@ -681,22 +682,24 @@ function NaClWaiter(body_element) {
     return embed.lastError != undefined && embed.lastError != '';
   }
 
+  var eventListener = function(e) {
+    if (e.type == 'loadend') {
+      this_.embedsLoaded.push(e.target);
+    }
+  }
+
   // If an argument was passed, it is the body element for registering
   // event listeners for the 'loadend' event type.
   if (body_element != undefined) {
-    var eventListener = function(e) {
-      if (e.type == 'loadend') {
-        this_.embedsLoaded.push(e.target);
-      }
-    }
-
     body_element.addEventListener('loadend', eventListener, true);
   }
 
   // Takes an arbitrary number of arguments.
   this.waitFor = function() {
     for (var i = 0; i< arguments.length; i++) {
-      embedsToWaitFor.push(arguments[i]);
+      var e = arguments[i];
+      embedsToWaitFor.push(e);
+      e.addEventListener('loadend', eventListener, true);
     }
   }
 

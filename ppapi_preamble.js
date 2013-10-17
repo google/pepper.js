@@ -502,6 +502,8 @@ var CreateInstance = function(width, height, shadow_instance) {
     }
 
     // Fake the load sequence.
+    // Note that .readyState will always be "complete" in IE, and
+    // this assignment will do nothing.
     shadow_instance.readyState = 4;
     sendProgressEvent('load');
     sendProgressEvent('loadend');
