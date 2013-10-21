@@ -8,95 +8,6 @@ function $(id) {
 }
 
 // BEGIN MODIFICATION copied from common.js
-var addListener = function(elt, event_name, callback) {
-  if (elt.addEventListener) {
-    elt.addEventListener(event_name, callback, false);
-  } else {
-    elt.attachEvent("on" + event_name, callback);
-  }
-};
-
-// Canonicalize the URL using the DOM.
-var resolveURL = function(url) {
-  var a = document.createElement('a');
-  a.href = url;
-  return a.href;
-}
-
-// Search for a script element in the page.  The user may have loaded it
-// themselves or it could have been dynamically loaded by the subsequent code.
-var findScript = function(src) {
-  var scripts = document.getElementsByTagName('script');
-  for (var i = 0; i < scripts.length; i++) {
-    if (scripts[i].src === src) {
-      return scripts[i];
-    }
-  }
-  return null;
-}
-
-// A look-up table for the scripts we're waiting for.
-var waiting = {};
-
-// Make sure the specified script is loaded before invoking a callback.
-var loadScript = function(url, onload, onerror) {
-  var src = resolveURL(url);
-  if (findScript(src) === null) {
-    // Loading the script if it cannot be found.
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = src;
-
-    waiting[src] = [];
-    script.onload = function() {
-      for (var i in waiting[src]) {
-        waiting[src][i].onload();
-      }
-      delete waiting[src];
-    };
-    script.onerror = function() {
-      for (var i in waiting[src]) {
-        if (waiting[src][i].onerror) {
-          waiting[src][i].onerror();
-        }
-      }
-      delete waiting[src];
-    };
-    document.getElementsByTagName('head')[0].appendChild(script);
-  }
-
-  // If src is in waiting, we have started to load the script but it is not
-  // yet ready.
-  if (src in waiting) {
-    waiting[src].push({onload: onload, onerror: onerror});
-  } else {
-    // HACK assumes the script loaded successfully.
-    onload();
-  }
-}
-
-function createEmscriptenModule(name, tool, path, width, height) {
-  // Create a fake embed element.  The actual script may take a while to load.
-  var e = document.createElement("span");
-  e.setAttribute("name", "nacl_module");
-  e.setAttribute("id", "nacl_module");
-  document.getElementById('listener').appendChild(e);
-
-  var src = path + '/' + name + '.js';
-  e.setAttribute("src", src);
-  loadScript(src, function() {
-    CreateInstance(width, height, e);
-    // Instead of listening to DOM mutation events (which has cross-platform
-    // compatibility issues), explicitly notify the instance that it has been
-    // inserted into the document.
-    e.finishLoading();
-  }, function() {
-    // TODO send event.
-    e.readyState = 4;
-    e.lastError = "Could not load " + src;
-  });
-  return e;
-}
 
 /**
  * Create the Native Client <embed> element as a child of the DOM element
@@ -110,38 +21,51 @@ function createEmscriptenModule(name, tool, path, width, height) {
  * @param {Object} optional dictionary of args to send to DidCreateInstance
  */
 function createNaClModule(name, tool, config, path, width, height, args) {
-  if (tool == 'emscripten') {
-    return createEmscriptenModule(name, tool, path, width, height);
+  // The SDK uses the pnacl toolchain to compile nexes in Debug mode.
+  if (tool == "pnacl" && config == "Debug") {
+    tool = "nacl";
   }
-  var moduleEl = document.createElement('embed');
+
+  var moduleEl;
+  var isHost = false;
+  if (tool == 'emscripten') {
+    var url = path + '/' + name + '.js';
+    moduleEl = nacl.createEmscriptenInstance(url, width, height);
+  } else {
+    // For NaCL modules use application/x-nacl.
+    var mimetype = nacl.naclMimeType;
+    isHost = tool == 'win' || tool == 'linux' || tool == 'mac';
+    if (isHost) {
+      // For non-nacl PPAPI plugins use the x-ppapi-debug/release
+      // mime type.
+      if (path.toLowerCase().indexOf('release') != -1)
+        mimetype = 'application/x-ppapi-release';
+      else
+        mimetype = 'application/x-ppapi-debug';
+    } else if (tool == 'pnacl') {
+      // Note: the SDK actually produces .nexe files is Debug mode, so the tool is set to 'nacl'.
+      mimetype = nacl.pnaclMimeType;
+      if(!nacl.hasPNaCl()) {
+        updateStatus('PNaCl requires Chrome 31 or newer.');
+      }
+    } else {
+      if(!nacl.hasNaCl()) {
+        updateStatus('NaCl requires Chrome.');
+      }
+    }
+    var url = path + '/' + name + '.nmf';
+    moduleEl = nacl.createEmbedInstance(url, mimetype, width, height);
+  }
+
   moduleEl.setAttribute('name', 'nacl_module');
   moduleEl.setAttribute('id', 'nacl_module');
-  moduleEl.setAttribute('width', width);
-  moduleEl.setAttribute('height',height);
   moduleEl.setAttribute('path', path);
-  moduleEl.setAttribute('src', path + '/' + name + '.nmf');
-
   // Add any optional arguments
   if (args) {
     for (var key in args) {
       moduleEl.setAttribute(key, args[key])
     }
   }
-
-  // For NaCL modules use application/x-nacl.
-  var mimetype = 'application/x-nacl';
-  var isHost = tool == 'win' || tool == 'linux' || tool == 'mac';
-  if (isHost) {
-    // For non-nacl PPAPI plugins use the x-ppapi-debug/release
-    // mime type.
-    if (path.toLowerCase().indexOf('release') != -1)
-      mimetype = 'application/x-ppapi-release';
-    else
-      mimetype = 'application/x-ppapi-debug';
-  } else if (tool == 'pnacl' && config != 'Debug') {
-    mimetype = 'application/x-pnacl';
-  }
-  moduleEl.setAttribute('type', mimetype);
 
   // The <EMBED> element is wrapped inside a <DIV>, which has both a 'load'
   // and a 'message' event listener attached.  This wrapping method is used
@@ -150,6 +74,7 @@ function createNaClModule(name, tool, config, path, width, height, args) {
   // event fires.
   var listenerDiv = document.getElementById('listener');
   listenerDiv.appendChild(moduleEl);
+  moduleEl.load();
 
   // Host plugins don't send a moduleDidLoad message. We'll fake it here.
   if (isHost) {
