@@ -1,0 +1,62 @@
+<html>
+<!--
+Copyright (c) 2013 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+-->
+<head>
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <meta charset="UTF-8">
+  <title>Bullet Physics</title>
+  <link rel="stylesheet" type="text/css" href="../../examples.css" />
+  <script type="text/javascript" src="../../loadnacl.js"></script>
+  <script type="text/javascript" src="../../common.js"></script>
+  <script type="text/javascript" src="example.js"></script>
+  <script type="text/javascript" src="NaClAM.js"></script>
+  <script type="text/javascript" src="NaClAMBullet.js"></script>
+  <script type="text/javascript" src="three.min.js"></script>
+  <script type="text/javascript" src="scene.js"></script>
+  <script type="text/javascript" src="world.js"></script>
+  <script type="text/javascript" src="scenes.js"></script>
+</head>
+<body data-name="NaClAMBullet" data-width="0" data-height="0" data-tools="emscripten newlib pnacl" data-configs="Debug Release" data-path="../{tc}/{config}">
+  <h1>Bullet Physics</h1>
+  <p><b>Status:</b> <span id="statusField">no status</span></p>
+  <div id="config">
+    <select id="scene">
+      <option value="jenga10">Block Tower (10 blocks)</option>
+      <option value="jenga20" selected>Block Tower (20 blocks)</option>
+      <option value="randomShapes">Random Shapes</option>
+      <option value="randomCube250">Random Cubes (250)</option>
+      <option value="randomCylinder500">Random Cylinders (500)</option>
+      <option value="randomCube1000">Random Cubes (1000)</option>
+      <option value="randomCube2000">Random Cubes (2000)</option>
+    </select>
+    <button id="reload">Reload Scene</button>
+  </div>
+  <ul>
+    <li>Click and drag an object to move it</li>
+    <li>Click and drag elsewhere to rotate the camera</li>
+    <li>Use the mousewheel to zoom in/out</li>
+  </ul>
+  <div id="rendererContainer" style="position: static; width: 512px; height: 512px"></div>
+  <p>
+    More info about Bullet Physics can be found at <a
+    href="http://bulletphysics.org/">http://bulletphysics.org</a>.
+  </p>
+  <p>
+    This demo was implemented by <a
+      href="http://www.johnmccutchan.com">John McCutchan</a>.  Read his
+    blog post about Native Client acceleration modules <a
+      href="http://www.johnmccutchan.com/2012/10/bullet-native-client-acceleration-module.html">here</a>,
+    and see the source for this demo <a
+      href="https://github.com/binji/NaClAMBase">here</a>.
+  </p>
+  <p>
+    Simulation time: <span id="simulationTime">0</span>&mu;s.
+  </p>
+  <div id="listener"></div>
+</body>
+</html>
