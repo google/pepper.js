@@ -147,7 +147,18 @@
           } else if (event_type === PPIE_Type.MOUSEUP) {
             button_state[button] = false;
           } else {
-            // Only MOUSEDOWN and MOUSEUP specify a button.
+            // Only MOUSEDOWN and MOUSEUP specify a button, as per the PPAPI
+            // documentation.  In practice, however, Chrome also specifies a
+            // button for MOUSEMOVE.  If would be possible to emulate this
+            // behavior in JavaScript, with the caveat that mouse motion events
+            // do not distinguish between left button held and no button held
+            // (event.button === 0) so additional bookkeeping would be required.
+            // It is somewhat unclear what button will be reported on various
+            // platforms, however, (Last pressed?  Lowest enumeration?) because
+            // motion is not directly associated with a button, unlike click
+            // events.  Sticking with the well-defined documented behavior is
+            // the simplest solution, although it may result in portability
+            // issues if a program relies on Chrome's behavior.
             button = -1;
           }
         }
@@ -164,7 +175,7 @@
         // Webkit will only have mouse button modifers for mouse events, too.
         // But really, this wierd an non-orthogonal, so we don't bother emulating it.
         for(var i = 0; i < mod_buttons.length; i++) {
-	  if (button_state[i]) {
+          if (button_state[i]) {
             modifiers |= mod_buttons[i];
           }
         }
