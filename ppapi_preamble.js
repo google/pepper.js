@@ -62,21 +62,6 @@ var getFullscreenElement = function() {
   return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || null;
 }
 
-var postMessage = function(message) {
-  var instance = this.instance;
-  // Fill out the PP_Var structure
-  var var_ptr = _malloc(16);
-  glue.jsToMemoryVar(message, var_ptr);
-
-  // Post messages are resolved asynchronously.
-  glue.defer(function() {
-    _DoPostMessage(instance, var_ptr);
-    // Note: the callee releases the var so we don't need to.
-    // This is different than most interfaces.
-    _free(var_ptr);
-  });
-}
-
 // Encoding types as numbers instead of string saves ~2kB when minified because closure will inline these constants.
 var STRING_RESOURCE = 0;
 var ARRAY_BUFFER_RESOURCE = 1;
@@ -343,7 +328,20 @@ var CreateInstance = function(width, height, shadow_instance) {
   shadow_instance.style.overflow = "hidden";
 
   // Called from external code.
-  shadow_instance["postMessage"] = postMessage;
+  shadow_instance["postMessage"] = function(message) {
+    var instance = this.instance;
+    // Fill out the PP_Var structure
+    var var_ptr = _malloc(16);
+    glue.jsToMemoryVar(message, var_ptr);
+
+    // Post messages are resolved asynchronously.
+    glue.defer(function() {
+      _DoPostMessage(instance, var_ptr);
+      // Note: the callee releases the var so we don't need to.
+      // This is different than most interfaces.
+      _free(var_ptr);
+    });
+  };
 
   // Not compatible with CSP.
   var style = document.createElement("style");
