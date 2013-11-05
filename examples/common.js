@@ -31,6 +31,40 @@ var common = (function () {
     return buffer;
   }
 
+  nacl.createInstance = function(config) {
+    var variant = config.module;
+    var e;
+    var width = config.width;
+    var height = config.height;
+    var type = variant.type;
+    if (type == "pnacl") {
+      e = nacl.createEmbedInstance(variant.url, nacl.pnaclMimeType, width, height);
+    } else if (type == "emscripten") {
+      e = nacl.createEmscriptenInstance(variant.url, width, height);
+    } else if (type == "nacl") {
+      e = nacl.createEmbedInstance(variant.url, nacl.naclMimeType, width, height);
+    } else if (type == "host") {
+      e = nacl.createEmbedInstance("bogusURL", nacl.mimetype, width, height);
+    } else {
+      throw new Error("Unknown variant type " + type);
+    }
+    if (config.init) {
+      config.init(e);
+    }
+    if (config.progress) {
+      e.addEventListener('progress', config.progress);
+    }
+    if (config.load) {
+      e.addEventListener('load', config.load);
+    }
+    if (config.error) {
+      e.addEventListener('error', config.error);
+    }
+    config.insert.appendChild(e);
+    e.load();
+    return e;
+  };
+
   var loadStart;
 
   /**
@@ -47,58 +81,75 @@ var common = (function () {
   function createNaClModule(name, tool, path, width, height, args) {
     loadStart = new Date();
 
-    var moduleEl;
-    var isHost = false;
+    var isRelease = path.toLowerCase().indexOf('release') != -1;
 
-    if (tool == 'emscripten') {
-      var url = path + '/' + name + '.js';
-      moduleEl = nacl.createEmscriptenInstance(url, width, height);
+    var progress = document.createElement('progress');
+    progress.style.width = '480px';
+
+    var modules = {
+        "pnacl": {
+          type: "pnacl",
+          url: path + '/' + name + '.nmf',
+        },
+        "nacl": {
+          type: "nacl",
+          url: path + '/' + name + '.nmf',
+        },
+        "emscripten": {
+          type: "emscripten",
+          url: path + '/' + name + '.js',
+        },
+        "host": {
+          type: "host",
+          mimetype: 'application/x-ppapi-' + (isRelease ? 'release' : 'debug'),
+        }
+    };
+
+    var moduleEl = nacl.createInstance({
+      module: modules[tool],
+      width: width,
+      height: height,
+      insert: document.getElementById('listener'),
+      init: function(e) {
+        e.setAttribute('name', 'nacl_module');
+        e.setAttribute('id', 'nacl_module');
+        e.setAttribute('path', path);
+        // Add any optional arguments
+        if (args) {
+          for (var key in args) {
+            e.setAttribute(key, args[key])
+          }
+        }
+      },
+      progress: function(evt) {
+        var loadPercent = -1.0;
+        progress.max = 100;
+        if (evt.lengthComputable && evt.total > 0) {
+          loadPercent = evt.loaded / evt.total * 100.0;
+        }
+        progress.value = loadPercent;
+      },
+      load: function(evt) {
+        progress.value = 100;
+        progress.remove();
+      },
+      error: function(evt) {
+        progress.value = 100;
+        progress.remove();
+      },
+    });
+
+    if (tool == 'pnacl' && !nacl.hasPNaCl()) {
+      updateStatus('PNaCl requires Chrome 31 or newer.');
+    } else if (tool == 'nacl' && !nacl.hasNaCl()) {
+      updateStatus('NaCl requires Chrome.');
     } else {
-      // For NaCL modules use application/x-nacl.
-      var mimetype = nacl.naclMimeType;
-      isHost = tool == 'win' || tool == 'linux' || tool == 'mac';
-      if (isHost) {
-        // For non-nacl PPAPI plugins use the x-ppapi-debug/release
-        // mime type.
-        if (path.toLowerCase().indexOf('release') != -1)
-          mimetype = 'application/x-ppapi-release';
-        else
-          mimetype = 'application/x-ppapi-debug';
-      } else if (tool == 'pnacl') {
-        // Note: the SDK actually produces .nexe files is Debug mode, so the tool is set to 'nacl'.
-        mimetype = nacl.pnaclMimeType;
-        if(!nacl.hasPNaCl()) {
-          updateStatus('PNaCl requires Chrome 31 or newer.');
-        }
-      } else {
-        if(!nacl.hasNaCl()) {
-          updateStatus('NaCl requires Chrome.');
-        }
-      }
-      var url = path + '/' + name + '.nmf';
-      moduleEl = nacl.createEmbedInstance(url, mimetype, width, height);
+      document.getElementById('listener').appendChild(progress);
     }
 
-    moduleEl.setAttribute('name', 'nacl_module');
-    moduleEl.setAttribute('id', 'nacl_module');
-    moduleEl.setAttribute('path', path);
-    // Add any optional arguments
-    if (args) {
-      for (var key in args) {
-        moduleEl.setAttribute(key, args[key])
-      }
-    }
-
-    // The <EMBED> element is wrapped inside a <DIV>, which has both a 'load'
-    // and a 'message' event listener attached.  This wrapping method is used
-    // instead of attaching the event listeners directly to the <EMBED> element
-    // to ensure that the listeners are active before the NaCl module 'load'
-    // event fires.
-    var listenerDiv = document.getElementById('listener');
-    listenerDiv.appendChild(moduleEl);
-    moduleEl.load();
-
-    // Host plugins don't send a moduleDidLoad message. We'll fake it here.
+    // Host plugins don't send a moduleDidLoad message. We'll fake it
+    // here.
+    var isHost = tool == 'win' || tool == 'linux' || tool == 'mac' || tool == 'host';
     if (isHost) {
       window.setTimeout(function () {
         var evt = document.createEvent('Event');
@@ -349,10 +400,15 @@ window.onload = function() {
     path = path.replace('{tc}', tc).replace('{config}', config);
 
     // The SDK uses the pnacl toolchain to compile nexes in Debug mode.
-    if (tc == "pnacl" && config == "Debug") {
-      tc = "nacl";
+    if (tc == 'pnacl' && config == 'Debug') {
+      tc = 'nacl';
     }
-
+    if (tc == 'newlib') {
+      tc = 'nacl';
+    }
+    if (tc == 'win' || tc == 'linux' || tc == 'mac') {
+      tc = 'host';
+    }
     loadFunction(name, tc, path, width, height);
   }
 };
