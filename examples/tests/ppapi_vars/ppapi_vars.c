@@ -92,7 +92,8 @@ void simpleArrayBuffer(PP_Instance instance) {
     data = (uint8_t*)ppb_var_array_buffer->Map(result);
 
     if (data) {
-      for (int i = 0; i < length; ++i) {
+      int i;
+      for (i = 0; i < length; ++i) {
         data[i] = i;
       }
       ppb_var_array_buffer->Unmap(result);
