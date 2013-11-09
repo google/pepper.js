@@ -903,7 +903,9 @@ function onError(e) {
 // Clean up.
 // TODO: decide if this is the best place for this. 
 exports.addEventListener('beforeunload', function(e) {
-  idb_.db.close();
+  if (idb_.db) {
+    idb_.db.close();
+  }
 }, false);
 
 //exports.idb = idb_;

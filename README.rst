@@ -428,8 +428,12 @@ Platform Errata
 ---------------
 
 ``PPB_Graphics3D`` does not work on Internet Explorer 10 or before because WebGL
-is not supported.  WebGL is supported on Safari, but it must be manually
-enabled: https://discussions.apple.com/thread/3300585.
+is not supported.  IE11 supports WebGL to some extent, but it still has a way to
+go before it is considered a conformant implementation of WebGL 1.0.  It is
+missing features such as bufferSubData and accepting arrays of byte indices when
+drawing elements.  If you want a 3D app to work on IE11, you must test it on
+IE11 and find workarounds for missing features.  WebGL is supported on Safari,
+but it must be manually enabled: https://discussions.apple.com/thread/3300585.
 
 ``PPB_MouseLock`` and ``PPB_Fullscreen`` are only supported in Chrome and
 Firefox.  The behavior of these interfaces varies somewhat between the two

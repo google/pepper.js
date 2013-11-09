@@ -72,7 +72,7 @@ GLuint  g_colorLoc;
 GLuint  g_MVPLoc;
 GLuint  g_vboID;
 GLuint  g_ibID;
-GLubyte g_Indices[36];
+GLushort g_Indices[36];
 
 GLuint g_programObj;
 GLuint g_vertexShader;
@@ -207,7 +207,7 @@ void InitProgram( void )
 
   glGenBuffers(1, &g_ibID);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibID);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 36 * sizeof(char), (void*)&g_Indices[0],
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_Indices), (void*)&g_Indices[0],
                GL_STATIC_DRAW);
 
   //
@@ -327,7 +327,7 @@ void Render( void )
   glEnableVertexAttribArray(g_colorLoc);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibID);
-  glDrawElements ( GL_TRIANGLES, 36, GL_UNSIGNED_BYTE ,0 );
+  glDrawElements ( GL_TRIANGLES, 36, GL_UNSIGNED_SHORT ,0 );
 }
 
 
@@ -582,7 +582,9 @@ static PP_Bool InputEvent_HandleInputEvent(PP_Instance instance, PP_Resource inp
 
   PP_InputEvent_Type type = ppb_input_event_interface->GetType(input_event);
   if (type == PP_INPUTEVENT_TYPE_MOUSEDOWN) {
-    ppb_fullscreen_interface->SetFullscreen(instance, PP_TRUE);
+    if (ppb_fullscreen_interface) {
+      ppb_fullscreen_interface->SetFullscreen(instance, PP_TRUE);
+    }
     return PP_TRUE;
   }
 

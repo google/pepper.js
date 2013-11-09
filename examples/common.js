@@ -131,11 +131,11 @@ var common = (function () {
       },
       load: function(evt) {
         progress.value = 100;
-        progress.remove();
+        document.getElementById('listener').removeChild(progress);
       },
       error: function(evt) {
         progress.value = 100;
-        progress.remove();
+        document.getElementById('listener').removeChild(progress);
       },
     });
 
