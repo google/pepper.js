@@ -581,7 +581,7 @@ static PP_Bool Instance_HandleDocumentLoad(PP_Instance instance,
 static PP_Bool InputEvent_HandleInputEvent(PP_Instance instance, PP_Resource input_event) {
 
   PP_InputEvent_Type type = ppb_input_event_interface->GetType(input_event);
-  if (type == PP_INPUTEVENT_TYPE_MOUSEDOWN) {
+  if (type == PP_INPUTEVENT_TYPE_MOUSEUP) {
     if (ppb_fullscreen_interface) {
       ppb_fullscreen_interface->SetFullscreen(instance, PP_TRUE);
     }

@@ -353,6 +353,7 @@ var CreateInstance = function(width, height, shadow_instance) {
   var fullscreenCSS = "{position: fixed; top: 0; left: 0; bottom: 0; right: 0; width: 100% !important; height: 100% !important; box-sizing: border-box; object-fit: contain; background-color: black;}";
   style.innerHTML += " .ppapiJsEmbed:-webkit-full-screen " + fullscreenCSS;
   style.innerHTML += " .ppapiJsEmbed:-moz-full-screen " + fullscreenCSS;
+  style.innerHTML += " .ppapiJsEmbed:-ms-fullscreen " + fullscreenCSS;
   style.innerHTML += " .ppapiJsEmbed:full-screen " + fullscreenCSS;
 
   document.getElementsByTagName("head")[0].appendChild(style);

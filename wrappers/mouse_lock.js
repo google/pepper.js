@@ -51,7 +51,7 @@
     if (res === undefined) {
       return 0;
     }
-    var element = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+    var element = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
     return element === res.element ? 1 : 0;
   };
 
@@ -69,6 +69,8 @@
         element.mozRequestFullScreen();
       } else if (element.webkitRequestFullscreen) {
         element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
       }
     } else {
       if (document.cancelFullscreen) {
@@ -77,6 +79,8 @@
         document.mozCancelFullScreen();
       } else if (document.webkitCancelFullScreen) {
         document.webkitCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
       }
     }
 
@@ -94,7 +98,7 @@
     FullScreen_GetScreenSize
   ], function() {
     var b = document.body;
-    return b.requestFullscreen || b.mozRequestFullScreen || b.webkitRequestFullscreen;
+    return b.requestFullscreen || b.mozRequestFullScreen || b.webkitRequestFullscreen || b.msRequestFullscreen;
   });
 
 })();

@@ -33,7 +33,7 @@ var nacl = nacl || {};
 
   nacl.hasFullscreen = function() {
     var b = document.body;
-    return !!(b.requestFullscreen || b.mozRequestFullScreen || b.webkitRequestFullscreen);
+    return !!(b.requestFullscreen || b.mozRequestFullScreen || b.webkitRequestFullscreen || b.msRequestFullscreen);
   };
 
   nacl.hasPointerLock = function() {
