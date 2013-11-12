@@ -533,6 +533,8 @@ static void Instance_DidChangeView(PP_Instance instance,
   view_width = rect.size.width;
   view_height = rect.size.height;
 
+  printf("View change: %d x %d\n", view_width, view_height);
+
   if (g_context == 0) {
     InitGL();
     MainLoop(NULL, 0);

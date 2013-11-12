@@ -360,16 +360,18 @@ var CreateInstance = function(width, height, shadow_instance) {
 
   var last_update = "";
   var updateView = function() {
-    // NOTE: this will give the wrong value if the canvas has any margin, border, or padding.
+    // NOTE: this will give the wrong value if the canvas has any margin,
+    // border, or padding.  Some browsers may also give non-integer values and
+    // rounding is prefered to truncation.
     var bounds = shadow_instance.getBoundingClientRect();
     var rect = {
       point: {
-        x: bounds.left,
-        y: bounds.top
+        x: Math.round(bounds.left),
+        y: Math.round(bounds.top)
       },
       size: {
-        width: bounds.right - bounds.left,
-        height: bounds.bottom - bounds.top
+        width: Math.round(bounds.right - bounds.left),
+        height: Math.round(bounds.bottom - bounds.top)
       }
     };
 
@@ -522,6 +524,8 @@ var CreateInstance = function(width, height, shadow_instance) {
     document.addEventListener('mozfullscreenchange', updateView);
   } else if (target.webkitRequestFullscreen) {
     document.addEventListener('webkitfullscreenchange', updateView);
+  } else if (target.msRequestFullscreen) {
+    document.addEventListener('MSFullscreenChange', updateView);
   }
 
   // TODO handle removal events.

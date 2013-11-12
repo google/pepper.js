@@ -20,6 +20,9 @@ missing_externs.webkitRequestPointerLock;
 
 missing_externs.webkitFullscreenElement;
 
+missing_externs.msRequestFullscreen;
+missing_externs.msExitFullscreen;
+
 missing_externs.FileError;
 missing_externs.resolveLocalFileSystemURL;
 
