@@ -24,6 +24,8 @@ found in the LICENSE file.
 <body data-name="NaClAMBullet" data-width="0" data-height="0" data-tools="emscripten newlib pnacl" data-configs="Debug Release" data-path="../{tc}/{config}">
   <h1>Bullet Physics</h1>
   <p><b>Status:</b> <span id="statusField">no status</span></p>
+  <div id="rendererContainer" style="position: static; width: 512px; height: 512px"></div>
+  <div id="listener"></div>
   <div id="config">
     <select id="scene">
       <option value="jenga10">Block Tower (10 blocks)</option>
@@ -41,7 +43,6 @@ found in the LICENSE file.
     <li>Click and drag elsewhere to rotate the camera</li>
     <li>Use the mousewheel to zoom in/out</li>
   </ul>
-  <div id="rendererContainer" style="position: static; width: 512px; height: 512px"></div>
   <p>
     More info about Bullet Physics can be found at <a
     href="http://bulletphysics.org/">http://bulletphysics.org</a>.
@@ -57,6 +58,5 @@ found in the LICENSE file.
   <p>
     Simulation time: <span id="simulationTime">0</span>&mu;s.
   </p>
-  <div id="listener"></div>
 </body>
 </html>
