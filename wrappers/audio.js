@@ -4,6 +4,10 @@
 
 (function() {
 
+  var isAudioSupported = function() {
+    return !!(window["AudioContext"] || window["webkitAudioContext"]);
+  };
+
   var createAudioContext = function() {
     if (window["AudioContext"] !== undefined) {
       return new AudioContext();
@@ -14,7 +18,13 @@
 
   // The Web Audio API currently does not allow user-specified sample rates.
   var supportedSampleRate = function() {
-    return createAudioContext().sampleRate;
+    if(isAudioSupported()) {
+      return createAudioContext().sampleRate;
+    } else {
+      // TODO(ncbray): should the AudioConfig interface be disabled if
+      // Audio is not available?
+      return 44100;
+    }
   }
 
   var createScriptNode = function(context, sample_count, channels) {
@@ -173,8 +183,6 @@
     Audio_GetCurrentConfig,
     Audio_StartPlayback,
     Audio_StopPlayback,
-  ], function() {
-    return !!(window["AudioContext"] || window["webkitAudioContext"]);
-  });
+  ], isAudioSupported);
 
 })();
