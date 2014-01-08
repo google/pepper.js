@@ -31,8 +31,10 @@ TARGET=ppapi_cpp
 #
 # List of sources to compile
 #
-SOURCES= \
-  alarms_dev.cc \
+AT_LEAST_33:=$(shell $(GETOS) --check-version=33 2>&1)
+AT_LEAST_34:=$(shell $(GETOS) --check-version=34 2>&1)
+
+SOURCES = \
   array_output.cc \
   audio.cc \
   audio_config.cc \
@@ -43,8 +45,6 @@ SOURCES= \
   cursor_control_dev.cc \
   device_ref_dev.cc \
   directory_entry.cc \
-  event_base.cc \
-  events_dev.cc \
   file_chooser_dev.cc \
   file_io.cc \
   file_ref.cc \
@@ -108,6 +108,33 @@ SOURCES= \
   widget_client_dev.cc \
   widget_dev.cc \
   zoom_dev.cc \
+
+# Before 33
+ifneq ($(AT_LEAST_33),)
+SOURCES += \
+  alarms_dev.cc \
+  event_base.cc \
+  events_dev.cc \
+
+endif
+
+# 33 and up
+ifeq ($(AT_LEAST_33),)
+SOURCES += \
+  var_resource_dev.cc \
+
+endif
+
+# 34 and up
+ifeq ($(AT_LEAST_34),)
+SOURCES += \
+  alarms_dev.cc \
+  media_stream_video_track.cc \
+  string_wrapper_dev.cc \
+  video_frame.cc \
+
+endif
+
 
 SOURCES:=$(foreach src,$(SOURCES),$(NACL_SDK_ROOT)/src/ppapi_cpp/$(src))
 

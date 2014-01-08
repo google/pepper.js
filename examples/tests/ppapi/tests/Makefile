@@ -63,6 +63,10 @@ DEPS=ppapi ppapi_cpp
 LIBS=$(DEPS) pthread
 
 
+# Testing interface header file was removed in newer versions of the SDK.
+AT_LEAST_33:=$(shell $(GETOS) --check-version=33 2>&1)
+ifneq ($(AT_LEAST_33),)
+
 #
 # Use the library dependency macro for each dependency
 #
@@ -82,3 +86,5 @@ $(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
 # Specify the NMF to be created with no additional arugments.
 #
 $(eval $(call NMF_RULE,$(TARGET),))
+
+endif
