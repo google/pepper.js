@@ -78,7 +78,6 @@ SOURCES = \
   printing_dev.cc \
   rect.cc \
   resource.cc \
-  resource_array_dev.cc \
   scriptable_object_deprecated.cc \
   scrollbar_dev.cc \
   selection_dev.cc \
@@ -109,8 +108,13 @@ SOURCES = \
   widget_dev.cc \
   zoom_dev.cc \
 
+ifeq ($(AT_LEAST_33),)
+# 33 and up
+SOURCES += \
+  var_resource_dev.cc \
+
+else
 # Before 33
-ifneq ($(AT_LEAST_33),)
 SOURCES += \
   alarms_dev.cc \
   event_base.cc \
@@ -118,20 +122,18 @@ SOURCES += \
 
 endif
 
-# 33 and up
-ifeq ($(AT_LEAST_33),)
-SOURCES += \
-  var_resource_dev.cc \
-
-endif
-
-# 34 and up
 ifeq ($(AT_LEAST_34),)
+# 34 and up
 SOURCES += \
   alarms_dev.cc \
   media_stream_video_track.cc \
   string_wrapper_dev.cc \
   video_frame.cc \
+
+else
+# Before 34
+SOURCES += \
+resource_array_dev.cc \
 
 endif
 
