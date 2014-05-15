@@ -94,6 +94,7 @@ var GRAPHICS_3D_RESOURCE = 20;
 
 var ARRAY_RESOURCE = 21;
 var DICTIONARY_RESOURCE = 22;
+var WEB_SOCKET_RESOURCE = 23;
 
 var ResourceManager = function() {
   this.lut = {};

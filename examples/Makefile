@@ -24,6 +24,7 @@ PROJECTS:= \
   tests/ppapi/tests \
   tests/ppapi_messaging \
   tests/ppapi_geturl \
+  tests/ppapi_websocket \
   tests/ppapi_vars \
   stress \
   probe_interfaces \

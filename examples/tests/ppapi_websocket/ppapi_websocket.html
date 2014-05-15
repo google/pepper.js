@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <!-- Copyright (c) 2011 Google Inc.  All rights reserved. -->
+  <head>
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache" />
+    <META HTTP-EQUIV="Expires" CONTENT="-1" />
+    <script type="text/javascript" src="../../loadnacl.js"></script>
+    <script type="text/javascript" src="../nacltest.js"></script>
+    <script type="text/javascript">
+      //<![CDATA[
+      // These constants need to match their corresponding values in module.cc.
+      var ARGUMENT_SEPARATOR = '|';
+      var TRUE_STRING_VALUE = '1';
+      var FALSE_STRING_VALUE = '0';
+
+      function isMatch(actual, expected) {
+        return (0 <= actual.indexOf(expected));
+      }
+
+      // Convert a string to a boolean value.  '1' convertes to |true|,
+      // anything else converts to |false|.
+      function stringToBool(str_value) {
+        return str_value == TRUE_STRING_VALUE;
+      }
+
+      function setupTests(tester, plugin) {
+        function addTest(name, url, hex_encoded_string, expected_data, expected_success) {
+          tester.addAsyncTest(name, function(test) {
+            var listener = test.wrap(function(test_response) {
+                plugin.removeEventListener('message', listener, false);
+
+                var response_args =
+                    test_response.data.split(ARGUMENT_SEPARATOR);
+                test.assertEqual(response_args.length, 4);
+
+                // Validate the results.
+                var response_url = response_args[0];
+                var response_hex_encoded_string = response_args[1];
+                var response_data = response_args[2];
+                var response_success = stringToBool(response_args[3]);
+                test.assert(isMatch(response_url, url));
+                test.assert(isMatch(response_hex_encoded_string, hex_encoded_string));
+                test.log(response_data);
+                test.assert(isMatch(response_data, expected_data));
+                test.assertEqual(response_success, expected_success);
+                test.pass();
+            });
+            plugin.addEventListener('message', listener, false);
+
+            // Make the request.
+            var loadWebSocketMessage = [
+              'loadWebSocket',
+              url,
+              hex_encoded_string].join(ARGUMENT_SEPARATOR);
+            plugin.postMessage(loadWebSocketMessage);
+          });
+        }
+
+        var VALID_URL = 'ws://echo.websocket.org/';
+        var INVALID_URL = 'ws://ppapi_nonexistent_url.html/';
+        console.log(plugin);
+        var is_js = plugin.getAttribute("src").slice(-3) === ".js";
+
+        addTest('Valid', VALID_URL, '6162636465666768696a6b6c6d6e6f70', '6162636465666768696a6b6c6d6e6f70', true); //abcdefghijklmnop
+        addTest('Valid_File', VALID_URL, 'f0288c28000a0dffeeeffe', 'f0288c28000a0dffeeeffe', true); //invalid unicode codepoint
+        addTest('Invalid', INVALID_URL, "WebSocketRequest::OpenCallback: PP_ERROR_FAILED", "WebSocketRequest::OpenCallback: PP_ERROR_FAILED", false);
+      }
+      //]]>
+    </script>
+
+  <title>PPAPI Websocket Test</title>
+  </head>
+  <body>
+    <h2>PPAPI Websocket Test</h2>
+
+    <div id="listener"></div>
+
+    <script type="text/javascript">
+      //<![CDATA[
+      // TODO(ncbray) allow the test to run in parallel
+      var tester = new Tester();
+      var e = createTestModule("ppapi_websocket", 0, 0);
+      setupTests(tester, e);
+      tester.waitFor(e);
+      tester.run();
+      //]]>
+    </script>
+  </body>
+</html>
