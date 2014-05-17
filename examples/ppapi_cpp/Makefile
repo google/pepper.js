@@ -110,9 +110,6 @@ SOURCES = \
 
 ifeq ($(AT_LEAST_33),)
 # 33 and up
-SOURCES += \
-  var_resource_dev.cc \
-
 else
 # Before 33
 SOURCES += \
@@ -133,7 +130,8 @@ SOURCES += \
 else
 # Before 34
 SOURCES += \
-resource_array_dev.cc \
+  resource_array_dev.cc \
+  var_resource_dev.cc \
 
 endif
 

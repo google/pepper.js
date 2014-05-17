@@ -166,6 +166,17 @@
     return resource.memory;
   };
 
+  // Var/Resource conversion is not needed until we have better support for
+  // media streams and file systems.
+
+  var Var_VarToResource = function(v) {
+    throw "Var_VarToResource not implemented";
+  };
+
+  var Var_VarFromResource = function(r) {
+    throw "Var_VarFromResource not implemented";
+  };
+
   registerInterface("PPB_Var;1.0", [
     Var_AddRef,
     Var_Release,
@@ -178,6 +189,15 @@
     Var_Release,
     Var_VarFromUtf8_1_1,
     Var_VarToUtf8
+  ]);
+
+  registerInterface("PPB_Var;1.2", [
+    Var_AddRef,
+    Var_Release,
+    Var_VarFromUtf8_1_1,
+    Var_VarToUtf8,
+    Var_VarToResource,
+    Var_VarFromResource
   ]);
 
 

@@ -75,6 +75,7 @@ ifeq (,$(wildcard $(NACL_SDK_ROOT)/tools/oshelpers.py))
   $(error NACL_SDK_ROOT is set to an invalid location: $(NACL_SDK_ROOT))
 endif
 
+NACL_CONFIG := python $(NACL_SDK_ROOT)/tools/nacl_config.py
 
 #
 # If this makefile is part of a valid nacl SDK, but NACL_SDK_ROOT is set
