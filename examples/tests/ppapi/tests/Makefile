@@ -80,7 +80,12 @@ $(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 #
 # Use the link macro for this target on the list of sources.
 #
+ifeq ($(CONFIG),Release)
+$(eval $(call LINK_RULE,$(TARGET)_unstripped,$(SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call STRIP_RULE,$(TARGET),$(TARGET)_unstripped))
+else
 $(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
+endif
 
 #
 # Specify the NMF to be created with no additional arugments.

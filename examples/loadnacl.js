@@ -123,7 +123,7 @@ var nacl = nacl || {};
       }, function() {
         // TODO send event.
         e.readyState = 4;
-        e.lastError = 'Could not load ' + src;
+        e.lastError = 'Could not load ' + url;
       });
     };
     return e;
