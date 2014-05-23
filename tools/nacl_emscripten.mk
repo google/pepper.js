@@ -10,28 +10,23 @@
 
 
 #
-# Default Paths
-#
-EM_PATH:=$(abspath $(PEPPERJS_SRC_ROOT)/emscripten)
-#$(error $(EM_PATH))
-
-# Use the PNaCl toolchain instead of a vanilla version of LLVM.
-# The folder layout changed at version 31, but "less than" is annoying in
-# Makefiles and we don't support an SDK less than 30, anyways.
-SDK_VERSION=$(shell python $(NACL_SDK_ROOT)/tools/getos.py --sdk-version)
-ifeq ($(SDK_VERSION),30)
-export LLVM?=$(TC_PATH)/$(OSNAME)_x86_pnacl/newlib/bin
-else
-export LLVM?=$(TC_PATH)/$(OSNAME)_pnacl/bin
-endif
-
-#
 # Macros for TOOLS
 #
-EM_CC?=$(EM_PATH)/emcc
-EM_CXX?=$(EM_PATH)/em++
-EM_LINK?=$(EM_PATH)/em++
-EM_LIB?=$(EM_PATH)/emar
+ifeq ($(EMSCRIPTEN),)
+EM_PATH:=$(shell $(WHICH) emcc))
+ifeq (,$(findstring emcc,$(shell $(WHICH) emcc)))
+$(error Unable to find Emscripten.  Please install the Emscripten SDK and make sure the directory containing emcc is either in your path or pointed to by the EMSCRIPTEN environment variable)
+endif
+EM_CC?=emcc
+EM_CXX?=em++
+EM_LINK?=em++
+EM_LIB?=emar
+else
+EM_CC?=$(EMSCRIPTEN)/emcc
+EM_CXX?=$(EMSCRIPTEN)/em++
+EM_LINK?=$(EMSCRIPTEN)/em++
+EM_LIB?=$(EMSCRIPTEN)/emar
+endif
 
 # Architecture-specific flags
 EM_CFLAGS?=-DNACL_ARCH=x86_32 -Wno-warn-absolute-paths

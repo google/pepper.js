@@ -31,7 +31,6 @@ ifeq (,$(findstring $(TOOLCHAIN),$(VALID_TOOLCHAINS)))
   $(error Can not use TOOLCHAIN=$(TOOLCHAIN) on this example.)
 endif
 
-
 #
 # Build Configuration
 #

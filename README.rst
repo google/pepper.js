@@ -23,6 +23,23 @@ Note: for more up-to-date documentation, check out the wiki_.
 
 .. _wiki: https://github.com/google/pepper.js/wiki
 
+-------------
+Upgrade Notes
+-------------
+
+Older version of pepper.js included Emscripten to simplify the install process.
+This approach resulted in some rather unfortunate versioning issues, so it has
+been discontinued.  To use pepper.js, you must now install Emscripten yourself.
+This will be covered in the "Getting Started" section.  If you have previously
+used pepper.js, you will need to upgrade:
+
+* Install the `Emscripten SDK`_.
+* Manually delete the "emscripten" directory from this repo.
+* Make sure either emcc is in your search path (prefered), or the ``EMSCRIPTEN``
+  environment variable is set.
+
+.. _`Emscripten SDK`: https://github.com/kripken/emscripten/wiki/Emscripten-SDK
+
 ---------------
 Getting Started
 ---------------
@@ -44,36 +61,11 @@ It is possible to use an older version of Pepper by setting the ``LLVM``
 environment variable to point to a toolchain other than the one contained in
 ``NACL_SDK_ROOT``.)
 
-Inside the pepper.js repo, run:
 
-::
+Install the `Emscripten SDK`_.
 
-    git submodule update --init
-
-This will clone Emscripten.  Install Emscripten's dependencies on your system:
-
-* node.js_ 0.8 or above
-* Python_ 2.7
-* Java_
-* Optional: `Clang and LLVM`_
-
-.. _git: http://git-scm.com/downloads
-.. _`NaCl SDK`: https://developers.google.com/native-client/sdk/download
-.. _node.js: http://nodejs.org/download/
-.. _Python: http://www.python.org/download/
-.. _Java: http://java.com/en/download/index.jsp
-.. _`Clang and LLVM`: http://llvm.org/releases/download.html
-
-On Ubuntu, you can run the following commands to install the dependencies:
-
-::
-
-    sudo apt-get install nodejs
-    sudo apt-get install python27
-
-Note, however, that Ubuntu Precise does not have a new enough version of node.js
-so you will need to build it from source.  If you get the following error while
-running Emscripten, your version of node.js is too old:
+Note that Ubuntu Precise does not have a new enough version of node.js. If you
+accidently call the system version of node.js, you get the following error:
 
 ::
 
@@ -82,6 +74,10 @@ running Emscripten, your version of node.js is too old:
 Emscripten expects a ``python2`` binary to exist.  If it does not exist on your
 system, such as on OSX, you can create a symlink.
 ``sudo ln -s /usr/bin/python /usr/bin/python2``
+
+.. _git: http://git-scm.com/downloads
+.. _`NaCl SDK`: https://developers.google.com/native-client/sdk/download
+.. _`Emscripten SDK`: https://github.com/kripken/emscripten/wiki/Emscripten-SDK
 
 Building the Examples
 ---------------------
@@ -98,30 +94,8 @@ When you run Emscripten for the first time, it will build a few dependencies in
 the background and the compilation may appear to hang.  Emscripten will also
 create a create a configuration file named ``~/.emscripten``.  You may need to
 edit this file if it fails to guess the correct paths, or you want to use a
-version other than the one it guessed.
-
-Clang
------
-
-Emscripten uses Clang to compile source code into bitcode.  This means Clang is
-normally a dependency of Emscripten.  The build system in the pepper.js repo is,
-however, configured to use the PNaCl toolchain instead of a standard version of
-Clang.  PNaCl is essentially a modified version of Clang.  This is done for two
-reasons.  First, it eliminates an install-time dependency.  Second, Clang was
-historically not supported on Windows (but this is beginning to change).
-
-There appear to be a few issues with using the PNaCl
-toolchain in Emscripten, such as exception support, but they are being worked
-on.  If you want to use another version of Clang when compiling the examples,
-simply set the ``LLVM`` environment variable to point to it before invoking
-``make``.  Similarly, if you want to use the PNaCl toolchain when using
-Emscripten in other situations, either set the ``LLVM`` environment variable or
-edit ``~/.emscripten``.
-
-If you want to use a version of Clang other than PNaCl on Mac OSX, note that
-Emscripten doesn't appear to be entirely happy with Xcode's command line tools.
-Downloading prebuilt binaries from LLVM's website or building them from source
-are the best options.
+version other than the one it guessed.  If you install the Emscripten SDK, this
+should not be a problem.
 
 Running the Examples
 --------------------
