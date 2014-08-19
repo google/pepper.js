@@ -22,10 +22,10 @@ EM_CXX?=em++
 EM_LINK?=em++
 EM_LIB?=emar
 else
-EM_CC?=$(EMSCRIPTEN)/emcc
-EM_CXX?=$(EMSCRIPTEN)/em++
-EM_LINK?=$(EMSCRIPTEN)/em++
-EM_LIB?=$(EMSCRIPTEN)/emar
+EM_CC?="$(EMSCRIPTEN)/emcc"
+EM_CXX?="$(EMSCRIPTEN)/em++"
+EM_LINK?="$(EMSCRIPTEN)/em++"
+EM_LIB?="$(EMSCRIPTEN)/emar"
 endif
 
 # Architecture-specific flags
