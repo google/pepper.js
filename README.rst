@@ -38,7 +38,7 @@ used pepper.js, you will need to upgrade:
 * Make sure either emcc is in your search path (prefered), or the ``EMSCRIPTEN``
   environment variable is set.
 
-.. _`Emscripten SDK`: https://github.com/kripken/emscripten/wiki/Emscripten-SDK
+.. _`Emscripten SDK`: http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html
 
 ---------------
 Getting Started
@@ -77,7 +77,7 @@ system, such as on OSX, you can create a symlink.
 
 .. _git: http://git-scm.com/downloads
 .. _`NaCl SDK`: https://developers.google.com/native-client/sdk/download
-.. _`Emscripten SDK`: https://github.com/kripken/emscripten/wiki/Emscripten-SDK
+.. _`Emscripten SDK`: http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html
 
 Building the Examples
 ---------------------
